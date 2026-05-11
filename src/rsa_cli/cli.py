@@ -21,6 +21,22 @@ def build_parser() -> argparse.ArgumentParser:
         "validate-profile", help="Validate a topic profile YAML file."
     )
     validate_profile.add_argument("profile", help="Path to the topic profile YAML file.")
+    new_round = subcommands.add_parser(
+        "new-round", help="Create a bounded research round archive."
+    )
+    new_round.add_argument("--topic", required=True, help="Topic profile YAML path.")
+    new_round.add_argument("--objective", required=True, help="Round objective.")
+    new_round.add_argument("--name", required=True, help="Short round name.")
+    new_round.add_argument("--max-candidates", type=int, help="Candidate paper limit.")
+    new_round.add_argument(
+        "--allowed-tool",
+        action="append",
+        dest="allowed_tools",
+        help="Allowed tool for this round. May be repeated.",
+    )
+    new_round.add_argument("--output-policy", help="Round output policy.")
+    new_round.add_argument("--approval-mode", help="Human approval mode.")
+    new_round.add_argument("--campaign-id", help="Optional campaign identifier.")
     return parser
 
 
@@ -49,6 +65,32 @@ def _run_validate_profile(profile_path: Path) -> int:
     return 0
 
 
+def _run_new_round(args: argparse.Namespace, root: Path) -> int:
+    from .rounds import RoundError, create_research_round
+
+    config = load_project_config(root)
+    topic_path = Path(args.topic)
+    if not topic_path.is_absolute():
+        topic_path = config.root / topic_path
+    try:
+        result = create_research_round(
+            config=config,
+            topic_profile_path=topic_path,
+            objective=args.objective,
+            name=args.name,
+            max_candidates=args.max_candidates,
+            allowed_tools=args.allowed_tools,
+            output_policy=args.output_policy,
+            approval_mode=args.approval_mode,
+            campaign_id=args.campaign_id,
+        )
+    except RoundError as exc:
+        print(f"Round error: {exc}", file=sys.stderr)
+        return 1
+    print(f"Created round {result.round_id}: {result.path}")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -58,6 +100,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_init(root)
         if args.command == "validate-profile":
             return _run_validate_profile(Path(args.profile))
+        if args.command == "new-round":
+            return _run_new_round(args, root)
     except ConfigError as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
