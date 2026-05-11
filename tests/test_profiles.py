@@ -99,6 +99,39 @@ def test_starter_profile_passes_generic_validation():
     assert validate_topic_profile(starter) == []
 
 
+def test_starter_profile_contains_required_research_coverage_terms():
+    repo_root = Path(__file__).resolve().parents[1]
+    starter = (
+        repo_root
+        / "01_literature"
+        / "topic_profiles"
+        / "sar_noncontinuous_aperture.yaml"
+    ).read_text(encoding="utf-8")
+
+    for term in [
+        "noncontinuous aperture",
+        "distributed SAR",
+        "cross-channel coherence",
+        "phase-history recovery",
+        "ghost artifact",
+        "failure boundary",
+        "physics-constrained learning",
+    ]:
+        assert term in starter
+
+
+def test_profile_validator_and_cli_have_no_sar_specific_branching():
+    repo_root = Path(__file__).resolve().parents[1]
+    source_text = "\n".join(
+        (repo_root / path).read_text(encoding="utf-8")
+        for path in ["src/rsa_cli/profiles.py", "src/rsa_cli/cli.py"]
+    )
+
+    assert "sar_noncontinuous_aperture" not in source_text
+    assert "noncontinuous" not in source_text.lower()
+    assert "distributed SAR" not in source_text
+
+
 def test_cli_validates_starter_profile(capsys):
     repo_root = Path(__file__).resolve().parents[1]
     starter = (
