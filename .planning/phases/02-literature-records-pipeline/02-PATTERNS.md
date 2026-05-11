@@ -19,6 +19,16 @@
 | `tests/test_index.py` | Index generation/validation tests | `tests/test_skeleton.py`, `tests/test_cli.py` | Deterministic content checks and stale-file mismatch tests |
 | `tests/test_templates.py` | Chinese field explanation and review template tests | `tests/test_skeleton.py` | Read root templates and assert required strings |
 | `tests/test_cli.py` | CLI command coverage | Existing CLI tests | `main([...])`, capsys, temp directories, no traceback assertions |
+| `templates/topic_profile.yaml` | Phase 1 topic template localization | Existing topic template | Preserve English keys; add Chinese field guide/comments |
+| `templates/round_readme.md` | Round archive README localization | Existing round template placeholders | Preserve `{round_id}` and other format placeholders |
+| `templates/final_round_summary.md` | Round summary localization | Existing summary headings | Chinese headings; preserve human confirmation section |
+| `templates/paper_note.md` | Paper-note seed localization | Existing note template | Chinese guidance only; no Phase 4 reading behavior |
+| `templates/map_integration.md` | Map-integration seed localization | Existing map template | Chinese guidance only; no Phase 3 map writer behavior |
+| `templates/pdf_acquisition_report.md` | PDF status report localization | Existing PDF report template | Chinese copyright/authorization warning; no download automation |
+| `templates/reading_batch_report.md` | Reading batch report localization | Existing reading report template | Chinese guidance only; no reading-note generator |
+| `01_literature/literature_map.md` | Formal map seed localization | Existing formal record seed | Chinese placeholder explaining Phase 3 will own updates |
+| `01_literature/research_tables.md` | Research tables seed localization | Existing formal record seed | Chinese placeholder for human-reviewed tables |
+| `01_literature/agent_research_notes.md` | Agent notes seed localization | Existing formal record seed | Chinese auxiliary-status warning |
 
 ## Data Flow
 
@@ -64,4 +74,4 @@ pdfs_root = literature_root / "pdfs"
 - Do not allocate or write `P###` for `rejected` or `uncertain` candidates.
 - Do not modify `paper_index.md` during validation; only `regenerate-index` may rewrite it.
 - Do not add external dependencies unless a standard-library/PyYAML solution is insufficient.
-
+- Localize remaining Phase 1 user-facing templates and seed files without introducing Phase 3/4 behavior.

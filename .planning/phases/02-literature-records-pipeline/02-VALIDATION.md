@@ -19,7 +19,7 @@ created: 2026-05-11
 |----------|-------|
 | **Framework** | pytest |
 | **Config file** | `pyproject.toml` |
-| **Quick run command** | `python -m pytest tests/test_metadata.py tests/test_index.py tests/test_cli.py -q` |
+| **Quick run command** | `python -m pytest tests/test_metadata.py tests/test_index.py tests/test_templates.py tests/test_cli.py -q` |
 | **Full suite command** | `python -m pytest -q` |
 | **Estimated runtime** | ~1 second |
 
@@ -27,7 +27,7 @@ created: 2026-05-11
 
 ## Sampling Rate
 
-- **After every task commit:** Run `python -m pytest tests/test_metadata.py tests/test_index.py tests/test_cli.py -q`
+- **After every task commit:** Run `python -m pytest tests/test_metadata.py tests/test_index.py tests/test_templates.py tests/test_cli.py -q`
 - **After every plan wave:** Run `python -m pytest -q`
 - **Before `$gsd-verify-work`:** Full suite must be green
 - **Max feedback latency:** 5 seconds
@@ -41,6 +41,7 @@ created: 2026-05-11
 | 02-01-01 | 02-01 | 1 | META-01, META-03 | T-02-01 / T-02-02 | Formal metadata requires verified + human confirmation and stable P### IDs | unit/cli | `python -m pytest tests/test_metadata.py tests/test_cli.py -q` | yes | pending |
 | 02-02-01 | 02-02 | 2 | SRCH-01, SRCH-02 | T-02-04 | Candidate review stays in staging and explains English fields in Chinese | unit/template | `python -m pytest tests/test_templates.py tests/test_cli.py -q` | Wave 2 creates if missing | pending |
 | 02-03-01 | 02-03 | 3 | META-02, META-03 | T-02-03 | paper_index.md is generated/validated from metadata and regenerate is explicit | unit/cli | `python -m pytest tests/test_index.py tests/test_cli.py -q` | Wave 3 creates if missing | pending |
+| 02-04-01 | 02-04 | 4 | META-01, META-02, SRCH-01, SRCH-02 | T-02-05 | Phase 1 user-facing templates and seed files receive Chinese explanations without adding new behavior | template/docs | `python -m pytest tests/test_templates.py tests/test_skeleton.py -q` | Wave 4 creates if missing | pending |
 
 *Status: pending / green / red / flaky*
 

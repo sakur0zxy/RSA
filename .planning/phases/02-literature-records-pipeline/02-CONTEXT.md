@@ -52,6 +52,10 @@ Phase 2 建立正式文献记录流水线：定义 `metadata/P###.yaml` 的正�
 - **D-24:** `paper_index.md` 不建议手动维护，应由 CLI 根据 metadata 生成和校验。
 - **D-25:** 如果 metadata 和 `paper_index.md` 不一致，CLI 校验应报错并提供可操作的不一致信息。重建 index 必须通过显式 regenerate 命令，不在 validate 时自动改文件。
 
+### Phase 1 Localization Cleanup
+- **D-26:** Phase 1 已经生成、且后续用户会阅读或编辑的英文模板和正式记录种子，也必须在 Phase 2 执行时补中文说明；这属于用户可见性修正，不改变 Phase 1 的功能边界。
+- **D-27:** 需要补中文说明的 Phase 1 遗留对象由执行者判断，但至少包括：`templates/topic_profile.yaml`、`templates/round_readme.md`、`templates/final_round_summary.md`、`templates/paper_note.md`、`templates/map_integration.md`、`templates/pdf_acquisition_report.md`、`templates/reading_batch_report.md`、`01_literature/literature_map.md`、`01_literature/research_tables.md`、`01_literature/agent_research_notes.md`。`templates/paper_metadata.yaml`、`templates/search_candidates.md`、`templates/verification_review.md` 和 `01_literature/paper_index.md` 已由 Phase 2 的 metadata/review/index 计划覆盖，但同样必须遵守 D-01 至 D-03。
+
 ### the agent's Discretion
 - 具体 CLI 子命令名称可以由 planner 决定，但必须体现人工确认门槛和显式 regenerate 行为。
 - 具体 YAML 校验实现、日期格式校验和 Markdown 表格生成方式可以由 planner 决定，只要保持本地文件、可测试、可 diff。
@@ -81,6 +85,16 @@ Phase 2 建立正式文献记录流水线：定义 `metadata/P###.yaml` 的正�
 - `templates/paper_metadata.yaml` - Current minimal metadata template to expand.
 - `templates/verification_review.md` - Current minimal candidate review template to localize and expand.
 - `templates/search_candidates.md` - Candidate staging template related to Phase 2 review flow.
+- `templates/topic_profile.yaml` - Phase 1 topic profile template that needs Chinese field explanations.
+- `templates/round_readme.md` - Round archive README template that needs Chinese user-facing labels.
+- `templates/final_round_summary.md` - Round summary template that needs Chinese section names.
+- `templates/paper_note.md` - Reading-note template seed that needs Chinese explanations without implementing Phase 4 reading behavior.
+- `templates/map_integration.md` - Map-integration template seed that needs Chinese explanations without implementing Phase 3 mapping behavior.
+- `templates/pdf_acquisition_report.md` - PDF status template seed that needs Chinese explanations without enabling unauthorized PDF acquisition.
+- `templates/reading_batch_report.md` - Reading batch template seed that needs Chinese explanations without implementing reading-note generation.
+- `01_literature/literature_map.md` - Formal map seed that needs Chinese guidance while remaining a placeholder until Phase 3.
+- `01_literature/research_tables.md` - Formal research-table seed that needs Chinese guidance.
+- `01_literature/agent_research_notes.md` - Agent note seed that needs Chinese guidance preserving auxiliary status.
 
 ### Prior Literature Workflow Reference
 - `E:/博士文件/工作整理/PhD_DistributedSAR_NoncontinuousAperture/00_plan/agent_literature_workflow_plan.md` - Old literature agent workflow, metadata fields, verification review responsibilities, and staging boundaries.
@@ -119,6 +133,7 @@ Phase 2 建立正式文献记录流水线：定义 `metadata/P###.yaml` 的正�
 - `metadata/P###.yaml` is a formal fact card for one verified and human-confirmed paper, not a reading note and not an agent summary.
 - `human_confirmed` means the user or designated human has approved the record for formal storage; it does not mean the full paper has already been deeply read.
 - `paper_index.md` should be quick to scan in Chinese, while still showing stable English field names where useful.
+- Phase 1's English-only placeholders should be localized as a cleanup inside Phase 2 so the project does not carry mixed-language user-facing templates into later phases.
 - Large-scale literature review remains possible later through multiple bounded rounds and campaign metadata, not by weakening Phase 2's formal admission gate.
 
 </specifics>

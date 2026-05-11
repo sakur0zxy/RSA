@@ -48,12 +48,13 @@ Plans:
   2. User can maintain a readable `paper_index.md` that matches metadata records.
   3. Candidate papers remain outside formal metadata until reviewed.
   4. User can mark candidates verified, rejected or uncertain with reasons and source evidence.
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 02-01: Define metadata schema, paper index format and validation checks.
 - [ ] 02-02: Implement candidate staging and verification review outputs.
 - [ ] 02-03: Add consistency checks between metadata and paper index.
+- [ ] 02-04: Add Chinese explanations to remaining Phase 1 user-facing templates and seed files.
 
 ### Phase 3: Research Round Integration
 **Goal**: Turn a bounded round into a traceable research packet that can update maps only through safe formal writes.
@@ -109,7 +110,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Harness Foundation | 3/3 | Complete   | 2026-05-11 |
-| 2. Literature Records Pipeline | 0/3 | Not started | - |
+| 2. Literature Records Pipeline | 0/4 | Not started | - |
 | 3. Research Round Integration | 0/3 | Not started | - |
 | 4. Reading Note Workflow | 0/2 | Not started | - |
 | 5. Evaluation and Hardening | 0/2 | Not started | - |

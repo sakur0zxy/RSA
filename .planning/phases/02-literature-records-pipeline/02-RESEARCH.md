@@ -38,6 +38,7 @@ The older literature workflow confirms the same shape: `metadata/` is the source
 - No command writes formal `metadata/P###.yaml`.
 - No command validates or regenerates `paper_index.md`.
 - `verification_review.md` does not match the Phase 2 lightweight evidence fields or Chinese user-facing requirements.
+- Several Phase 1 user-facing templates and formal-record seed files are still English-only placeholders and should receive Chinese explanations before later phases build on them.
 
 ## Recommended Architecture
 
@@ -94,7 +95,24 @@ Allowed `decision` values: `verified`, `rejected`, `uncertain`.
 
 The template should clearly state in Chinese that `verified` means source verification passed and does not automatically write formal metadata.
 
-### 4. CLI commands
+### 4. Phase 1 localization cleanup
+
+Add a dedicated cleanup slice for Phase 1 user-facing artifacts that are not already covered by metadata, candidate review, or index work. The cleanup should localize templates and seed files only; it must not implement Phase 3 mapping, Phase 4 reading notes, PDF acquisition automation, or new agent behavior.
+
+Targets:
+
+- `templates/topic_profile.yaml`
+- `templates/round_readme.md`
+- `templates/final_round_summary.md`
+- `templates/paper_note.md`
+- `templates/map_integration.md`
+- `templates/pdf_acquisition_report.md`
+- `templates/reading_batch_report.md`
+- `01_literature/literature_map.md`
+- `01_literature/research_tables.md`
+- `01_literature/agent_research_notes.md`
+
+### 5. CLI commands
 
 Add Phase 2 subcommands without changing existing Phase 1 commands:
 
@@ -107,7 +125,7 @@ Add Phase 2 subcommands without changing existing Phase 1 commands:
 
 `validate-index` should never modify files. If mismatches exist, it reports them and tells the user to run `rsa regenerate-index`.
 
-### 5. Tests
+### 6. Tests
 
 Add focused tests:
 
@@ -124,16 +142,18 @@ Add focused tests:
 
 ## Plan Slicing
 
-Roadmap's 3 plans are still the right execution structure:
+Use 4 plans after the localization decision:
 
 1. `02-01`: metadata schema, metadata validation, ID allocation, formal add-paper command.
 2. `02-02`: candidate review template and review-output constraints.
 3. `02-03`: index generation, index validation, regenerate command, consistency tests.
+4. `02-04`: Phase 1 user-facing template and seed-file Chinese explanations not already covered by 02-01 through 02-03.
 
 Dependencies:
 
 - `02-02` can run after `02-01` or in parallel if it only touches templates/tests.
 - `02-03` depends on `02-01` because it reads valid metadata records.
+- `02-04` should run after `02-02` and `02-03` to avoid template/test file overlap.
 
 ## Threat Model Notes
 
@@ -141,6 +161,7 @@ Dependencies:
 - **T-02-02 ID drift:** failed writes consume or skip `P###`, breaking asset references. Mitigation: allocate ID only after validation inputs pass and write atomically to `metadata/P###.yaml`.
 - **T-02-03 Index as false source:** manual edits make `paper_index.md` disagree with metadata. Mitigation: validate-index fails on mismatch and regenerate-index is explicit.
 - **T-02-04 User-facing ambiguity:** English field names confuse review. Mitigation: every template/help page with English keys includes Chinese field descriptions.
+- **T-02-05 Mixed-language harness drift:** Phase 1 English placeholders remain in files users read later. Mitigation: a dedicated localization cleanup plan updates remaining templates and formal-record seeds without adding new behavior.
 
 ## Validation Architecture
 
@@ -157,6 +178,6 @@ Required automated coverage:
 - `META-03`: DOI/official URL/source reliability/PDF status/local path/last_checked fields required or checked.
 - `SRCH-01`: candidate review template stays outside formal metadata and does not allocate IDs.
 - `SRCH-02`: review template supports `verified`, `rejected`, `uncertain`, with reason and source evidence fields.
+- `DOCS/localization cleanup`: remaining Phase 1 user-facing templates and seed files include Chinese explanations while preserving English keys and placeholders.
 
 Nyquist sampling should run quick tests after each task commit and full pytest after each plan wave. All Phase 2 behavior can be verified automatically; no manual-only checks are required beyond human approval semantics being represented by CLI flags and metadata fields.
-

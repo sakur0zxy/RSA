@@ -17,6 +17,14 @@
 
 ---
 
+## Phase 1 Localization Cleanup
+
+**User's choice:** 对 Phase 1 中没有进行中文注释和解释的地方添加对应中文，具体哪些地方由执行者判断。
+
+**Notes:** 纳入 Phase 2 执行范围的遗留用户可见对象包括 `templates/topic_profile.yaml`、`templates/round_readme.md`、`templates/final_round_summary.md`、`templates/paper_note.md`、`templates/map_integration.md`、`templates/pdf_acquisition_report.md`、`templates/reading_batch_report.md`、`01_literature/literature_map.md`、`01_literature/research_tables.md`、`01_literature/agent_research_notes.md`。这只是补中文说明，不提前实现 Phase 3/4 的 map、PDF 获取或阅读笔记功能。
+
+---
+
 ## Formal Metadata Admission Threshold
 
 | Option | Description | Selected |
