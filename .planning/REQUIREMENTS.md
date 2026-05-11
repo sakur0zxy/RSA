@@ -7,7 +7,7 @@
 
 ### Profiles
 
-- [ ] **PROF-01**: User can define a research topic profile in YAML with topic id, name, keywords, priority questions, metrics, preferred sources, excluded scope, grading rules and required outputs.
+- [x] **PROF-01**: User can define a research topic profile in YAML with topic id, name, keywords, priority questions, metrics, preferred sources, excluded scope, grading rules and required outputs.
 - [ ] **PROF-02**: User can validate a topic profile and receive actionable errors for missing required fields or invalid values.
 
 ### Rounds
@@ -47,7 +47,7 @@
 
 ### Project Guidance
 
-- [ ] **DOCS-01**: Future agents can read project-root `AGENTS.md` and understand the evidence hierarchy, harness rules, coding workflow and GSD entry points.
+- [x] **DOCS-01**: Future agents can read project-root `AGENTS.md` and understand the evidence hierarchy, harness rules, coding workflow and GSD entry points.
 
 ## v2 Requirements
 
@@ -85,10 +85,10 @@ Deferred to future releases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROF-01 | Phase 1 | Pending |
+| PROF-01 | Phase 1 | Complete |
 | PROF-02 | Phase 1 | Pending |
 | ROUND-01 | Phase 1 | Pending |
-| DOCS-01 | Phase 1 | Pending |
+| DOCS-01 | Phase 1 | Complete |
 | META-01 | Phase 2 | Pending |
 | META-02 | Phase 2 | Pending |
 | META-03 | Phase 2 | Pending |

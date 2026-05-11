@@ -31,7 +31,7 @@ v1 builds a local-first research agent harness in five phases. The path starts w
 
 Plans:
 **Wave 1**
-- [ ] 01-01: Create directory schema, starter topic profile and template files.
+- [x] 01-01: Create directory schema, starter topic profile and template files.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 01-02: Implement profile validation and research round configuration.
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Harness Foundation | 0/3 | Planned    |  |
+| 1. Harness Foundation | 1/3 | In Progress|  |
 | 2. Literature Records Pipeline | 0/3 | Not started | - |
 | 3. Research Round Integration | 0/3 | Not started | - |
 | 4. Reading Note Workflow | 0/2 | Not started | - |
