@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from importlib.resources import files
 from pathlib import Path
 
 from .config import ProjectConfig
-from .templates import FORMAL_RECORD_FILES, STARTER_TOPIC_PROFILE, TEMPLATE_FILES
+from .templates import FORMAL_RECORD_FILES, TEMPLATE_FILES
 
 
 LITERATURE_DIRECTORIES = [
@@ -48,6 +49,15 @@ def touch_if_missing(path: Path) -> bool:
     return True
 
 
+def iter_builtin_topic_profiles() -> list[tuple[str, str]]:
+    profile_root = files("rsa_cli.data").joinpath("topic_profiles")
+    return [
+        (profile.name, profile.read_text(encoding="utf-8"))
+        for profile in profile_root.iterdir()
+        if profile.name.endswith(".yaml")
+    ]
+
+
 def create_literature_skeleton(config: ProjectConfig) -> SkeletonResult:
     created: list[Path] = []
     existing: list[Path] = []
@@ -70,10 +80,11 @@ def create_literature_skeleton(config: ProjectConfig) -> SkeletonResult:
         path = config.templates_root / name
         (created if write_if_missing(path, content) else existing).append(path)
 
-    starter_profile = config.topic_profiles_root / "sar_noncontinuous_aperture.yaml"
-    if write_if_missing(starter_profile, STARTER_TOPIC_PROFILE):
-        created.append(starter_profile)
-    else:
-        existing.append(starter_profile)
+    for profile_name, content in iter_builtin_topic_profiles():
+        profile_path = config.topic_profiles_root / profile_name
+        if write_if_missing(profile_path, content):
+            created.append(profile_path)
+        else:
+            existing.append(profile_path)
 
     return SkeletonResult(created=created, existing=existing)

@@ -114,3 +114,15 @@ def test_templates_and_starter_profile_are_substantive():
         "physics-constrained learning",
     ]:
         assert term in starter
+
+
+def test_python_source_does_not_hard_code_sar_profile_details():
+    repo_root = Path(__file__).resolve().parents[1]
+    source_text = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (repo_root / "src" / "rsa_cli").rglob("*.py")
+    )
+
+    assert "sar_noncontinuous_aperture" not in source_text
+    assert "noncontinuous aperture SAR" not in source_text
+    assert "distributed SAR" not in source_text

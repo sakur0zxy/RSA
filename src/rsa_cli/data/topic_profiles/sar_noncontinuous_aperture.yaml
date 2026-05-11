@@ -1,0 +1,69 @@
+topic_id: sar_noncontinuous_aperture
+topic_name: SAR noncontinuous aperture and distributed multi-aspect imaging
+core_keywords:
+  - noncontinuous aperture SAR
+  - sparse aperture SAR
+  - wide-angle SAR
+  - wide-aperture SAR
+  - multi-aspect SAR
+  - subaperture imaging
+  - distributed SAR
+  - cross-channel coherence
+  - phase-history recovery
+  - ghost artifact suppression
+  - physics-constrained learning
+priority_questions:
+  - How do noncontinuous aperture gaps affect image focus, sidelobes, and ghost artifacts?
+  - Which wide-angle or wide-aperture SAR methods remain reliable with missing aperture support?
+  - How do multi-aspect and subaperture formulations connect to distributed SAR collection geometry?
+  - What cross-channel coherence constraints are needed for phase-history recovery?
+  - Which metrics best expose ghost artifacts, failure boundaries, and reconstruction uncertainty?
+  - How can physics-constrained learning support recovery without replacing source-grounded evidence?
+important_metrics:
+  - impulse response width
+  - peak sidelobe ratio
+  - integrated sidelobe ratio
+  - ghost artifact energy
+  - phase consistency
+  - cross-channel coherence
+  - reconstruction error
+  - failure boundary conditions
+preferred_sources:
+  - IEEE Transactions on Geoscience and Remote Sensing
+  - IEEE Transactions on Aerospace and Electronic Systems
+  - IEEE Geoscience and Remote Sensing Letters
+  - IET Radar Sonar and Navigation
+  - official publisher pages
+  - author preprints with publisher metadata cross-checks
+exclude_scope:
+  - optical aperture synthesis without SAR connection
+  - unverified blog summaries
+  - papers without source metadata sufficient for verification
+  - final thesis prose generation
+grade_rules:
+  A:
+    description: Core theory, baseline, or evaluation evidence
+    criteria:
+      - Directly addresses noncontinuous aperture, wide-angle, multi-aspect, or distributed SAR
+      - Provides reusable equations, algorithms, datasets, metrics, or failure analysis
+      - Source metadata can be verified from a reliable venue or official page
+  B:
+    description: Useful support for background or comparison
+    criteria:
+      - Addresses adjacent SAR imaging, sparse reconstruction, phase recovery, or coherence constraints
+      - Helps define terminology, baselines, or metric choices
+  C:
+    description: Peripheral or low-priority background
+    criteria:
+      - Mentions relevant concepts but lacks direct evidence for this topic profile
+  Reject:
+    description: Out of scope or unsafe for formal records
+    criteria:
+      - Not SAR-relevant
+      - Cannot be verified from reliable metadata
+      - Encourages unsupported claims or unauthorized PDF handling
+required_outputs:
+  - search_candidates.md
+  - verification_review.md
+  - final_round_summary.md
+  - literature_map.md
