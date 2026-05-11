@@ -63,6 +63,24 @@ class ProjectConfig:
     def hard_max_candidates(self) -> int:
         return int(self.rounds.get("hard_max_candidates", 20))
 
+    @property
+    def allowed_tools(self) -> list[str]:
+        tools = self.rounds.get("allowed_tools", [])
+        return list(tools or [])
+
+    @property
+    def output_policy(self) -> str:
+        return str(self.rounds.get("output_policy", "agent_outputs_only"))
+
+    @property
+    def approval_mode(self) -> str:
+        return str(self.rounds.get("approval_mode", "human_confirmed_formal_writes"))
+
+    @property
+    def campaign_id(self) -> str | None:
+        value = self.rounds.get("campaign_id")
+        return None if value in (None, "") else str(value)
+
     def resolve_path(self, value: str) -> Path:
         path = Path(value)
         if path.is_absolute():
@@ -94,6 +112,12 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
 def validate_config(config: ProjectConfig) -> None:
     default_max = config.default_max_candidates
     hard_max = config.hard_max_candidates
+    if not isinstance(config.rounds.get("allowed_tools", []), list):
+        raise ConfigError("rounds.allowed_tools must be a list")
+    if not config.output_policy:
+        raise ConfigError("rounds.output_policy must be non-empty")
+    if not config.approval_mode:
+        raise ConfigError("rounds.approval_mode must be non-empty")
     if default_max <= 0:
         raise ConfigError("rounds.default_max_candidates must be positive")
     if hard_max <= 0:
