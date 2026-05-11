@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 context gathered
-last_updated: "2026-05-11T03:46:26.735Z"
-last_activity: 2026-05-11 -- Phase 01 planning complete
+last_updated: "2026-05-11T03:52:50.784Z"
+last_activity: 2026-05-11 -- Phase 01 execution started
 progress:
   total_phases: 5
   completed_phases: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-11)
 
 **Core value:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
-**Current focus:** Phase 1 - Harness Foundation
+**Current focus:** Phase 01 — harness-foundation
 
 ## Current Position
 
-Phase: 1 of 5 (Harness Foundation)
-Plan: 0 of 3 in current phase
-Status: Ready to execute
-Last activity: 2026-05-11 -- Phase 01 planning complete
+Phase: 01 (harness-foundation) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 01
+Last activity: 2026-05-11 -- Phase 01 execution started
 
 Progress: [----------] 0%
 
