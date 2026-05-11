@@ -115,7 +115,22 @@
 
 ---
 
-## the agent's Discretion
+## Adopted Review Suggestions
+
+| Suggestion | Decision |
+|------------|----------|
+| Add recommended implementation order | Adopted; validation-first order added to CONTEXT.md. |
+| Define `formal_write_requests` schema | Adopted; fixed schema added without introducing `C001` candidate IDs. |
+| Split `weak` reasons | Adopted; `weak_reason` values added to gap report decisions. |
+| Clarify `ready_for_review` vs `completed` | Adopted; automated flow may only suggest `ready_for_review`. |
+| Add `literature_map.md` example row | Adopted; example row added to specifics. |
+| Plan CLI command groups | Adopted as recommended shape, with planner allowed to adjust exact names. |
+| Add hard "MUST NOT" guardrails | Adopted as D-31 through D-35. |
+| Rename `the agent's Discretion` | Adopted as `Planner Discretion`. |
+
+---
+
+## Planner Discretion
 
 - Exact CLI subcommand names.
 - Exact Markdown table formatting beyond required columns.

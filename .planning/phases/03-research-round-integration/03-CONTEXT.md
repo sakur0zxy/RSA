@@ -12,6 +12,20 @@ This phase does not implement real web search, automatic PDF download, full-text
 
 </domain>
 
+<implementation_guidance>
+## Recommended Implementation Order
+
+1. Extend `final_round_summary.md` with YAML frontmatter and Chinese field explanations.
+2. Implement round completion validation.
+3. Implement `literature_map.md` parser and validator.
+4. Implement gap report generation.
+5. Implement formal write guardrails.
+6. Add CLI tests and Chinese error messages.
+
+This order is intentionally validation-first. Do not start with formal write mutation before the round, map, and gap validation chain is working.
+
+</implementation_guidance>
+
 <decisions>
 ## Implementation Decisions
 
@@ -21,7 +35,7 @@ This phase does not implement real web search, automatic PDF download, full-text
 - **D-03:** A round cannot be considered complete unless every candidate row in `verification_review.md` has a `decision` of `verified`, `rejected`, or `uncertain`, plus non-empty `reason` and `last_checked`.
 - **D-04:** Optional round files are recorded through a summary manifest. `final_round_summary.md` must list actual optional files under `included_files`, and validation checks that listed files exist and match their expected role.
 - **D-05:** `final_round_summary.md` stores machine-readable completion metadata in YAML frontmatter, including at least `status`, `included_files`, and any formal write request fields. The Markdown body remains Chinese-readable.
-- **D-06:** `status: completed` requires `human_confirmed: true`, non-empty `confirmed_by`, and non-empty `confirmed_at`. Without those fields, a valid round can be at most `ready_for_review`.
+- **D-06:** `status: completed` requires `human_confirmed: true`, non-empty `confirmed_by`, and non-empty `confirmed_at`. Without those fields, a valid round can be at most `ready_for_review`; `ready_for_review` is the highest status an agent or automated validation flow may suggest.
 - **D-07:** If a round contains `verified` candidates that have not yet been written to formal metadata, completion is allowed only when they are listed under `formal_write_requests`. This is a request queue only; it never auto-creates `metadata/P###.yaml`.
 
 ### Literature Mapping Format
@@ -35,8 +49,8 @@ This phase does not implement real web search, automatic PDF download, full-text
 ### Research Gap Report
 - **D-14:** Gap detection compares a topic profile's `priority_questions` against approved rows in `literature_map.md`.
 - **D-15:** Gap output should be a Chinese-readable report under `01_literature/synthesis/`, plus concise CLI output. The report is generated; it is not a formal source of truth.
-- **D-16:** Gap status values are `covered`, `weak`, and `missing`. `covered` means at least one approved non-background mapping exists; `weak` means only background/risk-limitation evidence or incomplete thesis/planned-output links exist; `missing` means no approved mapping exists.
-- **D-17:** Gap reports should list the priority question, status, supporting `paper_id` values, research roles, and a short next-action note.
+- **D-16:** Gap status values are `covered`, `weak`, and `missing`. `covered` means at least one approved non-background mapping exists; `weak` means evidence exists but coverage is incomplete or low-confidence; `missing` means no approved mapping exists.
+- **D-17:** Gap reports should list the priority question, status, supporting `paper_id` values, research roles, and a short next-action note. When `status` is `weak`, gap reports must include `weak_reason` values chosen from: `only_background_evidence`, `only_risk_or_limitation`, `missing_thesis_section`, `missing_planned_output`, and `insufficient_method_or_evaluation_support`.
 
 ### Formal Write Guardrails
 - **D-18:** Formal writes to `literature_map.md`, `research_tables.md`, `agent_research_notes.md`, or any future formal record must require explicit CLI action plus `--human-confirmed` and `--confirmed-by`.
@@ -46,7 +60,58 @@ This phase does not implement real web search, automatic PDF download, full-text
 - **D-22:** On conflict, v1 should fail with actionable Chinese errors rather than silently overwriting. No automatic merge or force overwrite behavior is required in this phase.
 - **D-23:** English field names and CLI parameters stay stable, but every user-facing template, help text, validation error, and report must include Chinese explanations.
 
-### the agent's Discretion
+### Formal Write Request Schema
+- **D-24:** `formal_write_requests` must be a machine-readable list in `final_round_summary.md` frontmatter, not free text.
+- **D-25:** `formal_write_requests[].request_type` is required and initially supports `add_metadata` and `add_map_row`.
+- **D-26:** `add_metadata` requests must include `source_file`, `source_row`, `candidate_title`, `doi_or_url`, and `reason`. Do not introduce `C001` candidate IDs in Phase 3.
+- **D-27:** `add_map_row` requests must include `paper_id`, `target_file`, `priority_question`, `research_role`, and `reason`; `target_file` must be `literature_map.md` for v1.
+
+Example frontmatter shape:
+
+```yaml
+---
+status: ready_for_review
+included_files:
+  - verification_review.md
+formal_write_requests:
+  - request_type: add_metadata
+    source_file: verification_review.md
+    source_row: 3
+    candidate_title: "Paper title..."
+    doi_or_url: "10.0000/example"
+    reason: "已核验，建议进入正式元数据"
+  - request_type: add_map_row
+    paper_id: P001
+    target_file: literature_map.md
+    priority_question: "Q1: 间断孔径如何影响旁瓣与伪影？"
+    research_role: theory
+    reason: "该论文解释了孔径缺失与频域采样之间的关系"
+human_confirmed: false
+confirmed_by:
+confirmed_at:
+---
+```
+
+### CLI Command Shape
+- **D-28:** CLI commands should be grouped by intent: round validation, map proposal/validation, gap generation/validation, and formal application.
+- **D-29:** Commands named `validate` must be read-only. Commands named `generate` or `propose` may create generated reports or proposals, but must not modify formal records. Commands under `formal apply-*` are the only formal write path and must require human confirmation.
+- **D-30:** Recommended command shape for planning:
+  - `rsa round validate R001_xxx`
+  - `rsa round complete-check R001_xxx`
+  - `rsa map validate`
+  - `rsa map propose --round R001_xxx`
+  - `rsa gap generate --topic sar_noncontinuous_aperture`
+  - `rsa gap validate --topic sar_noncontinuous_aperture`
+  - `rsa formal apply-map --source-round R001_xxx --human-confirmed --confirmed-by "name"`
+
+### Phase 3 MUST NOT
+- **D-31:** Phase 3 must not create new `paper_id` values except through the Phase 2 metadata gate.
+- **D-32:** Phase 3 must not convert candidate titles directly into `literature_map.md` rows.
+- **D-33:** Phase 3 must not mark a round as `completed` without human confirmation.
+- **D-34:** Phase 3 must not overwrite formal records on conflict.
+- **D-35:** Phase 3 must not treat gap reports as final academic conclusions.
+
+### Planner Discretion
 - Exact CLI subcommand names may be chosen during planning, as long as they clearly separate validation, report generation, and formal writes.
 - Exact Markdown rendering details are flexible, provided the machine-readable frontmatter and required table columns remain stable.
 - The planner may decide whether gap reports are regenerated by a single command or separate validate/generate commands, as long as validation remains read-only and writes remain explicit.
@@ -60,6 +125,13 @@ This phase does not implement real web search, automatic PDF download, full-text
 - User then asked the agent to decide the remaining choices and report the result, so the mapping, gap report, and formal-write guardrail decisions above are locked recommended defaults.
 - `formal_write_requests` should make it easy to preserve verified-but-not-yet-formal candidates without weakening the Phase 2 `add-paper --human-confirmed` gate.
 - Gap reports should help the user decide what to read or search next, not pretend to make final academic judgments.
+- Example `literature_map.md` row shape:
+
+```markdown
+| paper_id | topic_profile | priority_question | thesis_section | planned_output | research_role | evidence_note | map_status |
+|----------|---------------|-------------------|----------------|----------------|---------------|---------------|------------|
+| P001 | sar_noncontinuous_aperture | Q1: 间断孔径如何影响旁瓣与伪影？ | 第2章 文献综述 | 形成间断孔径成像问题背景 | theory | 解释了孔径缺失与频域采样之间的关系 | approved |
+```
 
 </specifics>
 
