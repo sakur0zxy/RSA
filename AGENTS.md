@@ -68,6 +68,28 @@ Use these entry points:
 Do not edit broad project structure outside the GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
 
+<!-- GSD:rsa-cli-start source:phase-01 -->
+## RSA CLI Harness
+
+Use the project CLI for Phase 1 harness operations:
+
+- `rsa init` creates the configured literature foundation from `rsa.yaml` and `.rsa/local.yaml`.
+- `rsa validate-profile <path>` validates a topic profile YAML before it is used by later workflows.
+- `rsa new-round --topic <path> --objective <text> --name <text> --max-candidates <n>` creates a bounded research round under `agent_outputs/`.
+
+Evidence hierarchy:
+
+- Formal records are metadata files, `paper_index.md`, `literature_map.md`, notes, and human-confirmed research records.
+- `agent_outputs/` is staging only. It may contain round README files, summaries, candidates, and review packets, but it is not a formal source of truth.
+- Formal metadata, maps, notes, and research records require schema validation, conflict checks, and human confirmation before writes.
+
+Local-only asset policy:
+
+- PDFs are local-only by default and belong under `01_literature/pdfs/`.
+- Important screenshots and result assets are local-only by default and belong under `01_literature/assets/P###/`.
+- Metadata may reference local PDFs and assets, but agent round archives should reference those paths rather than storing PDF or screenshot payloads directly.
+<!-- GSD:rsa-cli-end -->
+
 <!-- GSD:profile-start -->
 ## Developer Profile
 

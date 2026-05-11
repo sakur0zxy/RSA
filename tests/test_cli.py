@@ -122,3 +122,17 @@ def test_cli_new_round_expected_errors_have_no_traceback(tmp_path, capsys):
     assert exit_code == 1
     assert "hard cap" in captured.err
     assert "Traceback" not in captured.err
+
+
+def test_agents_guidance_mentions_cli_and_asset_policy():
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[1]
+    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "rsa init" in agents
+    assert "rsa validate-profile" in agents
+    assert "rsa new-round" in agents
+    assert "PDFs are local-only" in agents
+    assert "screenshots and result assets are local-only" in agents
+    assert "human confirmation before writes" in agents
