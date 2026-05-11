@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 01-03-PLAN.md
+status: ready_to_plan
+stopped_at: Phase 1 complete; ready to plan Phase 2
 last_updated: "2026-05-11T08:08:07.730Z"
 last_activity: 2026-05-11
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
   completed_plans: 3
-  percent: 100
+  percent: 40
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-11)
 
 **Core value:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
-**Current focus:** Phase 01 — harness-foundation
+**Current focus:** Phase 2 - Literature Records Pipeline
 
 ## Current Position
 
-Phase: 01 (harness-foundation) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
+Phase: 2
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-05-11
 
 Progress: [██████████] 100%
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 0
+- Total plans completed: 3
 - Average duration: N/A
 - Total execution time: 0 hours
 
@@ -44,7 +44,7 @@ Progress: [██████████] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01 | 3 | - | - |
 
 **Recent Trend:**
 
@@ -80,6 +80,6 @@ None
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Completed 01-03-PLAN.md
-Resume file: --resume-file
+Last session: Phase 1 execution completed
+Stopped at: Phase 1 complete; ready to plan Phase 2
+Resume file: None
