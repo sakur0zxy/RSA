@@ -1,13 +1,16 @@
-# Paper Note: P000
+# 文献阅读笔记: P000
 
-## Source
+## 来源与授权
 
-- Metadata record:
-- Local PDF:
-- Authorization status:
+- metadata 记录:
+- 本地 PDF:
+- 授权状态: 仅允许使用本地、用户提供或已授权内容；不得根据未授权来源生成全文阅读结论。
 
-## Claims and Evidence
+## 关键论点与证据
 
-## Agent Summary
+## Agent 摘要
 
-## Human Decisions
+## 人工决策
+
+- 是否可进入正式研究记录:
+- 需要补充核验:

@@ -1,4 +1,6 @@
-# Reading Batch Report
+# 阅读批次报告
 
-| Paper | Reading note | Status | Human approval |
-|-------|--------------|--------|----------------|
+阅读输出必须基于本地、用户提供或已授权全文材料，并在进入正式研究记录前经过人工确认。
+
+| paper_id | reading_note | status | human_approval |
+|----------|--------------|--------|----------------|

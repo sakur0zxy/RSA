@@ -1,3 +1,6 @@
-# Research Tables
+# 研究表格
 
-Use this file for human-reviewed comparison tables and evidence summaries.
+用于保存经过人工审核的对比表、证据表和实验设置摘要。表格中的结论必须能追溯到正式 metadata 或授权阅读材料。
+
+| table_name | source_papers | purpose | status |
+|------------|---------------|---------|--------|

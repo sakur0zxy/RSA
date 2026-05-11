@@ -1,9 +1,19 @@
+# 字段说明
+# topic_id: 稳定的英文课题编号，供脚本和索引引用。
+# topic_name: 中文或英文课题名称，供人阅读。
+# core_keywords: 核心检索关键词列表。
+# priority_questions: 本课题优先回答的问题列表。
+# important_metrics: 评估论文时重点关注的指标。
+# preferred_sources: 优先使用的来源类型。
+# exclude_scope: 明确排除的范围。
+# grade_rules: 候选文献分级规则。
+# required_outputs: 每轮调研必须产出的文件名。
 topic_id: example_topic
-topic_name: Example research topic
+topic_name: 示例研究课题
 core_keywords:
   - keyword
 priority_questions:
-  - What should this research round answer?
+  - 这一轮调研需要回答什么问题？
 important_metrics:
   - evidence quality
 preferred_sources:
@@ -12,24 +22,24 @@ exclude_scope:
   - unverified claims
 grade_rules:
   A:
-    description: High-priority candidate
+    description: 高优先级候选
     criteria:
-      - Directly answers a priority question
-      - Reliable source with reusable evidence
+      - 直接回答 priority_questions 中的问题
+      - 来源可靠，证据可以复用
   B:
-    description: Useful supporting candidate
+    description: 有用的支撑候选
     criteria:
-      - Related to the topic boundary
-      - May support background or comparison
+      - 与课题边界相关
+      - 可用于背景、理论或对比
   C:
-    description: Low-priority candidate
+    description: 低优先级候选
     criteria:
-      - Peripheral or weakly connected
+      - 关联较弱或证据不足
   Reject:
-    description: Out of scope or unreliable
+    description: 范围外或来源不可靠
     criteria:
-      - Not source-grounded
-      - Outside the exclude_scope boundary
+      - 缺少可靠来源支撑
+      - 落入 exclude_scope 排除范围
 required_outputs:
   - search_candidates.md
   - final_round_summary.md

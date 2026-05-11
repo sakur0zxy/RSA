@@ -43,6 +43,22 @@ class ProjectConfig:
         return self.resolve_path(str(self.data["templates_root"]))
 
     @property
+    def metadata_root(self) -> Path:
+        return self.literature_root / "metadata"
+
+    @property
+    def paper_index_path(self) -> Path:
+        return self.literature_root / "paper_index.md"
+
+    @property
+    def assets_root(self) -> Path:
+        return self.literature_root / "assets"
+
+    @property
+    def pdfs_root(self) -> Path:
+        return self.literature_root / "pdfs"
+
+    @property
     def topic_profiles_root(self) -> Path:
         profiles_root = self.data.get("profiles", {}).get("root", "topic_profiles")
         return self.literature_root / str(profiles_root)

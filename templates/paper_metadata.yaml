@@ -1,3 +1,27 @@
+# 字段说明
+# paper_id: 正式文献编号，文件名必须是 metadata/P###.yaml。
+# title: 论文标题。
+# authors: 作者列表。
+# year: 发表年份。
+# venue: 期刊、会议或预印本平台。
+# doi: DOI；没有 DOI 时必须提供 official_url。
+# official_url: 官方页面或可靠来源链接。
+# source_reliability: 来源可靠性说明。
+# verification_status: 正式记录必须为 verified。
+# decision: 人工收录决策。
+# decision_reason: 收录决策原因。
+# last_checked: 最近一次核验时间。
+# pdf_status: PDF 获取与授权状态。
+# local_pdf: 本地 PDF 路径；没有合法 PDF 时留空。
+# assets: 本地截图、图表或结果图路径列表。
+# topic_profile: 关联的课题 profile。
+# priority_questions: 该文献服务的优先问题。
+# used_for: 计划用途。
+# research_roles: 研究角色。
+# notes: 人工备注。
+# human_confirmed: 是否人工确认写入正式记录。
+# confirmed_by: 确认人。
+# confirmed_at: 确认时间。
 paper_id: P000
 title:
 authors: []
@@ -7,9 +31,17 @@ doi:
 official_url:
 source_reliability:
 verification_status: unverified
+decision:
+decision_reason:
+last_checked:
 pdf_status: not_acquired
 local_pdf:
 assets: []
+topic_profile:
+priority_questions: []
 used_for: []
-last_checked:
+research_roles: []
+notes:
 human_confirmed: false
+confirmed_by:
+confirmed_at:

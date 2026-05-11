@@ -1,16 +1,18 @@
-# Final Round Summary: {round_id}
+# 研究轮次总结: {round_id}
 
-## Status
+## 状态
 
 draft
 
-## Key Findings
+## 关键发现
 
-## Candidate Decisions
+## 候选决策
 
-## Formal Record Updates Requested
+## 请求写入正式记录
 
-## Human Confirmation
+仅列出建议，不会自动创建 metadata/P###.yaml；正式写入必须通过 `rsa add-paper --human-confirmed`。
 
-- Confirmed by:
-- Date:
+## 人工确认
+
+- confirmed_by:
+- confirmed_at:

@@ -2,12 +2,22 @@ from __future__ import annotations
 
 
 TEMPLATE_FILES: dict[str, str] = {
-    "topic_profile.yaml": """topic_id: example_topic
-topic_name: Example research topic
+    "topic_profile.yaml": """# 字段说明
+# topic_id: 稳定的英文课题编号，供脚本和索引引用。
+# topic_name: 中文或英文课题名称，供人阅读。
+# core_keywords: 核心检索关键词列表。
+# priority_questions: 本课题优先回答的问题列表。
+# important_metrics: 评估论文时重点关注的指标。
+# preferred_sources: 优先使用的来源类型。
+# exclude_scope: 明确排除的范围。
+# grade_rules: 候选文献分级规则。
+# required_outputs: 每轮调研必须产出的文件名。
+topic_id: example_topic
+topic_name: 示例研究课题
 core_keywords:
   - keyword
 priority_questions:
-  - What should this research round answer?
+  - 这一轮调研需要回答什么问题？
 important_metrics:
   - evidence quality
 preferred_sources:
@@ -16,29 +26,53 @@ exclude_scope:
   - unverified claims
 grade_rules:
   A:
-    description: High-priority candidate
+    description: 高优先级候选
     criteria:
-      - Directly answers a priority question
-      - Reliable source with reusable evidence
+      - 直接回答 priority_questions 中的问题
+      - 来源可靠，证据可以复用
   B:
-    description: Useful supporting candidate
+    description: 有用的支撑候选
     criteria:
-      - Related to the topic boundary
-      - May support background or comparison
+      - 与课题边界相关
+      - 可用于背景、理论或对比
   C:
-    description: Low-priority candidate
+    description: 低优先级候选
     criteria:
-      - Peripheral or weakly connected
+      - 关联较弱或证据不足
   Reject:
-    description: Out of scope or unreliable
+    description: 范围外或来源不可靠
     criteria:
-      - Not source-grounded
-      - Outside the exclude_scope boundary
+      - 缺少可靠来源支撑
+      - 落入 exclude_scope 排除范围
 required_outputs:
   - search_candidates.md
   - final_round_summary.md
 """,
-    "paper_metadata.yaml": """paper_id: P000
+    "paper_metadata.yaml": """# 字段说明
+# paper_id: 正式文献编号，文件名必须是 metadata/P###.yaml。
+# title: 论文标题。
+# authors: 作者列表。
+# year: 发表年份。
+# venue: 期刊、会议或预印本平台。
+# doi: DOI；没有 DOI 时必须提供 official_url。
+# official_url: 官方页面或可靠来源链接。
+# source_reliability: 来源可靠性说明。
+# verification_status: 正式记录必须为 verified。
+# decision: 人工收录决策。
+# decision_reason: 收录决策原因。
+# last_checked: 最近一次核验时间。
+# pdf_status: PDF 获取与授权状态。
+# local_pdf: 本地 PDF 路径；没有合法 PDF 时留空。
+# assets: 本地截图、图表或结果图路径列表。
+# topic_profile: 关联的课题 profile。
+# priority_questions: 该文献服务的优先问题。
+# used_for: 计划用途。
+# research_roles: 研究角色。
+# notes: 人工备注。
+# human_confirmed: 是否人工确认写入正式记录。
+# confirmed_by: 确认人。
+# confirmed_at: 确认时间。
+paper_id: P000
 title:
 authors: []
 year:
@@ -47,112 +81,168 @@ doi:
 official_url:
 source_reliability:
 verification_status: unverified
+decision:
+decision_reason:
+last_checked:
 pdf_status: not_acquired
 local_pdf:
 assets: []
+topic_profile:
+priority_questions: []
 used_for: []
-last_checked:
+research_roles: []
+notes:
 human_confirmed: false
+confirmed_by:
+confirmed_at:
 """,
-    "paper_note.md": """# Paper Note: P000
+    "paper_note.md": """# 文献阅读笔记: P000
 
-## Source
+## 来源与授权
 
-- Metadata record:
-- Local PDF:
-- Authorization status:
+- metadata 记录:
+- 本地 PDF:
+- 授权状态: 仅允许使用本地、用户提供或已授权内容；不得根据未授权来源生成全文阅读结论。
 
-## Claims and Evidence
+## 关键论点与证据
 
-## Agent Summary
+## Agent 摘要
 
-## Human Decisions
+## 人工决策
+
+- 是否可进入正式研究记录:
+- 需要补充核验:
 """,
-    "round_readme.md": """# Research Round {round_id}
+    "round_readme.md": """# 研究轮次 {round_id}
 
-## Objective
+## 目标
 
 {objective}
 
-## Topic
+## 课题与边界
 
 - Profile: `{topic_profile}`
-- Max candidates: {max_candidates}
-- Allowed tools: {allowed_tools}
-- Output policy: {output_policy}
-- Approval mode: {approval_mode}
+- 候选数量上限 max_candidates: {max_candidates}
+- 允许工具 allowed_tools: {allowed_tools}
+- 输出策略 output_policy: {output_policy}
+- 人工确认模式 approval_mode: {approval_mode}
 - Campaign ID: {campaign_id}
 
-## Formal Write Policy
+## 正式写入规则
 
-This round may stage candidates and notes in `agent_outputs/`, but formal metadata,
-maps, notes, and research records require schema validation and human confirmation.
+本轮可以在 `agent_outputs/` 中暂存候选、证据和草稿；正式 metadata、文献映射、阅读笔记和研究记录都需要经过 schema 校验与人工确认。
 
-## Local Assets
+## 本地资产
 
-PDFs belong under the configured `pdfs/` directory. Important screenshots and
-result images belong under `assets/P###/` and should be referenced from metadata.
+PDF 只记录本地或已授权路径，重要截图和结果图放在 `assets/P###/`，并从 metadata 中引用。
 """,
-    "final_round_summary.md": """# Final Round Summary: {round_id}
+    "final_round_summary.md": """# 研究轮次总结: {round_id}
 
-## Status
+## 状态
 
 draft
 
-## Key Findings
+## 关键发现
 
-## Candidate Decisions
+## 候选决策
 
-## Formal Record Updates Requested
+## 请求写入正式记录
 
-## Human Confirmation
+仅列出建议，不会自动创建 metadata/P###.yaml；正式写入必须通过 `rsa add-paper --human-confirmed`。
 
-- Confirmed by:
-- Date:
+## 人工确认
+
+- confirmed_by:
+- confirmed_at:
 """,
-    "search_candidates.md": """# Search Candidates
+    "search_candidates.md": """# 候选文献
 
-| Candidate | Source | Why relevant | Status |
-|-----------|--------|--------------|--------|
+候选文献只进入 staging。候选必须先在 `verification_review.md` 中核验，只有 `verified + human_confirmed` 并通过正式 metadata 命令后，才可以创建 `metadata/P###.yaml`。
+
+| candidate_title | source | doi_or_url | why_relevant | next_review_action |
+|-----------------|--------|------------|--------------|--------------------|
 """,
-    "verification_review.md": """# Verification Review
+    "verification_review.md": """# 候选文献核验记录
 
-| Candidate | DOI/title checked | Official URL | Decision | Reason |
-|-----------|-------------------|--------------|----------|--------|
+| candidate_title | source | doi_or_url | decision | reason | last_checked |
+|-----------------|--------|------------|----------|--------|--------------|
+
+## 字段说明
+
+- `candidate_title`: 候选文献标题。
+- `source`: 候选来源，例如数据库、网页、人工提供列表。
+- `doi_or_url`: DOI 或官方/可靠链接。
+- `decision`: 核验结论，只能使用 `verified`、`rejected` 或 `uncertain`。
+- `reason`: 核验理由和证据摘要。
+- `last_checked`: 最近一次核验时间。
+
+## 状态取值
+
+- `verified`: 身份和来源核验通过，但正式 metadata 仍然需要显式 `human_confirmed`。
+- `rejected`: 明确不进入正式记录。
+- `uncertain`: 信息不足，需要后续补证。
 """,
-    "map_integration.md": """# Map Integration
+    "map_integration.md": """# 正式映射占位
 
-| Paper | Priority question | Role | Notes |
-|-------|-------------------|------|-------|
+本文件只记录待人工审核的映射建议。正式映射更新属于后续批准的工作流，不会因为填写本模板而自动写入正式记录。
+
+| paper_id | priority_question | role | notes |
+|----------|-------------------|------|-------|
 """,
-    "pdf_acquisition_report.md": """# PDF Acquisition Report
+    "pdf_acquisition_report.md": """# PDF 获取状态记录
 
-| Paper | PDF status | Local path | Source/authorization | Notes |
-|-------|------------|------------|----------------------|-------|
+不得下载未授权 PDF。本表只记录状态、来源、授权情况和本地路径；PDF 文件由用户在合法授权后放入本地目录。
+
+| paper_id | pdf_status | local_path | source_or_authorization | notes |
+|----------|------------|------------|-------------------------|-------|
 """,
-    "reading_batch_report.md": """# Reading Batch Report
+    "reading_batch_report.md": """# 阅读批次报告
 
-| Paper | Reading note | Status | Human approval |
-|-------|--------------|--------|----------------|
+阅读输出必须基于本地、用户提供或已授权全文材料，并在进入正式研究记录前经过人工确认。
+
+| paper_id | reading_note | status | human_approval |
+|----------|--------------|--------|----------------|
 """,
 }
 
 
 FORMAL_RECORD_FILES: dict[str, str] = {
-    "paper_index.md": """# Paper Index
+    "paper_index.md": """# 文献索引
 
-Formal paper records appear here only after metadata validation and human confirmation.
+正式事实源是 `metadata/P###.yaml`；本文件只作为人工阅读索引，应由 `rsa regenerate-index` 生成。
+
+| paper_id | year | title | venue | decision | used_for | pdf_status |
+|----------|------|-------|-------|----------|----------|------------|
+
+## 字段说明
+
+- `paper_id`: 正式文献编号。
+- `year`: 发表年份。
+- `title`: 论文标题。
+- `venue`: 期刊、会议或预印本平台。
+- `decision`: 人工收录决策。
+- `used_for`: 计划用于的章节、问题、实验或对比。
+- `pdf_status`: PDF 获取与授权状态。
 """,
-    "literature_map.md": """# Literature Map
+    "literature_map.md": """# 文献映射
 
-Verified papers can be mapped to topic questions, thesis chapters, and research roles here.
+用于人工维护 verified 文献与优先问题、论文章节、研究角色之间的关系。正式映射更新需要后续批准的工作流，不会自动发生。
+
+| paper_id | priority_question | thesis_section | research_role | notes |
+|----------|-------------------|----------------|---------------|-------|
 """,
-    "research_tables.md": """# Research Tables
+    "research_tables.md": """# 研究表格
 
-Use this file for human-reviewed comparison tables and evidence summaries.
+用于保存经过人工审核的对比表、证据表和实验设置摘要。表格中的结论必须能追溯到正式 metadata 或授权阅读材料。
+
+| table_name | source_papers | purpose | status |
+|------------|---------------|---------|--------|
 """,
-    "agent_research_notes.md": """# Agent Research Notes
+    "agent_research_notes.md": """# Agent 辅助材料
 
-Agent-generated research notes remain auxiliary until reviewed and promoted by a human.
+Agent 生成的研究笔记只作为辅助材料；进入论文、正式 map 或研究表格前必须人工审核和确认。
+
+| note_id | source | summary | human_status |
+|---------|--------|---------|--------------|
 """,
 }
