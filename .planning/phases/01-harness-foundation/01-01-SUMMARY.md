@@ -37,7 +37,7 @@ key-decisions:
   - "Create skeleton files with write-if-missing behavior so edited formal records are not overwritten."
 
 patterns-established:
-  - "Config merge: DEFAULT_CONFIG -> rsa.yaml -> .rsa/local.yaml, with local overrides winning."
+  - "Config merge: built-in defaults -> committed project defaults -> optional user-local overrides, with local overrides winning."
   - "Filesystem writes are idempotent and leave user-edited Markdown/YAML files intact."
   - "PDF and screenshot payloads are local-only by default; .gitkeep files keep the folders visible."
 
@@ -62,7 +62,7 @@ completed: 2026-05-11
 ## Accomplishments
 
 - Added the `rsa-research-agent` Python package with the `rsa` console script and `rsa init` command.
-- Added safe project configuration loading from `rsa.yaml` plus `.rsa/local.yaml`, with recursive local overrides.
+- Added safe project configuration loading from committed project defaults plus optional user-local overrides, with recursive local overrides.
 - Created the full `01_literature/` foundation, root templates, local-only ignore rules, and SAR starter profile.
 - Moved starter profile content into package/project YAML data so the Python harness remains topic-generic.
 
