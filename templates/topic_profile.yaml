@@ -1,0 +1,35 @@
+topic_id: example_topic
+topic_name: Example research topic
+core_keywords:
+  - keyword
+priority_questions:
+  - What should this research round answer?
+important_metrics:
+  - evidence quality
+preferred_sources:
+  - peer-reviewed papers
+exclude_scope:
+  - unverified claims
+grade_rules:
+  A:
+    description: High-priority candidate
+    criteria:
+      - Directly answers a priority question
+      - Reliable source with reusable evidence
+  B:
+    description: Useful supporting candidate
+    criteria:
+      - Related to the topic boundary
+      - May support background or comparison
+  C:
+    description: Low-priority candidate
+    criteria:
+      - Peripheral or weakly connected
+  Reject:
+    description: Out of scope or unreliable
+    criteria:
+      - Not source-grounded
+      - Outside the exclude_scope boundary
+required_outputs:
+  - search_candidates.md
+  - final_round_summary.md

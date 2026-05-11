@@ -1,0 +1,11 @@
+literature_root: "01_literature"
+templates_root: "templates"
+profiles:
+  root: "topic_profiles"
+rounds:
+  default_max_candidates: 5
+  hard_max_candidates: 20
+  allowed_tools: []
+  output_policy: "agent_outputs_only"
+  approval_mode: "human_confirmed_formal_writes"
+  campaign_id:
