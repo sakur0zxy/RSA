@@ -10,7 +10,7 @@ v1 builds a local-first research agent harness in five phases. The path starts w
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Harness Foundation** - Define local file schema, topic profiles, research rounds and project instructions.
+- [x] **Phase 1: Harness Foundation** - Define local file schema, topic profiles, research rounds and project instructions. (completed 2026-05-11)
 - [ ] **Phase 2: Literature Records Pipeline** - Build metadata-first records, paper index and candidate verification staging.
 - [ ] **Phase 3: Research Round Integration** - Connect round archives, topic mapping, gap detection and formal-write guardrails.
 - [ ] **Phase 4: Reading Note Workflow** - Add authorized full-text reading notes and approval gates for formal research notes.
@@ -37,7 +37,7 @@ Plans:
 - [x] 01-02: Implement profile validation and research round configuration.
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 01-03: Finalize project guidance and smoke-test a SAR starter profile.
+- [x] 01-03: Finalize project guidance and smoke-test a SAR starter profile.
 
 ### Phase 2: Literature Records Pipeline
 **Goal**: Make verified literature metadata the formal source of truth while keeping candidates safely staged.
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Harness Foundation | 2/3 | In Progress|  |
+| 1. Harness Foundation | 3/3 | Complete   | 2026-05-11 |
 | 2. Literature Records Pipeline | 0/3 | Not started | - |
 | 3. Research Round Integration | 0/3 | Not started | - |
 | 4. Reading Note Workflow | 0/2 | Not started | - |

@@ -12,7 +12,7 @@
 
 ### Rounds
 
-- [ ] **ROUND-01**: User can start a bounded research round with topic profile, objective, max paper count, allowed tools, output policy and human approval mode.
+- [x] **ROUND-01**: User can start a bounded research round with topic profile, objective, max paper count, allowed tools, output policy and human approval mode.
 - [ ] **ROUND-02**: User can inspect each completed research round through a lightweight archive containing `README.md`, `final_round_summary.md` and only task-relevant optional files.
 
 ### Literature Records
@@ -87,7 +87,7 @@ Deferred to future releases.
 |-------------|-------|--------|
 | PROF-01 | Phase 1 | Complete |
 | PROF-02 | Phase 1 | Complete |
-| ROUND-01 | Phase 1 | Pending |
+| ROUND-01 | Phase 1 | Complete |
 | DOCS-01 | Phase 1 | Complete |
 | META-01 | Phase 2 | Pending |
 | META-02 | Phase 2 | Pending |
