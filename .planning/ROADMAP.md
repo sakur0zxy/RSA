@@ -51,9 +51,16 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
+**Wave 1**
 - [ ] 02-01: Define metadata schema, paper index format and validation checks.
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 02-02: Implement candidate staging and verification review outputs.
+
+**Wave 3** *(blocked on Wave 1 completion)*
 - [ ] 02-03: Add consistency checks between metadata and paper index.
+
+**Wave 4** *(blocked on Wave 2 and Wave 3 completion)*
 - [ ] 02-04: Add Chinese explanations to remaining Phase 1 user-facing templates and seed files.
 
 ### Phase 3: Research Round Integration
