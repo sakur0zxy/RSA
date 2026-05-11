@@ -17,14 +17,14 @@
 
 ### Literature Records
 
-- [ ] **META-01**: User can store each verified paper as one metadata YAML file with required identity, source, status, PDF and research-use fields.
-- [ ] **META-02**: User can maintain `paper_index.md` as a human-readable index consistent with metadata YAML records.
-- [ ] **META-03**: User can track DOI, official URL, source reliability, PDF status, local PDF path, decision and `last_checked` for each paper.
+- [x] **META-01**: User can store each verified paper as one metadata YAML file with required identity, source, status, PDF and research-use fields.
+- [x] **META-02**: User can maintain `paper_index.md` as a human-readable index consistent with metadata YAML records.
+- [x] **META-03**: User can track DOI, official URL, source reliability, PDF status, local PDF path, decision and `last_checked` for each paper.
 
 ### Candidate Search
 
-- [ ] **SRCH-01**: User can collect candidate papers into a staging area without writing them into formal metadata.
-- [ ] **SRCH-02**: User can review candidate papers as verified, rejected or uncertain with reasons and source evidence.
+- [x] **SRCH-01**: User can collect candidate papers into a staging area without writing them into formal metadata.
+- [x] **SRCH-02**: User can review candidate papers as verified, rejected or uncertain with reasons and source evidence.
 
 ### Topic Mapping
 
@@ -89,11 +89,11 @@ Deferred to future releases.
 | PROF-02 | Phase 1 | Complete |
 | ROUND-01 | Phase 1 | Complete |
 | DOCS-01 | Phase 1 | Complete |
-| META-01 | Phase 2 | Pending |
-| META-02 | Phase 2 | Pending |
-| META-03 | Phase 2 | Pending |
-| SRCH-01 | Phase 2 | Pending |
-| SRCH-02 | Phase 2 | Pending |
+| META-01 | Phase 2 | Complete |
+| META-02 | Phase 2 | Complete |
+| META-03 | Phase 2 | Complete |
+| SRCH-01 | Phase 2 | Complete |
+| SRCH-02 | Phase 2 | Complete |
 | ROUND-02 | Phase 3 | Pending |
 | MAP-01 | Phase 3 | Pending |
 | MAP-02 | Phase 3 | Pending |

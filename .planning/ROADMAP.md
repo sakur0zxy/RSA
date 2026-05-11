@@ -11,7 +11,7 @@ v1 builds a local-first research agent harness in five phases. The path starts w
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Harness Foundation** - Define local file schema, topic profiles, research rounds and project instructions. (completed 2026-05-11)
-- [ ] **Phase 2: Literature Records Pipeline** - Build metadata-first records, paper index and candidate verification staging.
+- [x] **Phase 2: Literature Records Pipeline** - Build metadata-first records, paper index and candidate verification staging. (completed 2026-05-11)
 - [ ] **Phase 3: Research Round Integration** - Connect round archives, topic mapping, gap detection and formal-write guardrails.
 - [ ] **Phase 4: Reading Note Workflow** - Add authorized full-text reading notes and approval gates for formal research notes.
 - [ ] **Phase 5: Evaluation and Hardening** - Add eval fixtures, trace summaries and regression checks for harness reliability.
@@ -52,16 +52,16 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 02-01: Define metadata schema, paper index format and validation checks.
+- [x] 02-01: Define metadata schema, paper index format and validation checks.
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 02-02: Implement candidate staging and verification review outputs.
+- [x] 02-02: Implement candidate staging and verification review outputs.
 
 **Wave 3** *(blocked on Wave 1 completion)*
-- [ ] 02-03: Add consistency checks between metadata and paper index.
+- [x] 02-03: Add consistency checks between metadata and paper index.
 
 **Wave 4** *(blocked on Wave 2 and Wave 3 completion)*
-- [ ] 02-04: Add Chinese explanations to remaining Phase 1 user-facing templates and seed files.
+- [x] 02-04: Add Chinese explanations to remaining Phase 1 user-facing templates and seed files.
 
 ### Phase 3: Research Round Integration
 **Goal**: Turn a bounded round into a traceable research packet that can update maps only through safe formal writes.
@@ -117,7 +117,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Harness Foundation | 3/3 | Complete   | 2026-05-11 |
-| 2. Literature Records Pipeline | 0/4 | Not started | - |
+| 2. Literature Records Pipeline | 4/4 | Complete    | 2026-05-11 |
 | 3. Research Round Integration | 0/3 | Not started | - |
 | 4. Reading Note Workflow | 0/2 | Not started | - |
 | 5. Evaluation and Hardening | 0/2 | Not started | - |
