@@ -34,7 +34,7 @@ Plans:
 - [x] 01-01: Create directory schema, starter topic profile and template files.
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-02: Implement profile validation and research round configuration.
+- [x] 01-02: Implement profile validation and research round configuration.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 01-03: Finalize project guidance and smoke-test a SAR starter profile.
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Harness Foundation | 1/3 | In Progress|  |
+| 1. Harness Foundation | 2/3 | In Progress|  |
 | 2. Literature Records Pipeline | 0/3 | Not started | - |
 | 3. Research Round Integration | 0/3 | Not started | - |
 | 4. Reading Note Workflow | 0/2 | Not started | - |
