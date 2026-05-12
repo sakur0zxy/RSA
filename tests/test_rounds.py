@@ -40,6 +40,9 @@ def test_create_first_round_writes_required_files_only_under_agent_outputs(tmp_p
     assert result.path == round_dir
     assert (round_dir / "README.md").exists()
     assert (round_dir / "final_round_summary.md").exists()
+    assert (round_dir / "final_round_summary.md").read_text(encoding="utf-8").startswith(
+        "---\n"
+    )
     assert not (round_dir / "search_candidates.md").exists()
     assert sorted(p.name for p in (tmp_path / "01_literature" / "metadata").iterdir()) == [
         ".gitkeep"

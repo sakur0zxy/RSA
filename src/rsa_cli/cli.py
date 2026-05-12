@@ -41,6 +41,19 @@ def build_parser() -> argparse.ArgumentParser:
     new_round.add_argument("--approval-mode", help="人工确认模式。")
     new_round.add_argument("--campaign-id", help="可选 campaign 标识。")
 
+    round_group = subcommands.add_parser(
+        "round", help="校验研究轮次 archive，不写入正式记录。"
+    )
+    round_subcommands = round_group.add_subparsers(dest="round_command", required=True)
+    round_validate = round_subcommands.add_parser(
+        "validate", help="只读校验轮次 README、summary 和声明的可选文件。"
+    )
+    round_validate.add_argument("round_id", help="轮次目录名，例如 R001_topic。")
+    round_complete = round_subcommands.add_parser(
+        "complete-check", help="检查轮次是否满足 completed 人工确认条件。"
+    )
+    round_complete.add_argument("round_id", help="轮次目录名，例如 R001_topic。")
+
     validate_metadata = subcommands.add_parser(
         "validate-metadata", help="校验正式 metadata/P###.yaml 文件。"
     )
@@ -151,6 +164,33 @@ def _run_new_round(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def _print_round_validation(result, *, completion_check: bool) -> int:
+    if result.errors:
+        title = "轮次完成检查未通过" if completion_check else "轮次校验未通过"
+        print(f"{title}: {result.round_id}", file=sys.stderr)
+        for error in result.errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    if completion_check:
+        print(f"轮次可以标记为 completed: {result.round_id}")
+    else:
+        print(f"轮次 archive 有效: {result.round_id} (status: {result.status})")
+    return 0
+
+
+def _run_round_command(args: argparse.Namespace, root: Path) -> int:
+    from .rounds import validate_round_archive
+
+    config = load_project_config(root)
+    completion_check = args.round_command == "complete-check"
+    result = validate_round_archive(
+        config,
+        args.round_id,
+        completion_check=completion_check,
+    )
+    return _print_round_validation(result, completion_check=completion_check)
+
+
 def _run_validate_metadata(metadata_path: Path) -> int:
     from .metadata import validate_metadata_record
 
@@ -244,6 +284,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_validate_profile(Path(args.profile))
         if args.command == "new-round":
             return _run_new_round(args, root)
+        if args.command == "round":
+            return _run_round_command(args, root)
         if args.command == "validate-metadata":
             return _run_validate_metadata(Path(args.metadata))
         if args.command == "add-paper":

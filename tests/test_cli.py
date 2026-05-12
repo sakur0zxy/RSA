@@ -56,6 +56,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "init" in captured.out
     assert "validate-profile" in captured.out
     assert "new-round" in captured.out
+    assert "round" in captured.out
     assert "validate-metadata" in captured.out
     assert "add-paper" in captured.out
     assert "validate-index" in captured.out
@@ -156,6 +157,37 @@ def test_cli_new_round_expected_errors_have_no_traceback(tmp_path, capsys):
     assert exit_code == 1
     assert "hard cap" in captured.err
     assert "Traceback" not in captured.err
+
+
+def test_cli_round_validate_and_complete_check(tmp_path, capsys):
+    profile = prepare_project(tmp_path)
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            "new-round",
+            "--topic",
+            str(profile),
+            "--objective",
+            "Round validate",
+            "--name",
+            "phase three",
+        ]
+    )
+    capsys.readouterr()
+
+    ok = main(["--root", str(tmp_path), "round", "validate", "R001_phase_three"])
+    ok_out = capsys.readouterr()
+    complete = main(
+        ["--root", str(tmp_path), "round", "complete-check", "R001_phase_three"]
+    )
+    complete_out = capsys.readouterr()
+
+    assert ok == 0
+    assert "archive" in ok_out.out
+    assert complete == 1
+    assert "ready_for_review" in complete_out.err
+    assert "Traceback" not in complete_out.err
 
 
 def test_agents_guidance_mentions_cli_and_asset_policy():

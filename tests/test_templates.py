@@ -124,7 +124,22 @@ def test_round_templates_preserve_placeholders_and_chinese_sections():
         assert placeholder in fallback
 
     final_text = root_template("final_round_summary.md")
-    for needle in ["状态", "关键发现", "候选决策", "请求写入正式记录", "人工确认"]:
+    assert final_text.startswith("---\n")
+    for needle in [
+        "status: draft",
+        "included_files",
+        "formal_write_requests",
+        "human_confirmed",
+        "ready_for_review",
+        "completed",
+        "metadata/P###.yaml",
+        "literature_map.md",
+        "状态",
+        "关键发现",
+        "候选决策",
+        "请求写入正式记录",
+        "人工确认",
+    ]:
         assert needle in final_text
         assert needle in TEMPLATE_FILES["final_round_summary.md"]
 
