@@ -14,7 +14,7 @@ v1 builds a local-first research agent harness in five phases. The path starts w
 - [x] **Phase 2: Literature Records Pipeline** - Build metadata-first records, paper index and candidate verification staging. (completed 2026-05-11)
 - [x] **Phase 3: Research Round Integration** - Connect round archives, topic mapping, gap detection and formal-write guardrails. (completed 2026-05-12)
 - [x] **Phase 4: Reading Note Workflow** - Add authorized full-text reading notes and approval gates for formal research notes. (completed 2026-05-12)
-- [ ] **Phase 5: Evaluation and Hardening** - Add eval fixtures, trace summaries and regression checks for harness reliability.
+- [x] **Phase 5: Evaluation and Hardening** - Add eval fixtures, trace summaries and regression checks for harness reliability. (completed 2026-05-13)
 
 ## Phase Details
 
@@ -124,8 +124,16 @@ Cross-cutting constraints:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: Build eval fixtures and scoring rules.
-- [ ] 05-02: Add trace summaries, regression report and hardening docs.
+**Wave 1**
+- [x] 05-01: Build eval fixtures and scoring rules.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 05-02: Add trace summaries, regression report and hardening docs.
+
+Cross-cutting constraints:
+- Eval fixtures must stay deterministic, local and independent of network calls, LLM graders or subagents.
+- Trace summaries are audit artifacts and must not write formal metadata, map rows, reading notes or thesis prose.
+- User-facing eval/trace reports must provide Chinese explanations while stable field names, YAML keys and CLI flags remain English.
 
 ## Progress
 
@@ -138,7 +146,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Literature Records Pipeline | 4/4 | Complete    | 2026-05-11 |
 | 3. Research Round Integration | 3/3 | Complete    | 2026-05-12 |
 | 4. Reading Note Workflow | 2/2 | Complete    | 2026-05-12 |
-| 5. Evaluation and Hardening | 0/2 | Not started | - |
+| 5. Evaluation and Hardening | 2/2 | Complete    | 2026-05-13 |
 
 ---
 *Roadmap created: 2026-05-11*

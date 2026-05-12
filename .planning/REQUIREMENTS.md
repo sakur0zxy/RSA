@@ -42,8 +42,8 @@
 
 ### Evaluation
 
-- [ ] **EVAL-01**: User can run local eval fixtures covering metadata hallucination, unauthorized PDF behavior, formal-record conflicts, output format drift and scope creep.
-- [ ] **EVAL-02**: User can inspect a trace summary for each round, including tools used, decisions made, rejected items, uncertain items and human approvals.
+- [x] **EVAL-01**: User can run local eval fixtures covering metadata hallucination, unauthorized PDF behavior, formal-record conflicts, output format drift and scope creep.
+- [x] **EVAL-02**: User can inspect a trace summary for each round, including tools used, decisions made, rejected items, uncertain items and human approvals.
 
 ### Project Guidance
 
@@ -100,8 +100,8 @@ Deferred to future releases.
 | GUARD-01 | Phase 3 | Complete |
 | NOTE-01 | Phase 4 | Complete |
 | NOTE-02 | Phase 4 | Complete |
-| EVAL-01 | Phase 5 | Pending |
-| EVAL-02 | Phase 5 | Pending |
+| EVAL-01 | Phase 5 | Complete |
+| EVAL-02 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 17 total
@@ -110,4 +110,4 @@ Deferred to future releases.
 
 ---
 *Requirements defined: 2026-05-11*
-*Last updated: 2026-05-12 after Phase 4 completion*
+*Last updated: 2026-05-13 after Phase 5 completion*

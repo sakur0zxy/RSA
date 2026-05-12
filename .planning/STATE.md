@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to discuss or plan
-stopped_at: Phase 4 complete; ready to discuss Phase 5
-last_updated: "2026-05-12T23:59:00+08:00"
-last_activity: 2026-05-12 -- Phase 04 complete
+status: Complete
+stopped_at: Phase 5 complete; v1 milestone ready for audit or cleanup
+last_updated: "2026-05-13T00:37:00+08:00"
+last_activity: 2026-05-13 -- Phase 05 complete
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 5
+  total_plans: 14
+  completed_plans: 14
   percent: 100
 ---
 
@@ -18,17 +18,18 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-11)
+See: `.planning/PROJECT.md` (updated 2026-05-11)
 
 **Core value:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
-**Current focus:** Phase 5 - Evaluation and Hardening
+
+**Current focus:** v1 milestone complete
 
 ## Current Position
 
 Phase: 5
-Plan: Not started
-Status: Ready to discuss or plan
-Last activity: 2026-05-12 -- Phase 04 complete
+Plan: Complete
+Status: Complete
+Last activity: 2026-05-13 -- Phase 05 complete
 
 Progress: [██████████] 100%
 
@@ -36,7 +37,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 10
+- Total plans completed: 14
 - Average duration: N/A
 - Total execution time: 0 hours
 
@@ -44,34 +45,36 @@ Progress: [██████████] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 3 | - | - |
+| 1 | 3 | - | - |
 | 2 | 4 | - | - |
 | 3 | 3 | - | - |
 | 4 | 2 | - | - |
+| 5 | 2 | - | - |
 
 **Recent Trend:**
 
-- Last 5 plans: 03-01, 03-02, 03-03, 04-01, 04-02
+- Last 5 plans: 03-03, 04-01, 04-02, 05-01, 05-02
 - Trend: N/A
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Decisions are logged in `PROJECT.md` and phase context files.
 
 - Initialization: v1 is a local-first Python/Markdown/YAML research harness, not a Web platform.
-- Initialization: formal records outrank agent_outputs; formal writes require validation and human approval.
+- Initialization: formal records outrank `agent_outputs`; formal writes require validation and human approval.
 - Initialization: SAR noncontinuous aperture is the starter topic profile, not a hard-coded product assumption.
+- Phase 5: eval fixtures are deterministic local checks, not LLM grading or network-backed research.
+- Phase 5: trace summaries are audit artifacts and must not write formal records.
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-None
+None.
 
 ## Deferred Items
 
@@ -80,14 +83,17 @@ None
 | Integration | Citation manager sync | v2 | Initialization |
 | Interface | Local Web UI | v2 | Initialization |
 | Runtime | Full multi-agent orchestration | v2 | Initialization |
+| Evaluation | LLM-judged semantic evals | v2 | Phase 5 |
 
 ## Session Continuity
 
 Last session: 2026-05-11T14:15:32.345Z
-Stopped at: Phase 4 complete; ready to discuss Phase 5
-Resume file: .planning/ROADMAP.md
+Stopped at: Phase 5 complete; v1 milestone ready for audit or cleanup
+Resume file: `.planning/ROADMAP.md`
 
-**Planned Phase:** 03 (Research Round Integration) — 3 plans — 2026-05-12T02:12:01.988Z
-**Completed Phase:** 03 (Research Round Integration) — 3 plans — 2026-05-12
-**Planned Phase:** 04 (Reading Note Workflow) — 2 plans — 2026-05-12
-**Completed Phase:** 04 (Reading Note Workflow) — 2 plans — 2026-05-12
+**Planned Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
+**Completed Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
+**Planned Phase:** 04 (Reading Note Workflow) - 2 plans - 2026-05-12
+**Completed Phase:** 04 (Reading Note Workflow) - 2 plans - 2026-05-12
+**Planned Phase:** 05 (Evaluation and Hardening) - 2 plans - 2026-05-13
+**Completed Phase:** 05 (Evaluation and Hardening) - 2 plans - 2026-05-13
