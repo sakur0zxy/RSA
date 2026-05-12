@@ -133,6 +133,22 @@ def build_parser() -> argparse.ArgumentParser:
         "validate", help="只读校验已有 gap report 是否过期。"
     )
     gap_validate.add_argument("--topic", required=True, help="topic_id 或 profile 路径。")
+
+    formal_group = subcommands.add_parser(
+        "formal", help="正式记录写入命令；所有写入都需要人工确认。"
+    )
+    formal_subcommands = formal_group.add_subparsers(dest="formal_command", required=True)
+    apply_map = formal_subcommands.add_parser(
+        "apply-map", help="唯一的 Phase 3 正式 literature_map.md 写入路径。"
+    )
+    apply_map.add_argument("--source-round", required=True, help="来源轮次目录名。")
+    apply_map.add_argument(
+        "--human-confirmed",
+        action="store_true",
+        help="确认执行正式写入；缺少时不会修改正式记录。",
+    )
+    apply_map.add_argument("--confirmed-by", help="人工确认人。")
+    apply_map.add_argument("--confirmed-at", help="人工确认时间，可选。")
     return parser
 
 
@@ -342,6 +358,31 @@ def _run_gap_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_formal_command(args: argparse.Namespace, root: Path) -> int:
+    from .formal import FormalWriteError, apply_map_requests
+
+    config = load_project_config(root)
+    if args.formal_command == "apply-map":
+        try:
+            result = apply_map_requests(
+                config,
+                args.source_round,
+                human_confirmed=args.human_confirmed,
+                confirmed_by=args.confirmed_by,
+                confirmed_at=args.confirmed_at,
+            )
+        except FormalWriteError as exc:
+            print(f"正式写入被阻止: {exc}", file=sys.stderr)
+            return 1
+        print(
+            "正式映射写入完成: "
+            f"{result.applied_count} rows -> {result.destination}; "
+            f"skipped add_metadata requests: {result.skipped_metadata_count}"
+        )
+        return 0
+    return 2
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -367,6 +408,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_map_command(args, root)
         if args.command == "gap":
             return _run_gap_command(args, root)
+        if args.command == "formal":
+            return _run_formal_command(args, root)
     except ConfigError as exc:
         print(f"Configuration error / 配置错误: {exc}", file=sys.stderr)
         return 2

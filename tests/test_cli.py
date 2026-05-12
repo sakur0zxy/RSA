@@ -63,6 +63,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "regenerate-index" in captured.out
     assert "map" in captured.out
     assert "gap" in captured.out
+    assert "formal" in captured.out
 
 
 def test_cli_init_and_validate_profile(tmp_path, capsys):
