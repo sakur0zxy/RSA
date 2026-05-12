@@ -64,6 +64,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "map" in captured.out
     assert "gap" in captured.out
     assert "note" in captured.out
+    assert "eval" in captured.out
     assert "formal" in captured.out
 
 
@@ -111,6 +112,7 @@ def test_cli_new_round_success(tmp_path, capsys):
     assert "Created round R001_short_topic_name" in captured.out
     assert (round_dir / "README.md").exists()
     assert (round_dir / "final_round_summary.md").exists()
+    assert (round_dir / "trace_summary.md").exists()
 
 
 def test_cli_new_round_validates_profile_before_writing(tmp_path, capsys):
@@ -182,6 +184,8 @@ def test_cli_round_validate_and_complete_check(tmp_path, capsys):
 
     ok = main(["--root", str(tmp_path), "round", "validate", "R001_phase_three"])
     ok_out = capsys.readouterr()
+    trace = main(["--root", str(tmp_path), "round", "trace", "R001_phase_three"])
+    trace_out = capsys.readouterr()
     complete = main(
         ["--root", str(tmp_path), "round", "complete-check", "R001_phase_three"]
     )
@@ -189,6 +193,15 @@ def test_cli_round_validate_and_complete_check(tmp_path, capsys):
 
     assert ok == 0
     assert "archive" in ok_out.out
+    assert trace == 0
+    assert "trace" in trace_out.out
+    assert (
+        tmp_path
+        / "01_literature"
+        / "agent_outputs"
+        / "R001_phase_three"
+        / "trace_summary.md"
+    ).exists()
     assert complete == 1
     assert "ready_for_review" in complete_out.err
     assert "Traceback" not in complete_out.err
@@ -413,3 +426,24 @@ def test_cli_note_create_validate_and_status(tmp_path, capsys):
     assert "阅读笔记有效" in valid_out.out
     assert status == 0
     assert "draft" in status_out.out
+
+
+def test_cli_eval_run_baseline_and_compare(tmp_path, capsys):
+    run = main(["--root", str(tmp_path), "eval", "run"])
+    run_out = capsys.readouterr()
+    baseline = main(["--root", str(tmp_path), "eval", "baseline"])
+    baseline_out = capsys.readouterr()
+    compare = main(["--root", str(tmp_path), "eval", "compare"])
+    compare_out = capsys.readouterr()
+
+    assert run == 0
+    assert "Eval" in run_out.out
+    assert baseline == 0
+    assert "baseline" in baseline_out.out
+    assert compare == 0
+    assert "regressions=0" in compare_out.out
+    assert (tmp_path / "01_literature" / "synthesis" / "eval_report.md").exists()
+    assert (tmp_path / "01_literature" / "synthesis" / "eval_baseline.yaml").exists()
+    assert (
+        tmp_path / "01_literature" / "synthesis" / "eval_regression_report.md"
+    ).exists()

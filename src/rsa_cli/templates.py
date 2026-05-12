@@ -212,6 +212,34 @@ confirmed_at:
 - confirmed_by:
 - confirmed_at:
 """,
+    "trace_summary.md": """---
+round_id: {round_id}
+tools_used: []
+decisions_made: []
+rejected_items: []
+uncertain_items: []
+human_approvals: []
+formal_write_request_count: 0
+---
+
+# Trace Summary / 追踪摘要: {round_id}
+
+本文件用于快速审计研究轮次，不是正式文献事实源，也不会自动写入 metadata、map、reading note 或论文正文。
+
+## Tools Used / 使用工具
+
+## Decisions Made / 决策记录
+
+## Rejected Items / 拒绝项
+
+## Uncertain Items / 不确定项
+
+## Human Approvals / 人工确认
+
+## Formal Write Requests / 正式写入请求
+
+- count: 0
+""",
     "search_candidates.md": """# 候选文献
 
 候选文献只进入 staging。候选必须先在 `verification_review.md` 中核验，只有 `verified + human_confirmed` 并通过正式 metadata 命令后，才可以创建 `metadata/P###.yaml`。

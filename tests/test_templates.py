@@ -164,6 +164,14 @@ def test_later_phase_seed_templates_are_safe_and_localized():
     )
     assert_in_root_and_fallback("pdf_acquisition_report.md", "不得下载未授权 PDF")
     assert_in_root_and_fallback("reading_batch_report.md", "人工确认")
+    assert_in_root_and_fallback(
+        "trace_summary.md",
+        "Trace Summary",
+        "tools_used",
+        "decisions_made",
+        "human_approvals",
+        "formal_write_request_count",
+    )
 
     assert "不得下载未授权 PDF" in root_template("pdf_acquisition_report.md")
     assert "不会因为填写本模板而自动写入正式记录" in root_template("map_integration.md")
@@ -204,6 +212,9 @@ def test_init_writes_localized_templates_and_formal_records(tmp_path):
     assert "PDF 获取状态记录" in (
         tmp_path / "01_literature" / "pdf_acquisition_report.md"
     ).read_text(encoding="utf-8")
+    assert "tools_used" in (tmp_path / "templates" / "trace_summary.md").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_second_init_does_not_overwrite_human_edited_formal_records(tmp_path):

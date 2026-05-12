@@ -71,6 +71,18 @@ class ProjectConfig:
         return self.literature_root / "synthesis"
 
     @property
+    def eval_report_path(self) -> Path:
+        return self.synthesis_root / "eval_report.md"
+
+    @property
+    def eval_baseline_path(self) -> Path:
+        return self.synthesis_root / "eval_baseline.yaml"
+
+    @property
+    def eval_regression_report_path(self) -> Path:
+        return self.synthesis_root / "eval_regression_report.md"
+
+    @property
     def assets_root(self) -> Path:
         return self.literature_root / "assets"
 

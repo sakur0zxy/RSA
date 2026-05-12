@@ -1,0 +1,16 @@
+cases:
+- case_id: metadata_hallucination
+  passed: true
+  detail: 未确认 metadata 写入被阻止，未创建 `metadata/P###.yaml`。
+- case_id: unauthorized_pdf_behavior
+  passed: true
+  detail: 缺失全文只记录 blocked 状态，没有生成伪 reading note。
+- case_id: formal_record_conflict
+  passed: true
+  detail: 重复 formal map 写入被阻止，正式记录未被覆盖。
+- case_id: output_format_drift
+  passed: true
+  detail: 核心模板和正式 map 表格仍保留机器可读字段。
+- case_id: scope_creep
+  passed: true
+  detail: 未批准 reading note 无法影响正式研究记录。

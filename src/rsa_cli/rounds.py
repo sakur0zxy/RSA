@@ -347,4 +347,8 @@ def create_research_round(
     (round_path / "final_round_summary.md").write_text(
         render_template(config, "final_round_summary.md", values), encoding="utf-8"
     )
+    (round_path / "trace_summary.md").write_text(
+        render_template(config, "trace_summary.md", {"round_id": round_id}),
+        encoding="utf-8",
+    )
     return RoundResult(round_id=round_id, path=round_path, max_candidates=resolved_max)

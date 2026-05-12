@@ -53,6 +53,10 @@ def build_parser() -> argparse.ArgumentParser:
         "complete-check", help="检查轮次是否满足 completed 人工确认条件。"
     )
     round_complete.add_argument("round_id", help="轮次目录名，例如 R001_topic。")
+    round_trace = round_subcommands.add_parser(
+        "trace", help="生成或刷新 trace_summary.md，不写入正式记录。"
+    )
+    round_trace.add_argument("round_id", help="轮次目录名，例如 R001_topic。")
 
     validate_metadata = subcommands.add_parser(
         "validate-metadata", help="校验正式 metadata/P###.yaml 文件。"
@@ -158,6 +162,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     note_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
 
+    eval_group = subcommands.add_parser(
+        "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
+    )
+    eval_subcommands = eval_group.add_subparsers(dest="eval_command", required=True)
+    eval_subcommands.add_parser("run", help="运行全部本地 eval fixtures 并写入 eval_report.md。")
+    eval_subcommands.add_parser(
+        "baseline", help="运行 eval fixtures 并写入 eval_baseline.yaml。"
+    )
+    eval_subcommands.add_parser(
+        "compare", help="将当前 eval fixtures 与 baseline 比较并写入 regression report。"
+    )
+
     formal_group = subcommands.add_parser(
         "formal", help="正式记录写入命令；所有写入都需要人工确认。"
     )
@@ -256,6 +272,16 @@ def _run_round_command(args: argparse.Namespace, root: Path) -> int:
     from .rounds import validate_round_archive
 
     config = load_project_config(root)
+    if args.round_command == "trace":
+        from .trace import TraceError, write_trace_summary
+
+        try:
+            result = write_trace_summary(config, args.round_id)
+        except TraceError as exc:
+            print(f"Trace summary 生成失败: {exc}", file=sys.stderr)
+            return 1
+        print(f"已生成 trace summary: {result.path}")
+        return 0
     completion_check = args.round_command == "complete-check"
     result = validate_round_archive(
         config,
@@ -424,6 +450,42 @@ def _run_note_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
+    from .evals import (
+        EvalError,
+        compare_eval_baseline,
+        run_eval_fixtures,
+        write_eval_baseline,
+        write_eval_report,
+    )
+
+    config = load_project_config(root)
+    if args.eval_command == "run":
+        result = run_eval_fixtures()
+        path = write_eval_report(config, result)
+        print(
+            f"Eval 完成: {result.passed_count}/{len(result.cases)} passed; report: {path}"
+        )
+        return 0 if result.passed else 1
+    if args.eval_command == "baseline":
+        result = run_eval_fixtures()
+        path = write_eval_baseline(config, result)
+        write_eval_report(config, result)
+        print(f"Eval baseline 已写入: {path}")
+        return 0 if result.passed else 1
+    if args.eval_command == "compare":
+        try:
+            result = compare_eval_baseline(config)
+        except EvalError as exc:
+            print(f"Eval compare 失败: {exc}", file=sys.stderr)
+            return 1
+        print(
+            f"Eval compare 完成: regressions={len(result.regressions)}; report: {result.path}"
+        )
+        return 0 if result.passed else 1
+    return 2
+
+
 def _run_formal_command(args: argparse.Namespace, root: Path) -> int:
     from .formal import FormalWriteError, apply_map_requests, apply_note_requests
 
@@ -494,6 +556,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_gap_command(args, root)
         if args.command == "note":
             return _run_note_command(args, root)
+        if args.command == "eval":
+            return _run_eval_command(args, root)
         if args.command == "formal":
             return _run_formal_command(args, root)
     except ConfigError as exc:
