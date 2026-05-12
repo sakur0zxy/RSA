@@ -110,6 +110,29 @@ def build_parser() -> argparse.ArgumentParser:
 
     subcommands.add_parser("validate-index", help="校验 paper_index.md 是否与 metadata 一致。")
     subcommands.add_parser("regenerate-index", help="根据 metadata 显式重建 paper_index.md。")
+
+    map_group = subcommands.add_parser(
+        "map", help="校验或生成文献映射建议；validate 只读，propose 不写正式记录。"
+    )
+    map_subcommands = map_group.add_subparsers(dest="map_command", required=True)
+    map_subcommands.add_parser("validate", help="只读校验 literature_map.md。")
+    map_propose = map_subcommands.add_parser(
+        "propose", help="从轮次 formal_write_requests 生成 map_proposal.md。"
+    )
+    map_propose.add_argument("--round", required=True, dest="round_id", help="轮次目录名。")
+
+    gap_group = subcommands.add_parser(
+        "gap", help="生成或校验 topic profile 的研究空白报告。"
+    )
+    gap_subcommands = gap_group.add_subparsers(dest="gap_command", required=True)
+    gap_generate = gap_subcommands.add_parser(
+        "generate", help="生成 01_literature/synthesis 下的 gap report。"
+    )
+    gap_generate.add_argument("--topic", required=True, help="topic_id 或 profile 路径。")
+    gap_validate = gap_subcommands.add_parser(
+        "validate", help="只读校验已有 gap report 是否过期。"
+    )
+    gap_validate.add_argument("--topic", required=True, help="topic_id 或 profile 路径。")
     return parser
 
 
@@ -273,6 +296,52 @@ def _run_regenerate_index(root: Path) -> int:
     return 0
 
 
+def _run_map_command(args: argparse.Namespace, root: Path) -> int:
+    from .map import MapError, validate_literature_map, write_map_proposal
+
+    config = load_project_config(root)
+    try:
+        if args.map_command == "validate":
+            errors = validate_literature_map(config)
+            if errors:
+                for error in errors:
+                    print(f"文献映射无效: {error}", file=sys.stderr)
+                return 1
+            print(f"文献映射有效: {config.literature_map_path}")
+            return 0
+        if args.map_command == "propose":
+            path = write_map_proposal(config, args.round_id)
+            print(f"已生成文献映射建议: {path}；正式写入请运行 rsa formal apply-map。")
+            return 0
+    except MapError as exc:
+        print(f"文献映射操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
+def _run_gap_command(args: argparse.Namespace, root: Path) -> int:
+    from .map import MapError, generate_gap_report, validate_gap_report
+
+    config = load_project_config(root)
+    try:
+        if args.gap_command == "generate":
+            path, _report = generate_gap_report(config, args.topic)
+            print(f"已生成研究空白报告: {path}")
+            return 0
+        if args.gap_command == "validate":
+            errors = validate_gap_report(config, args.topic)
+            if errors:
+                for error in errors:
+                    print(f"研究空白报告不一致: {error}", file=sys.stderr)
+                return 1
+            print(f"研究空白报告一致: {args.topic}")
+            return 0
+    except MapError as exc:
+        print(f"研究空白报告操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -294,6 +363,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_validate_index(root)
         if args.command == "regenerate-index":
             return _run_regenerate_index(root)
+        if args.command == "map":
+            return _run_map_command(args, root)
+        if args.command == "gap":
+            return _run_gap_command(args, root)
     except ConfigError as exc:
         print(f"Configuration error / 配置错误: {exc}", file=sys.stderr)
         return 2

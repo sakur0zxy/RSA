@@ -51,6 +51,14 @@ class ProjectConfig:
         return self.literature_root / "paper_index.md"
 
     @property
+    def literature_map_path(self) -> Path:
+        return self.literature_root / "literature_map.md"
+
+    @property
+    def synthesis_root(self) -> Path:
+        return self.literature_root / "synthesis"
+
+    @property
     def assets_root(self) -> Path:
         return self.literature_root / "assets"
 

@@ -146,7 +146,15 @@ def test_round_templates_preserve_placeholders_and_chinese_sections():
 
 def test_later_phase_seed_templates_are_safe_and_localized():
     assert_in_root_and_fallback("paper_note.md", "授权", "人工决策")
-    assert_in_root_and_fallback("map_integration.md", "正式映射")
+    assert_in_root_and_fallback(
+        "map_integration.md",
+        "文献映射建议",
+        "literature_map.md",
+        "topic_profile",
+        "planned_output",
+        "research_role",
+        "map_status",
+    )
     assert_in_root_and_fallback("pdf_acquisition_report.md", "不得下载未授权 PDF")
     assert_in_root_and_fallback("reading_batch_report.md", "人工确认")
 

@@ -61,6 +61,8 @@ def test_help_lists_expected_subcommands(capsys):
     assert "add-paper" in captured.out
     assert "validate-index" in captured.out
     assert "regenerate-index" in captured.out
+    assert "map" in captured.out
+    assert "gap" in captured.out
 
 
 def test_cli_init_and_validate_profile(tmp_path, capsys):
@@ -325,3 +327,39 @@ def test_cli_index_smoke_and_stale_validation_is_read_only(tmp_path, capsys):
     assert "rsa regenerate-index" in stale_out.err
     assert index_path.read_text(encoding="utf-8") == "stale text\n"
     assert "Traceback" not in stale_out.err
+
+
+def test_cli_map_validate_and_gap_generate(tmp_path, capsys):
+    prepare_project(tmp_path)
+
+    map_ok = main(["--root", str(tmp_path), "map", "validate"])
+    map_out = capsys.readouterr()
+    gap_ok = main(
+        [
+            "--root",
+            str(tmp_path),
+            "gap",
+            "generate",
+            "--topic",
+            "sar_noncontinuous_aperture",
+        ]
+    )
+    gap_out = capsys.readouterr()
+    gap_validate = main(
+        [
+            "--root",
+            str(tmp_path),
+            "gap",
+            "validate",
+            "--topic",
+            "sar_noncontinuous_aperture",
+        ]
+    )
+    gap_validate_out = capsys.readouterr()
+
+    assert map_ok == 0
+    assert "文献映射有效" in map_out.out
+    assert gap_ok == 0
+    assert "研究空白报告" in gap_out.out
+    assert gap_validate == 0
+    assert "研究空白报告一致" in gap_validate_out.out
