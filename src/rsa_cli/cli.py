@@ -134,6 +134,30 @@ def build_parser() -> argparse.ArgumentParser:
     )
     gap_validate.add_argument("--topic", required=True, help="topic_id 或 profile 路径。")
 
+    note_group = subcommands.add_parser(
+        "note", help="创建、校验或查看单篇文献 reading note；validate/status 只读。"
+    )
+    note_subcommands = note_group.add_subparsers(dest="note_command", required=True)
+    note_create = note_subcommands.add_parser(
+        "create", help="从本地、用户提供或已授权全文创建结构化阅读笔记。"
+    )
+    note_create.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    note_create.add_argument("--source-file", required=True, help="本地全文文件路径。")
+    note_create.add_argument(
+        "--authorization",
+        required=True,
+        choices=["provided", "local", "authorized"],
+        help="全文授权来源；只能是 provided/local/authorized。",
+    )
+    note_validate = note_subcommands.add_parser(
+        "validate", help="只读校验 P###_reading_note.md 的 schema 和人工确认状态。"
+    )
+    note_validate.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    note_status = note_subcommands.add_parser(
+        "status", help="只读查看 reading note 或 PDF 获取状态。"
+    )
+    note_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+
     formal_group = subcommands.add_parser(
         "formal", help="正式记录写入命令；所有写入都需要人工确认。"
     )
@@ -149,6 +173,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     apply_map.add_argument("--confirmed-by", help="人工确认人。")
     apply_map.add_argument("--confirmed-at", help="人工确认时间，可选。")
+    apply_note = formal_subcommands.add_parser(
+        "apply-note", help="将 approved reading note 的请求写入正式 map 或研究笔记。"
+    )
+    apply_note.add_argument("--source-note", required=True, help="来源阅读笔记的 paper_id，例如 P001。")
+    apply_note.add_argument(
+        "--human-confirmed",
+        action="store_true",
+        help="确认执行正式写入；缺少时不会修改正式记录。",
+    )
+    apply_note.add_argument("--confirmed-by", help="人工确认人。")
+    apply_note.add_argument("--confirmed-at", help="人工确认时间，可选。")
     return parser
 
 
@@ -358,8 +393,39 @@ def _run_gap_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_note_command(args: argparse.Namespace, root: Path) -> int:
+    from .notes import NoteError, create_reading_note, note_status, validate_reading_note
+
+    config = load_project_config(root)
+    try:
+        if args.note_command == "create":
+            result = create_reading_note(
+                config,
+                args.paper_id,
+                source_file=args.source_file,
+                authorization=args.authorization,
+            )
+            print(f"已创建阅读笔记: {result.path}")
+            return 0
+        if args.note_command == "validate":
+            errors = validate_reading_note(config, args.paper_id)
+            if errors:
+                for error in errors:
+                    print(f"阅读笔记无效: {error}", file=sys.stderr)
+                return 1
+            print(f"阅读笔记有效: {args.paper_id}")
+            return 0
+        if args.note_command == "status":
+            print(f"阅读笔记状态: {args.paper_id} -> {note_status(config, args.paper_id)}")
+            return 0
+    except NoteError as exc:
+        print(f"阅读笔记操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def _run_formal_command(args: argparse.Namespace, root: Path) -> int:
-    from .formal import FormalWriteError, apply_map_requests
+    from .formal import FormalWriteError, apply_map_requests, apply_note_requests
 
     config = load_project_config(root)
     if args.formal_command == "apply-map":
@@ -378,6 +444,24 @@ def _run_formal_command(args: argparse.Namespace, root: Path) -> int:
             "正式映射写入完成: "
             f"{result.applied_count} rows -> {result.destination}; "
             f"skipped add_metadata requests: {result.skipped_metadata_count}"
+        )
+        return 0
+    if args.formal_command == "apply-note":
+        try:
+            result = apply_note_requests(
+                config,
+                args.source_note,
+                human_confirmed=args.human_confirmed,
+                confirmed_by=args.confirmed_by,
+                confirmed_at=args.confirmed_at,
+            )
+        except FormalWriteError as exc:
+            print(f"正式写入被阻止: {exc}", file=sys.stderr)
+            return 1
+        print(
+            "正式阅读笔记写入完成: "
+            f"{result.map_rows_applied} map rows -> {result.map_destination}; "
+            f"{result.research_notes_applied} research notes -> {result.research_notes_destination}"
         )
         return 0
     return 2
@@ -408,6 +492,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_map_command(args, root)
         if args.command == "gap":
             return _run_gap_command(args, root)
+        if args.command == "note":
+            return _run_note_command(args, root)
         if args.command == "formal":
             return _run_formal_command(args, root)
     except ConfigError as exc:

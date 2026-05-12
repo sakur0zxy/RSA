@@ -55,6 +55,18 @@ class ProjectConfig:
         return self.literature_root / "literature_map.md"
 
     @property
+    def agent_research_notes_path(self) -> Path:
+        return self.literature_root / "agent_research_notes.md"
+
+    @property
+    def pdf_acquisition_report_path(self) -> Path:
+        return self.literature_root / "pdf_acquisition_report.md"
+
+    @property
+    def notes_root(self) -> Path:
+        return self.literature_root / "notes"
+
+    @property
     def synthesis_root(self) -> Path:
         return self.literature_root / "synthesis"
 

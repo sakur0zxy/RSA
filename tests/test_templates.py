@@ -145,7 +145,14 @@ def test_round_templates_preserve_placeholders_and_chinese_sections():
 
 
 def test_later_phase_seed_templates_are_safe_and_localized():
-    assert_in_root_and_fallback("paper_note.md", "授权", "人工决策")
+    assert_in_root_and_fallback(
+        "paper_note.md",
+        "授权",
+        "人工决策",
+        "source_grounded_claims",
+        "short_quotes",
+        "note_integration_requests",
+    )
     assert_in_root_and_fallback(
         "map_integration.md",
         "文献映射建议",
@@ -193,6 +200,9 @@ def test_init_writes_localized_templates_and_formal_records(tmp_path):
     ).read_text(encoding="utf-8")
     assert "辅助材料" in (
         tmp_path / "01_literature" / "agent_research_notes.md"
+    ).read_text(encoding="utf-8")
+    assert "PDF 获取状态记录" in (
+        tmp_path / "01_literature" / "pdf_acquisition_report.md"
     ).read_text(encoding="utf-8")
 
 

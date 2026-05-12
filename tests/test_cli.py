@@ -63,6 +63,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "regenerate-index" in captured.out
     assert "map" in captured.out
     assert "gap" in captured.out
+    assert "note" in captured.out
     assert "formal" in captured.out
 
 
@@ -364,3 +365,51 @@ def test_cli_map_validate_and_gap_generate(tmp_path, capsys):
     assert "研究空白报告" in gap_out.out
     assert gap_validate == 0
     assert "研究空白报告一致" in gap_validate_out.out
+
+
+def test_cli_note_create_validate_and_status(tmp_path, capsys):
+    profile = prepare_project(tmp_path)
+    source = tmp_path / "01_literature" / "pdfs" / "P001.pdf"
+    source.write_text("authorized local source", encoding="utf-8")
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Reading Note CLI Paper"),
+            "--pdf-status",
+            "local",
+            "--local-pdf",
+            str(source),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+
+    created = main(
+        [
+            "--root",
+            str(tmp_path),
+            "note",
+            "create",
+            "P001",
+            "--source-file",
+            str(source),
+            "--authorization",
+            "local",
+        ]
+    )
+    created_out = capsys.readouterr()
+    valid = main(["--root", str(tmp_path), "note", "validate", "P001"])
+    valid_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "note", "status", "P001"])
+    status_out = capsys.readouterr()
+
+    assert profile.exists()
+    assert created == 0
+    assert "已创建阅读笔记" in created_out.out
+    assert valid == 0
+    assert "阅读笔记有效" in valid_out.out
+    assert status == 0
+    assert "draft" in status_out.out
