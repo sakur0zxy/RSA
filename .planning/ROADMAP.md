@@ -75,9 +75,19 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
+**Wave 1**
 - [ ] 03-01: Implement round archive creation and required summary files.
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 03-02: Implement literature map and research gap update workflow.
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 03-03: Implement formal record writer with schema, conflict and approval checks.
+
+Cross-cutting constraints:
+- User-facing templates, help text, validation errors and generated reports must provide Chinese explanations while field names, YAML keys, table columns and CLI flags remain English.
+- `validate` commands must be read-only; `generate` and `propose` commands may create generated guidance, but must not modify formal records.
+- Formal writes must preserve Phase 2 metadata gates, avoid new `paper_id` allocation, and fail on conflicts instead of overwriting.
 
 ### Phase 4: Reading Note Workflow
 **Goal**: Support single-paper reading notes without crossing copyright or academic-integrity boundaries.
