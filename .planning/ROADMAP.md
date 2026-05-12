@@ -13,7 +13,7 @@ v1 builds a local-first research agent harness in five phases. The path starts w
 - [x] **Phase 1: Harness Foundation** - Define local file schema, topic profiles, research rounds and project instructions. (completed 2026-05-11)
 - [x] **Phase 2: Literature Records Pipeline** - Build metadata-first records, paper index and candidate verification staging. (completed 2026-05-11)
 - [x] **Phase 3: Research Round Integration** - Connect round archives, topic mapping, gap detection and formal-write guardrails. (completed 2026-05-12)
-- [ ] **Phase 4: Reading Note Workflow** - Add authorized full-text reading notes and approval gates for formal research notes.
+- [x] **Phase 4: Reading Note Workflow** - Add authorized full-text reading notes and approval gates for formal research notes. (completed 2026-05-12)
 - [ ] **Phase 5: Evaluation and Hardening** - Add eval fixtures, trace summaries and regression checks for harness reliability.
 
 ## Phase Details
@@ -101,8 +101,16 @@ Cross-cutting constraints:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: Create paper note template and authorized-content checks.
-- [ ] 04-02: Connect approved reading notes to formal maps and research notes.
+**Wave 1**
+- [x] 04-01: Create paper note template and authorized-content checks.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 04-02: Connect approved reading notes to formal maps and research notes.
+
+Cross-cutting constraints:
+- User-facing templates, help text, validation errors and generated reports must provide Chinese explanations while field names, YAML keys, table columns and CLI flags remain English.
+- Reading notes require formal metadata plus an existing local, provided or otherwise authorized source file.
+- Formal note-derived writes require `--human-confirmed`, `--confirmed-by`, approved note status and conflict-free validation.
 
 ### Phase 5: Evaluation and Hardening
 **Goal**: Make the harness regressions visible before future prompt, tool or workflow changes can corrupt research records.
@@ -129,7 +137,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Harness Foundation | 3/3 | Complete   | 2026-05-11 |
 | 2. Literature Records Pipeline | 4/4 | Complete    | 2026-05-11 |
 | 3. Research Round Integration | 3/3 | Complete    | 2026-05-12 |
-| 4. Reading Note Workflow | 0/2 | Not started | - |
+| 4. Reading Note Workflow | 2/2 | Complete    | 2026-05-12 |
 | 5. Evaluation and Hardening | 0/2 | Not started | - |
 
 ---

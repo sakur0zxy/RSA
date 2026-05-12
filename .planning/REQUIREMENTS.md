@@ -13,7 +13,7 @@
 ### Rounds
 
 - [x] **ROUND-01**: User can start a bounded research round with topic profile, objective, max paper count, allowed tools, output policy and human approval mode.
-- [ ] **ROUND-02**: User can inspect each completed research round through a lightweight archive containing `README.md`, `final_round_summary.md` and only task-relevant optional files.
+- [x] **ROUND-02**: User can inspect each completed research round through a lightweight archive containing `README.md`, `final_round_summary.md` and only task-relevant optional files.
 
 ### Literature Records
 
@@ -28,17 +28,17 @@
 
 ### Topic Mapping
 
-- [ ] **MAP-01**: User can map verified papers to topic profiles, priority questions, thesis chapters, planned paper outputs and baseline/theory roles.
-- [ ] **MAP-02**: User can see research gaps by comparing verified literature coverage against topic profile priority questions.
+- [x] **MAP-01**: User can map verified papers to topic profiles, priority questions, thesis chapters, planned paper outputs and baseline/theory roles.
+- [x] **MAP-02**: User can see research gaps by comparing verified literature coverage against topic profile priority questions.
 
 ### Reading Notes
 
-- [ ] **NOTE-01**: User can generate a single-paper reading note only from provided, local or otherwise authorized full text.
-- [ ] **NOTE-02**: User can require human approval before reading notes, literature maps or research notes become formal records.
+- [x] **NOTE-01**: User can generate a single-paper reading note only from provided, local or otherwise authorized full text.
+- [x] **NOTE-02**: User can require human approval before reading notes, literature maps or research notes become formal records.
 
 ### Guardrails
 
-- [ ] **GUARD-01**: User can rely on a formal record writer that validates schema, checks conflicts, verifies approval status and blocks unsafe writes.
+- [x] **GUARD-01**: User can rely on a formal record writer that validates schema, checks conflicts, verifies approval status and blocks unsafe writes.
 
 ### Evaluation
 
@@ -94,12 +94,12 @@ Deferred to future releases.
 | META-03 | Phase 2 | Complete |
 | SRCH-01 | Phase 2 | Complete |
 | SRCH-02 | Phase 2 | Complete |
-| ROUND-02 | Phase 3 | Pending |
-| MAP-01 | Phase 3 | Pending |
-| MAP-02 | Phase 3 | Pending |
-| GUARD-01 | Phase 3 | Pending |
-| NOTE-01 | Phase 4 | Pending |
-| NOTE-02 | Phase 4 | Pending |
+| ROUND-02 | Phase 3 | Complete |
+| MAP-01 | Phase 3 | Complete |
+| MAP-02 | Phase 3 | Complete |
+| GUARD-01 | Phase 3 | Complete |
+| NOTE-01 | Phase 4 | Complete |
+| NOTE-02 | Phase 4 | Complete |
 | EVAL-01 | Phase 5 | Pending |
 | EVAL-02 | Phase 5 | Pending |
 
@@ -110,4 +110,4 @@ Deferred to future releases.
 
 ---
 *Requirements defined: 2026-05-11*
-*Last updated: 2026-05-11 after initial definition*
+*Last updated: 2026-05-12 after Phase 4 completion*
