@@ -1,66 +1,125 @@
-# RSA 科研 Agent Harness
+# RSA Research Agent Harness
 
-RSA 是一个本地优先的科研 agent harness，用来管理可审计、可回滚、可人工确认的文献调研流程。v1.0 已归档，核心目标是让 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断写入正式科研记录。
+面向科研文献调研的本地优先 agent harness。它用 Markdown/YAML、CLI 和显式人工确认，把“候选文献 -> 正式元数据 -> 阅读笔记 -> 文献映射 -> 研究空白报告”串成一条可审计、可回滚、可长期维护的证据链。
 
-## 当前状态
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
+![CLI](https://img.shields.io/badge/interface-CLI-444444)
+![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
+![Tests](https://img.shields.io/badge/tests-94%20passed-2F855A)
 
-- 里程碑：`v1.0 Local Harness`
-- 状态：已发布并归档
-- 语言策略：用户可读内容和交互提示以中文为主；字段名、YAML key、表格列、CLI flag、命令名和代码标识保留英文。
-- 存储方式：本地 Markdown/YAML 文件，便于 git diff、人工审阅和长期博士课题记录。
+## 为什么需要它
 
-## v1.0 已完成能力
+LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模型判断污染。RSA 的核心目标是：让 agent 的每一步输出都能追溯到来源、状态和人工确认。
 
-- Topic profile：定义并校验研究主题，包括关键词、优先问题、指标、来源偏好和评分规则。
-- Research round：创建有边界的 `agent_outputs/R###_name` 调研轮次，包含目标、限制、最终总结和追踪摘要。
-- 正式 metadata：通过人工确认门禁写入 `metadata/P###.yaml`。
-- 候选文献 staging：检索候选和核验记录停留在 staging，不会自动进入正式记录。
-- Paper index：校验或重建由正式 metadata 生成的 `paper_index.md`。
-- Literature map 和 gap report：把已验证文献映射到 topic、章节、计划产出和研究角色，并生成研究空白报告。
-- Reading note：只允许基于本地、用户提供或已授权全文创建单篇阅读笔记。
-- Formal write guardrails：正式写入必须通过 schema 校验、冲突校验和显式人工确认。
-- Harness evals：本地 deterministic fixtures 覆盖 metadata hallucination、未授权 PDF、正式记录冲突、输出格式漂移和 scope creep。
+这个项目适合：
 
-## 快速开始
+- 博士课题、长期科研项目和文献综述整理。
+- 需要保留 PDF、截图、阅读笔记和研究判断依据的本地工作流。
+- 希望使用 agent 提速，但不希望 agent 自动写入正式科研记录的场景。
 
-```powershell
-python -m pytest -q
-python -m rsa_cli.cli --help
-python -m rsa_cli.cli --root . init
+## 核心能力
+
+| 能力 | 说明 |
+|------|------|
+| Topic profile | 用 YAML 定义研究主题、关键词、优先问题、指标和排除范围。 |
+| Research round | 创建有边界的文献调研轮次，保留目标、限制、候选和追踪摘要。 |
+| Metadata gate | 只有经过人工确认的文献才能进入 `metadata/P###.yaml`。 |
+| Candidate staging | 候选文献和核验记录先停留在 staging，不会自动进入正式记录。 |
+| Literature map | 将已验证文献映射到 topic、priority question、章节和计划产出。 |
+| Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记。 |
+| Formal write guardrails | 正式写入必须通过 schema 校验、冲突检查和显式人工确认。 |
+| Harness evals | 用本地 deterministic fixtures 检查回归、越界写入和格式漂移。 |
+
+## 工作流
+
+```mermaid
+flowchart LR
+  A["Topic profile<br/>研究主题配置"] --> B["Research round<br/>有边界调研轮次"]
+  B --> C["Candidate staging<br/>候选文献暂存"]
+  C --> D["Human verification<br/>人工核验"]
+  D --> E["Formal metadata<br/>正式文献记录"]
+  E --> F["Reading note<br/>阅读笔记"]
+  E --> G["Literature map<br/>文献映射"]
+  F --> H["Formal write gate<br/>正式写入门禁"]
+  G --> I["Gap report<br/>研究空白报告"]
+  H --> G
 ```
 
-创建并校验一个有边界的文献调研轮次：
+## 安装
 
 ```powershell
-python -m rsa_cli.cli --root . validate-profile 01_literature/topic_profiles/sar_noncontinuous_aperture.yaml
-python -m rsa_cli.cli --root . new-round --topic 01_literature/topic_profiles/sar_noncontinuous_aperture.yaml --objective "调研间断孔径 SAR 文献" --name "gap sar starter"
-python -m rsa_cli.cli --root . round validate R001_gap_sar_starter
-python -m rsa_cli.cli --root . round trace R001_gap_sar_starter
+# 克隆仓库后进入项目目录
+cd RSA
+
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+
+rsa --help
+```
+
+如果没有安装 editable package，也可以用：
+
+```powershell
+python -m rsa_cli.cli --help
+```
+
+## 快速体验
+
+初始化本地文献工作区：
+
+```powershell
+rsa --root . init
+```
+
+校验内置 SAR starter profile：
+
+```powershell
+rsa --root . validate-profile 01_literature/topic_profiles/sar_noncontinuous_aperture.yaml
+```
+
+创建一个有边界的调研轮次：
+
+```powershell
+rsa --root . new-round `
+  --topic 01_literature/topic_profiles/sar_noncontinuous_aperture.yaml `
+  --objective "调研间断孔径 SAR 文献" `
+  --name "gap sar starter"
+```
+
+校验并生成追踪摘要：
+
+```powershell
+rsa --root . round validate R001_gap_sar_starter
+rsa --root . round trace R001_gap_sar_starter
 ```
 
 运行 harness 回归检查：
 
 ```powershell
-python -m rsa_cli.cli --root . eval run
-python -m rsa_cli.cli --root . eval compare
+rsa --root . eval run
+rsa --root . eval compare
 ```
 
-## 主要 CLI 命令
+## 常用命令
 
-| 命令 | 中文说明 |
-|------|----------|
+| 命令 | 作用 |
+|------|------|
 | `rsa init` | 创建本地文献工作区结构和模板。 |
 | `rsa validate-profile` | 校验 topic profile YAML。 |
 | `rsa new-round` | 创建有边界的文献调研轮次。 |
 | `rsa round validate` | 只读校验 round archive。 |
 | `rsa round trace` | 生成或刷新 `trace_summary.md`。 |
 | `rsa add-paper` | 通过人工确认写入正式 metadata。 |
-| `rsa validate-index` / `rsa regenerate-index` | 校验或重建文献索引。 |
-| `rsa map validate` / `rsa map propose` | 校验正式 map 或生成 map 建议。 |
-| `rsa gap generate` / `rsa gap validate` | 生成或校验研究空白报告。 |
-| `rsa note create` / `rsa note validate` / `rsa note status` | 创建、校验或查看单篇阅读笔记。 |
-| `rsa formal apply-map` / `rsa formal apply-note` | 通过人工确认把建议写入正式记录。 |
-| `rsa eval run` / `rsa eval baseline` / `rsa eval compare` | 运行本地 harness evals 和回归比较。 |
+| `rsa validate-index` | 校验 `paper_index.md` 是否与 metadata 一致。 |
+| `rsa regenerate-index` | 根据 metadata 重建文献索引。 |
+| `rsa map validate` | 只读校验 `literature_map.md`。 |
+| `rsa map propose` | 从 round 输出生成 map 建议，不写正式记录。 |
+| `rsa gap generate` | 生成研究空白报告。 |
+| `rsa note create` | 从已授权全文创建单篇 reading note。 |
+| `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
+| `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
+| `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
 
 ## 项目结构
 
@@ -85,29 +144,63 @@ tests/                      # 回归测试
 ## 安全边界
 
 - 候选证据不会自动成为正式 metadata。
-- `metadata/P###.yaml` 分配必须带有 `--human-confirmed` 和 `--confirmed-by`。
+- `metadata/P###.yaml` 写入必须带 `--human-confirmed` 和 `--confirmed-by`。
 - 缺失或未授权 PDF 只会生成 blocked 状态记录，不会生成假的 reading note。
 - `validate` 命令必须只读。
-- `generate` 和 `propose` 可生成建议文件，但不能修改正式记录。
+- `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。
 - Eval report 和 trace summary 是审计材料，不是学术结论。
 
-## GSD 文档入口
+## 开发
 
-- 当前里程碑总结：`.planning/MILESTONES.md`
-- v1 roadmap 归档：`.planning/milestones/v1.0-ROADMAP.md`
-- v1 requirements 归档：`.planning/milestones/v1.0-REQUIREMENTS.md`
-- v2 讨论稿：`.planning/v2-DISCUSSION.md`
-- phase 执行历史：`.planning/phases/`
-- 复盘：`.planning/RETROSPECTIVE.md`
+安装开发依赖：
 
-## 验证方式
+```powershell
+python -m pip install -e ".[dev]"
+```
 
-v1.0 归档时使用的验证基线：
+运行测试：
 
 ```powershell
 python -m pytest -q
-python -m rsa_cli.cli --root . eval compare
 ```
 
-归档时全量测试为 94 passed，`eval compare` 结果为 `regressions=0`。
+运行 harness 回归比较：
+
+```powershell
+rsa --root . eval compare
+```
+
+当前 v1.0 归档基线：`94 passed`，`eval compare` 结果为 `regressions=0`。
+
+## 项目状态
+
+- 当前里程碑：`v1.0 Local Harness`
+- 当前版本：`v1.0`
+- 状态：已发布并归档
+- 主要用户语言：中文
+- 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定
+
+## 路线图
+
+v2 建议优先扩展这些方向：
+
+1. PDF 和截图资产管理。
+2. 批量候选文献导入和 campaign review queue。
+3. DOI/Crossref/OpenAlex 等 scholarly API 进入 staging。
+4. 本地 review UI。
+5. Claim-level citation check。
+6. 更强的 research-quality evals。
+7. 可选 multi-agent orchestration。
+
+更多 GSD 文档：
+
+- `.planning/MILESTONES.md`
+- `.planning/milestones/v1.0-ROADMAP.md`
+- `.planning/milestones/v1.0-REQUIREMENTS.md`
+- `.planning/v2-DISCUSSION.md`
+- `.planning/RETROSPECTIVE.md`
+
+## 许可证
+
+当前仓库还没有声明许可证。公开发布前建议补充 `LICENSE`，明确复用、分发和引用方式。
