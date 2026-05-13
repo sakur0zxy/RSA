@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "rsa-research-agent"
 version = "0.1.0"
 description = "Local-first research agent harness for auditable literature workflows."
-readme = "AGENTS.md"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "PyYAML>=6.0.3",
