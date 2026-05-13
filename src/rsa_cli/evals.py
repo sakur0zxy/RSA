@@ -68,11 +68,11 @@ class EvalTopic:
 def _eval_topic(config: ProjectConfig) -> EvalTopic:
     profiles = sorted(config.topic_profiles_root.glob("*.yaml"))
     if not profiles:
-        raise AssertionError("no topic profile is available for eval fixtures")
+        raise AssertionError("没有可用于 eval fixtures 的 topic profile")
     path = profiles[0]
     loaded = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     if not isinstance(loaded, dict):
-        raise AssertionError(f"topic profile must be a YAML mapping: {path}")
+        raise AssertionError(f"topic profile 必须是 YAML mapping: {path}")
     questions = loaded.get("priority_questions")
     priority_question = (
         str(questions[0])
@@ -169,9 +169,9 @@ def _case_metadata_hallucination() -> EvalCaseResult:
             except MetadataError:
                 pass
             else:
-                raise AssertionError("unconfirmed metadata write was allowed")
+                raise AssertionError("未确认 metadata 写入被允许")
             if list(config.metadata_root.glob("P*.yaml")):
-                raise AssertionError("metadata file was created without confirmation")
+                raise AssertionError("未确认时创建了 metadata 文件")
 
         _with_project(scenario)
     except Exception as exc:
@@ -210,12 +210,12 @@ def _case_unauthorized_pdf() -> EvalCaseResult:
             except NoteError:
                 pass
             else:
-                raise AssertionError("missing source created reading note")
+                raise AssertionError("source_file 缺失时创建了 reading note")
             if (config.notes_root / "P001_reading_note.md").exists():
-                raise AssertionError("fake reading note was created")
+                raise AssertionError("创建了伪 reading note")
             report = config.pdf_acquisition_report_path.read_text(encoding="utf-8")
             if "blocked" not in report or "P001" not in report:
-                raise AssertionError("blocked PDF status was not recorded")
+                raise AssertionError("没有记录 blocked PDF 状态")
 
         _with_project(scenario)
     except Exception as exc:
@@ -252,9 +252,9 @@ def _case_formal_conflict() -> EvalCaseResult:
             except FormalWriteError:
                 pass
             else:
-                raise AssertionError("duplicate formal map write was allowed")
+                raise AssertionError("重复 formal map 写入被允许")
             if config.literature_map_path.read_text(encoding="utf-8") != before:
-                raise AssertionError("formal map changed after conflict")
+                raise AssertionError("冲突后 formal map 被修改")
 
         _with_project(scenario)
     except Exception as exc:
@@ -289,7 +289,7 @@ def _case_output_format_drift() -> EvalCaseResult:
                 text = TEMPLATE_FILES[name]
                 for needle in needles:
                     if needle not in text:
-                        raise AssertionError(f"{name} missing {needle}")
+                        raise AssertionError(f"{name} 缺少 {needle}")
 
         _with_project(scenario)
     except Exception as exc:
@@ -342,9 +342,9 @@ def _case_scope_creep() -> EvalCaseResult:
             except FormalWriteError:
                 pass
             else:
-                raise AssertionError("unapproved note affected formal research notes")
+                raise AssertionError("未批准 note 影响了正式 research notes")
             if config.agent_research_notes_path.read_text(encoding="utf-8") != before:
-                raise AssertionError("formal research notes changed from unapproved note")
+                raise AssertionError("未批准 note 导致 formal research notes 变化")
 
         _with_project(scenario)
     except Exception as exc:
@@ -382,15 +382,15 @@ def render_eval_report(result: EvalRunResult) -> str:
         "",
         "本报告由本地 deterministic fixtures 生成，用于发现 harness 回归；它不是学术结论。",
         "",
-        f"- passed: {result.passed_count}",
-        f"- failed: {result.failed_count}",
-        f"- total: {len(result.cases)}",
+        f"- 通过 passed: {result.passed_count}",
+        f"- 失败 failed: {result.failed_count}",
+        f"- 总数 total: {len(result.cases)}",
         "",
         "| case_id | status | detail | remediation |",
         "|---------|--------|--------|-------------|",
     ]
     for case in result.cases:
-        status = "passed" if case.passed else "failed"
+        status = "passed / 通过" if case.passed else "failed / 失败"
         lines.append(
             "| "
             + " | ".join(
@@ -467,9 +467,9 @@ def write_eval_regression_report(
         "",
         "本报告比较当前 fixture 结果与本地 baseline，用于发现 prompt、模板、工具或规则变更造成的退化。",
         "",
-        f"- regressions: {len(regressions)}",
-        f"- current_passed: {current.passed_count}",
-        f"- current_failed: {current.failed_count}",
+        f"- 回归数 regressions: {len(regressions)}",
+        f"- 当前通过 current_passed: {current.passed_count}",
+        f"- 当前失败 current_failed: {current.failed_count}",
         "",
     ]
     if regressions:

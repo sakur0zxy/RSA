@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-94%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-103%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -31,6 +31,12 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Asset manifest | 登记截图、图表、结果图和补充资产，真实文件 local-only，manifest 可审计。 |
 | Formal write guardrails | 正式写入必须通过 schema 校验、冲突检查和显式人工确认。 |
 | Harness evals | 用本地 deterministic fixtures 检查回归、越界写入和格式漂移。 |
+
+## 语言策略
+
+RSA 当前主要面向中文用户，因此所有用户可见内容都应中文优先：CLI help、成功提示、错误信息、README、GSD 文档、模板说明、报告正文和人工确认提示都要让中文用户能直接理解。
+
+字段名、YAML key、Markdown 表格列、CLI flag、命令名、状态枚举和代码标识保持英文稳定；但只要它们出现在用户需要阅读或填写的位置，就必须配有中文说明或中文上下文。
 
 ## 工作流
 
@@ -177,15 +183,16 @@ python -m pytest -q
 rsa --root . eval compare
 ```
 
-当前 v1.0 归档基线：`94 passed`，`eval compare` 结果为 `regressions=0`。
+当前回归基线：103 个测试通过，`eval compare` 结果为回归数 0。
 
 ## 项目状态
 
 - 当前里程碑：`v1.0 Local Harness`
 - 当前版本：`v2.0` Phase 6 完成
 - 状态：v1.0 已归档；v2.0 已开始，下一步是 Phase 7
-- 主要用户语言：中文
-- 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定
+- 主要用户语言：中文优先
+- 语言策略：见 `.planning/LANGUAGE-POLICY.md`
+- 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释
 
 ## 路线图
 

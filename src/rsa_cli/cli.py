@@ -275,8 +275,8 @@ def _run_init(root: Path) -> int:
     config = load_project_config(root)
     result = create_literature_skeleton(config)
     print(
-        "已初始化文献基础 / Initialized literature foundation: "
-        f"{result.created_count} created, {result.existing_count} existing"
+        "已初始化文献基础: "
+        f"新建 {result.created_count} 项，已有 {result.existing_count} 项"
     )
     return 0
 
@@ -286,11 +286,11 @@ def _run_validate_profile(profile_path: Path) -> int:
 
     errors = validate_topic_profile(profile_path)
     if errors:
-        print(f"Profile invalid / profile 无效: {profile_path}", file=sys.stderr)
+        print(f"profile 无效: {profile_path}", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print(f"Profile valid / profile 有效: {profile_path}")
+    print(f"profile 有效: {profile_path}")
     return 0
 
 
@@ -314,9 +314,9 @@ def _run_new_round(args: argparse.Namespace, root: Path) -> int:
             campaign_id=args.campaign_id,
         )
     except RoundError as exc:
-        print(f"Round error: {exc}", file=sys.stderr)
+        print(f"创建调研轮次失败: {exc}", file=sys.stderr)
         return 1
-    print(f"已创建调研轮次 / Created round {result.round_id}: {result.path}")
+    print(f"已创建调研轮次 {result.round_id}: {result.path}")
     return 0
 
 
@@ -552,8 +552,8 @@ def _run_source_command(args: argparse.Namespace, root: Path) -> int:
         if args.source_command == "status":
             status = source_status(config, args.paper_id)
             print(
-                f"来源状态: {args.paper_id} -> total={status.total_count}, "
-                f"available={status.available_count}, blocked={status.blocked_count}; "
+                f"来源状态: {args.paper_id} -> 总数={status.total_count}, "
+                f"可用={status.available_count}, 阻塞={status.blocked_count}; "
                 f"ledger={status.path}"
             )
             return 0
@@ -600,8 +600,8 @@ def _run_asset_command(args: argparse.Namespace, root: Path) -> int:
         if args.asset_command == "status":
             status = asset_status(config, args.paper_id)
             print(
-                f"资产状态: {args.paper_id} -> total={status.total_count}, "
-                f"available={status.available_count}; manifest={status.path}"
+                f"资产状态: {args.paper_id} -> 总数={status.total_count}, "
+                f"可用={status.available_count}; manifest={status.path}"
             )
             return 0
     except AssetError as exc:
@@ -624,7 +624,7 @@ def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
         result = run_eval_fixtures()
         path = write_eval_report(config, result)
         print(
-            f"Eval 完成: {result.passed_count}/{len(result.cases)} passed; report: {path}"
+            f"Eval 完成: 通过 {result.passed_count}/{len(result.cases)}；报告: {path}"
         )
         return 0 if result.passed else 1
     if args.eval_command == "baseline":
@@ -640,7 +640,7 @@ def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
             print(f"Eval compare 失败: {exc}", file=sys.stderr)
             return 1
         print(
-            f"Eval compare 完成: regressions={len(result.regressions)}; report: {result.path}"
+            f"Eval compare 完成: 回归数={len(result.regressions)}；报告: {result.path}"
         )
         return 0 if result.passed else 1
     return 2
@@ -664,8 +664,8 @@ def _run_formal_command(args: argparse.Namespace, root: Path) -> int:
             return 1
         print(
             "正式映射写入完成: "
-            f"{result.applied_count} rows -> {result.destination}; "
-            f"skipped add_metadata requests: {result.skipped_metadata_count}"
+            f"已追加 {result.applied_count} 行 -> {result.destination}; "
+            f"已跳过 add_metadata 请求 {result.skipped_metadata_count} 个"
         )
         return 0
     if args.formal_command == "apply-note":
@@ -682,8 +682,8 @@ def _run_formal_command(args: argparse.Namespace, root: Path) -> int:
             return 1
         print(
             "正式阅读笔记写入完成: "
-            f"{result.map_rows_applied} map rows -> {result.map_destination}; "
-            f"{result.research_notes_applied} research notes -> {result.research_notes_destination}"
+            f"文献映射行 {result.map_rows_applied} -> {result.map_destination}; "
+            f"研究笔记行 {result.research_notes_applied} -> {result.research_notes_destination}"
         )
         return 0
     return 2
@@ -725,7 +725,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "formal":
             return _run_formal_command(args, root)
     except ConfigError as exc:
-        print(f"Configuration error / 配置错误: {exc}", file=sys.stderr)
+        print(f"配置错误: {exc}", file=sys.stderr)
         return 2
 
     parser.error(f"unknown command: {args.command}")

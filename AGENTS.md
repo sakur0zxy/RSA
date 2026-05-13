@@ -28,6 +28,8 @@ RSA 科研 Agent 是一个面向博士科研工作的轻量 agent harness 项目
 - 未授权 PDF 不能下载或处理，只能记录获取状态和合法待办。
 - 不自动写综述正文、论文正文或最终学术判断。
 - 对正式记录的写入必须经过 schema validation、冲突检查和人工确认。
+- 项目主要面向中文用户；CLI 输出、错误信息、模板说明、报告、README 和 GSD 文档必须中文优先。
+- 字段名、YAML key、Markdown 表格列、CLI flag、状态枚举和代码标识保持英文，但要在用户可见处提供中文解释。
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->

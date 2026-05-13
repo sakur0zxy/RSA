@@ -10,13 +10,19 @@ v1.0 已作为 `Local Harness` 归档。当前项目可以作为 SAR 间断孔�
 
 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
+## 语言策略
+
+RSA 当前主要面向中文用户。所有用户可见内容必须中文优先，包括 CLI help、成功提示、错误信息、模板说明、报告正文、README、GSD 文档和人工确认提示。
+
+字段名、YAML key、Markdown 表格列、CLI flag、命令名、状态枚举和代码标识保持英文稳定；当这些英文标识出现在用户需要阅读或填写的位置时，必须提供中文解释或中文上下文。详见 `.planning/LANGUAGE-POLICY.md`。
+
 ## 当前状态
 
 - 已发布里程碑：`v1.0 Local Harness`
 - Roadmap 归档：`.planning/milestones/v1.0-ROADMAP.md`
 - Requirements 归档：`.planning/milestones/v1.0-REQUIREMENTS.md`
 - 运行形态：Python CLI、Markdown/YAML 文件、pytest 回归测试
-- 当前验证：94 tests passing，`rsa eval compare` 报告 `regressions=0`
+- 当前验证：103 个测试通过，`rsa eval compare` 报告回归数 0
 
 ## Requirements
 
@@ -69,7 +75,7 @@ v1.0 已作为 `Local Harness` 归档。当前项目可以作为 SAR 间断孔�
 - 版权：不做未授权 PDF 获取。
 - 人工审阅：formal writes 必须显式确认。
 - 评估：修改 prompt、template、parser 或 formal-write 逻辑后，应运行 `rsa eval compare`。
-- 语言：用户可见内容以中文为主；schema name、CLI flag、YAML key 和代码标识保持英文。
+- 语言：用户可见内容中文优先；schema name、CLI flag、YAML key、表格列、状态枚举和代码标识保持英文，并提供中文解释。
 
 ## 关键决策
 

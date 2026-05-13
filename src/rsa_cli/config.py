@@ -147,7 +147,7 @@ def load_yaml_file(path: Path) -> dict[str, Any]:
     if loaded is None:
         return {}
     if not isinstance(loaded, dict):
-        raise ConfigError(f"{path} must contain a YAML mapping")
+        raise ConfigError(f"{path} 必须是 YAML mapping")
     return loaded
 
 
@@ -165,18 +165,18 @@ def validate_config(config: ProjectConfig) -> None:
     default_max = config.default_max_candidates
     hard_max = config.hard_max_candidates
     if not isinstance(config.rounds.get("allowed_tools", []), list):
-        raise ConfigError("rounds.allowed_tools must be a list")
+        raise ConfigError("rounds.allowed_tools 必须是 list")
     if not config.output_policy:
-        raise ConfigError("rounds.output_policy must be non-empty")
+        raise ConfigError("rounds.output_policy 不能为空")
     if not config.approval_mode:
-        raise ConfigError("rounds.approval_mode must be non-empty")
+        raise ConfigError("rounds.approval_mode 不能为空")
     if default_max <= 0:
-        raise ConfigError("rounds.default_max_candidates must be positive")
+        raise ConfigError("rounds.default_max_candidates 必须为正数")
     if hard_max <= 0:
-        raise ConfigError("rounds.hard_max_candidates must be positive")
+        raise ConfigError("rounds.hard_max_candidates 必须为正数")
     if default_max > hard_max:
         raise ConfigError(
-            "rounds.default_max_candidates must not exceed rounds.hard_max_candidates"
+            "rounds.default_max_candidates 不能超过 rounds.hard_max_candidates"
         )
 
 

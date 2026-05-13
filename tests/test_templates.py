@@ -239,6 +239,19 @@ def test_init_writes_localized_templates_and_formal_records(tmp_path):
     )
 
 
+def test_language_policy_is_documented_for_chinese_users():
+    policy = (REPO_ROOT / ".planning" / "LANGUAGE-POLICY.md").read_text(encoding="utf-8")
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    requirements = (REPO_ROOT / ".planning" / "REQUIREMENTS.md").read_text(
+        encoding="utf-8"
+    )
+
+    for text in [policy, readme, requirements]:
+        assert "中文优先" in text
+    for needle in ["YAML key", "CLI flag", "状态枚举", "代码标识"]:
+        assert needle in policy
+
+
 def test_second_init_does_not_overwrite_human_edited_formal_records(tmp_path):
     config = load_project_config(tmp_path)
     create_literature_skeleton(config)

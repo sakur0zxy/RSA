@@ -41,7 +41,7 @@ def test_eval_report_baseline_and_compare_are_deterministic(tmp_path):
     assert compare.passed
     assert compare.regressions == []
     assert compare.path == config.eval_regression_report_path
-    assert "regressions: 0" in compare.path.read_text(encoding="utf-8")
+    assert "回归数 regressions: 0" in compare.path.read_text(encoding="utf-8")
 
 
 def test_eval_compare_requires_existing_baseline(tmp_path):

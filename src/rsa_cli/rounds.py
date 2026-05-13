@@ -55,10 +55,10 @@ FORMAL_REQUEST_FIELDS: dict[str, set[str]] = {
 
 def slugify_round_name(name: str) -> str:
     if "/" in name or "\\" in name or ".." in name:
-        raise RoundError("round name must not contain path separators or '..'")
+        raise RoundError("round name 不能包含路径分隔符或 '..'")
     slug = re.sub(r"[^a-zA-Z0-9]+", "_", name.strip().lower()).strip("_")
     if not slug:
-        raise RoundError("round name must contain at least one letter or number")
+        raise RoundError("round name 至少需要一个字母或数字")
     return slug
 
 
@@ -78,10 +78,10 @@ def next_round_number(agent_outputs_root: Path) -> int:
 def enforce_candidate_limit(config: ProjectConfig, max_candidates: int | None) -> int:
     resolved = config.default_max_candidates if max_candidates is None else max_candidates
     if resolved <= 0:
-        raise RoundError("max candidates must be positive")
+        raise RoundError("max_candidates 必须为正数")
     if resolved > config.hard_max_candidates:
         raise RoundError(
-            f"max candidates {resolved} exceeds hard cap {config.hard_max_candidates}"
+            f"max_candidates {resolved} 超过硬上限 hard_max_candidates={config.hard_max_candidates}"
         )
     return resolved
 
@@ -314,7 +314,7 @@ def create_research_round(
     profile_errors = validate_topic_profile(profile_path)
     if profile_errors:
         joined = "; ".join(profile_errors)
-        raise RoundError(f"topic profile invalid: {joined}")
+        raise RoundError(f"topic profile 无效: {joined}")
 
     resolved_max = enforce_candidate_limit(config, max_candidates)
     slug = slugify_round_name(name)
@@ -328,7 +328,7 @@ def create_research_round(
     round_id = f"R{round_number:03d}_{slug}"
     round_path = config.agent_outputs_root / round_id
     if round_path.exists():
-        raise RoundError(f"round directory already exists: {round_path}")
+        raise RoundError(f"round 目录已存在: {round_path}")
 
     round_path.mkdir(parents=True, exist_ok=False)
     values = {

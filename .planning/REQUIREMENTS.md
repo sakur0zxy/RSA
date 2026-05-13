@@ -5,11 +5,19 @@
 
 ## 核心约束
 
-- 用户可见内容以中文为主；schema name、CLI flag、YAML key 和代码标识保持英文。
+- 用户可见内容中文优先；CLI help、成功提示、错误信息、模板说明、报告正文、README、GSD 文档和人工确认提示都必须可由中文用户直接理解。
+- schema name、CLI flag、YAML key、Markdown 表格列、状态枚举和代码标识保持英文稳定；当它们出现在用户需要阅读或填写的位置时，必须提供中文解释或中文上下文。
 - 不做未授权 PDF 获取，不绕过 paywall，不模拟机构账号批量下载。
 - AI 生成内容、自动阅读草稿和 AI scoring 不得直接进入 formal records。
 - Formal writes 仍必须经过 schema 校验、冲突检查和显式人工确认。
 - 除非后续 phase 明确改用数据库，否则 v2 继续使用本地 Markdown/YAML。
+
+## 全局语言要求
+
+- [x] **LANG-01:** 当前项目入口文档记录中文优先语言策略，并说明英文标识保留范围。
+- [x] **LANG-02:** 已实现 CLI 的主要 help、成功提示、错误信息和状态输出使用中文优先文案。
+- [x] **LANG-03:** 模板和正式记录 seed 文件保留英文 key/列名，同时提供中文说明。
+- [ ] **LANG-04:** 后续新增 phase 必须在计划和测试中显式覆盖中文用户可见内容。
 
 ## Phase 6: Asset & Source Foundation
 

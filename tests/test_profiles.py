@@ -72,7 +72,7 @@ topic_name: Incomplete
         "grade_rules",
         "required_outputs",
     ]:
-        assert f"missing required field: {field}" in errors
+        assert f"缺少必填字段: {field}" in errors
 
 
 def test_invalid_yaml_returns_actionable_cli_error(tmp_path, capsys):
@@ -83,7 +83,7 @@ def test_invalid_yaml_returns_actionable_cli_error(tmp_path, capsys):
     captured = capsys.readouterr()
 
     assert exit_code == 1
-    assert "invalid YAML" in captured.err
+    assert "YAML 无效" in captured.err
     assert "Traceback" not in captured.err
 
 
@@ -145,4 +145,4 @@ def test_cli_validates_starter_profile(capsys):
     captured = capsys.readouterr()
 
     assert exit_code == 0
-    assert "Profile valid" in captured.out
+    assert "profile 有效" in captured.out

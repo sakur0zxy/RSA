@@ -75,7 +75,7 @@ def test_round_number_increments(tmp_path):
 def test_candidate_hard_cap_fails_before_directory_creation(tmp_path):
     config, profile = prepare_project(tmp_path)
 
-    with pytest.raises(RoundError, match="hard cap"):
+    with pytest.raises(RoundError, match="硬上限"):
         create_research_round(
             config,
             profile,
@@ -90,7 +90,7 @@ def test_candidate_hard_cap_fails_before_directory_creation(tmp_path):
 def test_unsafe_round_name_fails_before_directory_creation(tmp_path):
     config, profile = prepare_project(tmp_path)
 
-    with pytest.raises(RoundError, match="path separators"):
+    with pytest.raises(RoundError, match="路径分隔符"):
         create_research_round(
             config,
             profile,

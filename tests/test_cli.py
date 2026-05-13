@@ -75,14 +75,14 @@ def test_cli_init_and_validate_profile(tmp_path, capsys):
     captured = capsys.readouterr()
 
     assert exit_code == 0
-    assert "Initialized literature foundation" in captured.out
+    assert "已初始化文献基础" in captured.out
 
     profile = tmp_path / "01_literature" / "topic_profiles" / "sar_noncontinuous_aperture.yaml"
     exit_code = main(["validate-profile", str(profile)])
     captured = capsys.readouterr()
 
     assert exit_code == 0
-    assert "Profile valid" in captured.out
+    assert "profile 有效" in captured.out
 
 
 def test_cli_new_round_success(tmp_path, capsys):
@@ -111,7 +111,7 @@ def test_cli_new_round_success(tmp_path, capsys):
 
     round_dir = tmp_path / "01_literature" / "agent_outputs" / "R001_short_topic_name"
     assert exit_code == 0
-    assert "Created round R001_short_topic_name" in captured.out
+    assert "已创建调研轮次 R001_short_topic_name" in captured.out
     assert (round_dir / "README.md").exists()
     assert (round_dir / "final_round_summary.md").exists()
     assert (round_dir / "trace_summary.md").exists()
@@ -138,7 +138,7 @@ def test_cli_new_round_validates_profile_before_writing(tmp_path, capsys):
     captured = capsys.readouterr()
 
     assert exit_code == 1
-    assert "topic profile invalid" in captured.err
+    assert "topic profile 无效" in captured.err
     assert round_payloads(tmp_path) == []
 
 
@@ -163,7 +163,7 @@ def test_cli_new_round_expected_errors_have_no_traceback(tmp_path, capsys):
     captured = capsys.readouterr()
 
     assert exit_code == 1
-    assert "hard cap" in captured.err
+    assert "硬上限" in captured.err
     assert "Traceback" not in captured.err
 
 
@@ -501,13 +501,13 @@ def test_cli_source_and_asset_add_validate_status(tmp_path, capsys):
     assert source_validate == 0
     assert "来源记录有效" in source_validate_out.out
     assert source_status_code == 0
-    assert "total=1" in source_status_out.out
+    assert "总数=1" in source_status_out.out
     assert asset_add == 0
     assert "已登记资产 A001" in asset_add_out.out
     assert asset_validate == 0
     assert "资产记录有效" in asset_validate_out.out
     assert asset_status_code == 0
-    assert "total=1" in asset_status_out.out
+    assert "总数=1" in asset_status_out.out
 
 
 def test_cli_source_add_expected_error_has_no_traceback(tmp_path, capsys):
@@ -543,11 +543,11 @@ def test_cli_eval_run_baseline_and_compare(tmp_path, capsys):
     compare_out = capsys.readouterr()
 
     assert run == 0
-    assert "Eval" in run_out.out
+    assert "Eval 完成" in run_out.out
     assert baseline == 0
     assert "baseline" in baseline_out.out
     assert compare == 0
-    assert "regressions=0" in compare_out.out
+    assert "回归数=0" in compare_out.out
     assert (tmp_path / "01_literature" / "synthesis" / "eval_report.md").exists()
     assert (tmp_path / "01_literature" / "synthesis" / "eval_baseline.yaml").exists()
     assert (

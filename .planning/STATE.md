@@ -4,8 +4,8 @@ milestone: v2.0
 milestone_name: Scaled Literature Workstation
 status: Phase 6 complete
 stopped_at: Phase 6 complete; ready to discuss Phase 7 Authorized Acquisition
-last_updated: "2026-05-13T01:15:00+08:00"
-last_activity: 2026-05-13 -- completed Phase 6 Asset & Source Foundation
+last_updated: "2026-05-13T19:45:00+08:00"
+last_activity: 2026-05-13 -- 固化中文优先语言策略并核查用户可见文案
 progress:
   total_phases: 13
   completed_phases: 6
@@ -29,7 +29,7 @@ progress:
 Phase: 7 Authorized Acquisition
 Plan: 未开始
 Status: Phase 6 已完成
-Last activity: 2026-05-13 -- 完成 Phase 6 Asset & Source Foundation
+Last activity: 2026-05-13 -- 固化中文优先语言策略并核查用户可见文案
 
 进度: [█████░░░░░] 46%
 
@@ -85,6 +85,7 @@ Last activity: 2026-05-13 -- 完成 Phase 6 Asset & Source Foundation
 | # | 描述 | 日期 | Commit | 目录 |
 |---|------|------|--------|------|
 | 260513-001 | 中文优先的用户可见内容 | 2026-05-13 | `6773dba` | [260513-001-zh-user-facing-language](./quick/260513-001-zh-user-facing-language/) |
+| 260513-002 | 中文优先语言策略固化与核查 | 2026-05-13 | pending | [260513-002-language-policy-audit](./quick/260513-002-language-policy-audit/) |
 
 ## 延后事项
 
