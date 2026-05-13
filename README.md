@@ -186,12 +186,16 @@ rsa --root . eval compare
 v2 建议优先扩展这些方向：
 
 1. PDF 和截图资产管理。
-2. 批量候选文献导入和 campaign review queue。
-3. DOI/Crossref/OpenAlex 等 scholarly API 进入 staging。
-4. 本地 review UI。
-5. Claim-level citation check。
-6. 更强的 research-quality evals。
-7. 可选 multi-agent orchestration。
+2. 授权全文获取和自动下载。
+3. 自动阅读草稿。
+4. 结构化证据抽取。
+5. AI 辅助评分：相关性、质量和阅读优先级。
+6. 批量候选文献导入和 campaign review queue。
+7. DOI/Crossref/OpenAlex 等 scholarly API 进入 staging。
+8. 本地 review UI。
+9. Claim-level citation check。
+10. 更强的 research-quality evals。
+11. 可选 multi-agent orchestration。
 
 更多 GSD 文档：
 

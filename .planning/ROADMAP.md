@@ -25,12 +25,16 @@ v2.0 尚未正式规划。建议主题：把 v1 harness 扩展成更适合大规
 建议候选顺序：
 
 1. PDF、截图和重要结果图的 asset management。
-2. Batch candidate import 和 campaign review queue。
-3. Scholarly API lookup 进入 staging records。
-4. 用于 verification 和 approval 的本地 review UI。
-5. 面向草稿写作的 claim-level citation check。
-6. 面向研究质量回归的 smarter evals。
-7. 带明确权限边界的可选 multi-agent orchestration。
+2. Authorized download / source trace，只允许 open access、用户提供或用户授权来源。
+3. Auto reading draft，基于本地或已授权全文生成可审阅阅读草稿。
+4. Evidence extraction / structured reading signals，在评分前抽取结构化证据。
+5. AI-assisted scoring rubric，区分 relevance、quality 和 read priority，且不直接进入 formal records。
+6. Batch candidate import 和 campaign review queue。
+7. Scholarly API lookup 进入 staging records。
+8. 用于 verification、approval 和 scoring review 的本地 review UI。
+9. 面向草稿写作的 claim-level citation check。
+10. 面向研究质量回归的 smarter evals。
+11. 带明确权限边界的可选 multi-agent orchestration。
 
 ## 进度
 
