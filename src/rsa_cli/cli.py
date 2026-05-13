@@ -162,6 +162,72 @@ def build_parser() -> argparse.ArgumentParser:
     )
     note_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
 
+    source_group = subcommands.add_parser(
+        "source", help="登记、校验或查看本地/已授权全文来源；validate/status 只读。"
+    )
+    source_subcommands = source_group.add_subparsers(dest="source_command", required=True)
+    source_add = source_subcommands.add_parser(
+        "add", help="登记本地、用户提供或已授权来源文件，并写入 source ledger。"
+    )
+    source_add.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    source_add.add_argument("--source-file", required=True, help="本地来源文件路径。")
+    source_add.add_argument(
+        "--authorization",
+        required=True,
+        choices=["provided", "local", "authorized", "open_access", "user_authorized"],
+        help="来源授权方式。不会绕过 paywall 或访问控制。",
+    )
+    source_add.add_argument(
+        "--source-type",
+        default="pdf",
+        choices=["pdf", "supplement", "dataset", "web_page", "other"],
+        help="来源类型；默认 pdf。",
+    )
+    source_add.add_argument("--source-url", help="可选来源 URL。")
+    source_add.add_argument(
+        "--license-note",
+        required=True,
+        help="中文授权或来源说明，说明为什么可以本地保存/阅读。",
+    )
+    source_add.add_argument("--added-by", help="添加人。")
+    source_validate = source_subcommands.add_parser(
+        "validate", help="只读校验 source ledger 和本地来源文件。"
+    )
+    source_validate.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    source_status = source_subcommands.add_parser(
+        "status", help="只读查看 source ledger 状态。"
+    )
+    source_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+
+    asset_group = subcommands.add_parser(
+        "asset", help="登记、校验或查看截图/图表/结果图资产；validate/status 只读。"
+    )
+    asset_subcommands = asset_group.add_subparsers(dest="asset_command", required=True)
+    asset_add = asset_subcommands.add_parser(
+        "add", help="登记本地截图、图表、结果图或补充资产，并写入 manifest。"
+    )
+    asset_add.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    asset_add.add_argument("--file", required=True, dest="asset_file", help="本地资产文件路径。")
+    asset_add.add_argument(
+        "--kind",
+        required=True,
+        choices=["figure", "table", "result", "screenshot", "supplement", "other"],
+        help="资产类型。",
+    )
+    asset_add.add_argument("--label", help="人类可读标签，例如 Fig. 3。")
+    asset_add.add_argument("--description-zh", help="中文说明，记录该资产为什么重要。")
+    asset_add.add_argument("--page", help="可选页码。")
+    asset_add.add_argument("--figure", help="可选图号、表号或结果编号。")
+    asset_add.add_argument("--added-by", help="添加人。")
+    asset_validate = asset_subcommands.add_parser(
+        "validate", help="只读校验 asset manifest 和本地资产文件。"
+    )
+    asset_validate.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    asset_status = asset_subcommands.add_parser(
+        "status", help="只读查看 asset manifest 状态。"
+    )
+    asset_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+
     eval_group = subcommands.add_parser(
         "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
     )
@@ -450,6 +516,100 @@ def _run_note_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_source_command(args: argparse.Namespace, root: Path) -> int:
+    from .assets import (
+        AssetError,
+        add_source_record,
+        source_status,
+        validate_source_record,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.source_command == "add":
+            result = add_source_record(
+                config,
+                args.paper_id,
+                source_file=args.source_file,
+                authorization=args.authorization,
+                source_type=args.source_type,
+                source_url=args.source_url,
+                license_note=args.license_note,
+                added_by=args.added_by,
+            )
+            print(
+                f"已登记来源 {result.source_id}: {result.local_path}；ledger: {result.record_path}"
+            )
+            return 0
+        if args.source_command == "validate":
+            errors = validate_source_record(config, args.paper_id)
+            if errors:
+                for error in errors:
+                    print(f"来源记录无效: {error}", file=sys.stderr)
+                return 1
+            print(f"来源记录有效: {args.paper_id}")
+            return 0
+        if args.source_command == "status":
+            status = source_status(config, args.paper_id)
+            print(
+                f"来源状态: {args.paper_id} -> total={status.total_count}, "
+                f"available={status.available_count}, blocked={status.blocked_count}; "
+                f"ledger={status.path}"
+            )
+            return 0
+    except AssetError as exc:
+        print(f"来源操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
+def _run_asset_command(args: argparse.Namespace, root: Path) -> int:
+    from .assets import (
+        AssetError,
+        add_asset_record,
+        asset_status,
+        validate_asset_manifest,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.asset_command == "add":
+            result = add_asset_record(
+                config,
+                args.paper_id,
+                asset_file=args.asset_file,
+                kind=args.kind,
+                label=args.label,
+                description_zh=args.description_zh,
+                page=args.page,
+                figure=args.figure,
+                added_by=args.added_by,
+            )
+            print(
+                f"已登记资产 {result.asset_id}: {result.local_path}；manifest: {result.manifest_path}"
+            )
+            return 0
+        if args.asset_command == "validate":
+            errors = validate_asset_manifest(config, args.paper_id)
+            if errors:
+                for error in errors:
+                    print(f"资产记录无效: {error}", file=sys.stderr)
+                return 1
+            print(f"资产记录有效: {args.paper_id}")
+            return 0
+        if args.asset_command == "status":
+            status = asset_status(config, args.paper_id)
+            print(
+                f"资产状态: {args.paper_id} -> total={status.total_count}, "
+                f"available={status.available_count}; manifest={status.path}"
+            )
+            return 0
+    except AssetError as exc:
+        print(f"资产操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -556,6 +716,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_gap_command(args, root)
         if args.command == "note":
             return _run_note_command(args, root)
+        if args.command == "source":
+            return _run_source_command(args, root)
+        if args.command == "asset":
+            return _run_asset_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":

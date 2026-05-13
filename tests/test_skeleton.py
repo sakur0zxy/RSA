@@ -10,6 +10,7 @@ REQUIRED_DIRECTORIES = {
     "agent_outputs",
     "notes",
     "synthesis",
+    "sources",
     "pdfs",
     "assets",
 }
@@ -32,6 +33,8 @@ REQUIRED_TEMPLATES = {
     "map_integration.md",
     "pdf_acquisition_report.md",
     "reading_batch_report.md",
+    "source_record.yaml",
+    "asset_manifest.yaml",
 }
 
 
@@ -71,10 +74,11 @@ def test_gitignore_protects_local_settings_pdfs_and_assets():
     gitignore = (repo_root / ".gitignore").read_text(encoding="utf-8")
 
     assert ".rsa/local.yaml" in gitignore
-    assert "01_literature/pdfs/*" in gitignore
+    assert "01_literature/pdfs/**" in gitignore
     assert "!01_literature/pdfs/.gitkeep" in gitignore
-    assert "01_literature/assets/*" in gitignore
+    assert "01_literature/assets/**" in gitignore
     assert "!01_literature/assets/.gitkeep" in gitignore
+    assert "!01_literature/assets/*/manifest.yaml" in gitignore
 
 
 def test_templates_and_starter_profile_are_substantive():

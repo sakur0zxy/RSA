@@ -8,7 +8,9 @@ build/
 dist/
 
 .rsa/local.yaml
-01_literature/pdfs/*
+01_literature/pdfs/**
 !01_literature/pdfs/.gitkeep
-01_literature/assets/*
+01_literature/assets/**
 !01_literature/assets/.gitkeep
+!01_literature/assets/*/
+!01_literature/assets/*/manifest.yaml

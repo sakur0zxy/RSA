@@ -32,12 +32,12 @@ v1.0 已作为 `Local Harness` 归档。当前项目可以作为 SAR 间断孔�
 - 人工确认 formal write guardrails - v1.0
 - 本地 deterministic eval fixtures - v1.0
 - 通过 `AGENTS.md` 提供项目级 agent 指引 - v1.0
+- Source ledger 和 asset manifest foundation - v2 Phase 6
 
 ### 下一里程碑待定义
 
-- 从 `.planning/v2-DISCUSSION.md` 选择 v2 范围。
-- 在实施前重新定义 v2 requirements。
-- 增加规模化、集成或 UI 能力时，必须保留 v1 guardrails。
+- Phase 6 执行后，继续推进 Phase 7 Authorized Acquisition。
+- 增加规模化、集成、自动阅读或 UI 能力时，必须保留 v1 guardrails。
 
 ### 除非重新打开，否则不做
 
@@ -54,6 +54,8 @@ v1.0 已作为 `Local Harness` 归档。当前项目可以作为 SAR 间断孔�
 - `01_literature/metadata/` 存放正式文献 metadata。
 - `01_literature/agent_outputs/` 存放有边界的 research round archive。
 - `01_literature/notes/` 存放结构化 reading note。
+- `01_literature/sources/` 存放每篇文献的 source ledger。
+- `01_literature/assets/P###/manifest.yaml` 存放截图、图表和结果图 manifest。
 - `01_literature/literature_map.md` 将已验证文献连接到 topic question 和 planned output。
 - `01_literature/synthesis/` 存放 gap report 和 eval report。
 - `.planning/` 存放 GSD context、archive、retrospective 和 v2 discussion。
@@ -98,4 +100,4 @@ v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
 
 ---
 
-*Last updated: 2026-05-13 after Chinese-first user-facing language quick task*
+*Last updated: 2026-05-13 after Phase 6 Asset & Source Foundation*

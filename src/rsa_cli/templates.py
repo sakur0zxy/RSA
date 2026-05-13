@@ -145,6 +145,38 @@ note_integration_requests: []
 - 是否可进入正式研究记录:
 - 需要补充核验:
 """,
+    "source_record.yaml": """# 字段说明
+# paper_id: 正式文献编号，必须已经存在于 metadata/P###.yaml。
+# sources: 与该文献相关的本地、用户提供或已授权全文/补充材料来源。
+# source_id: 当前 paper_id 内部稳定来源编号，例如 S001。
+# source_type: 来源类型，例如 pdf、supplement、dataset、web_page、other。
+# authorization: 授权方式，只能使用 provided、local、authorized、open_access、user_authorized。
+# source_url: 可选来源 URL；没有时留空。
+# license_note: 中文授权或来源说明，必须说明为什么可以本地保存/阅读。
+# original_path: 用户提供的原始本地路径。
+# local_path: RSA 工作区内的本地副本路径，实际文件不进入 git。
+# status: 来源状态，例如 available 或 blocked。
+# added_by: 添加人。
+# added_at: 添加日期。
+paper_id: P000
+sources: []
+""",
+    "asset_manifest.yaml": """# 字段说明
+# paper_id: 正式文献编号，必须已经存在于 metadata/P###.yaml。
+# assets: 与该文献相关的截图、图表、结果图或补充资产。
+# asset_id: 当前 paper_id 内部稳定资产编号，例如 A001。
+# kind: 资产类型，只能使用 figure、table、result、screenshot、supplement、other。
+# label: 人类可读标签，例如 Fig. 3 或 result-pslr。
+# description_zh: 中文说明，记录该资产为什么重要。
+# page: 可选页码。
+# figure: 可选图号、表号或结果编号。
+# original_path: 用户提供的原始本地路径。
+# local_path: RSA 工作区内的本地副本路径，实际文件不进入 git。
+# added_by: 添加人。
+# added_at: 添加日期。
+paper_id: P000
+assets: []
+""",
     "round_readme.md": """# 研究轮次 {round_id}
 
 ## 目标

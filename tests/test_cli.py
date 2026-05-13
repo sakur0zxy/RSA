@@ -64,6 +64,8 @@ def test_help_lists_expected_subcommands(capsys):
     assert "map" in captured.out
     assert "gap" in captured.out
     assert "note" in captured.out
+    assert "source" in captured.out
+    assert "asset" in captured.out
     assert "eval" in captured.out
     assert "formal" in captured.out
 
@@ -426,6 +428,110 @@ def test_cli_note_create_validate_and_status(tmp_path, capsys):
     assert "阅读笔记有效" in valid_out.out
     assert status == 0
     assert "draft" in status_out.out
+
+
+def test_cli_source_and_asset_add_validate_status(tmp_path, capsys):
+    prepare_project(tmp_path)
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Source Asset CLI Paper"),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+    source = tmp_path / "source.pdf"
+    source.write_text("authorized source", encoding="utf-8")
+    asset = tmp_path / "figure.png"
+    asset.write_text("asset", encoding="utf-8")
+
+    source_add = main(
+        [
+            "--root",
+            str(tmp_path),
+            "source",
+            "add",
+            "P001",
+            "--source-file",
+            str(source),
+            "--authorization",
+            "provided",
+            "--license-note",
+            "用户提供 PDF，仅用于本地科研阅读。",
+            "--added-by",
+            "zxy",
+        ]
+    )
+    source_add_out = capsys.readouterr()
+    source_validate = main(["--root", str(tmp_path), "source", "validate", "P001"])
+    source_validate_out = capsys.readouterr()
+    source_status_code = main(["--root", str(tmp_path), "source", "status", "P001"])
+    source_status_out = capsys.readouterr()
+
+    asset_add = main(
+        [
+            "--root",
+            str(tmp_path),
+            "asset",
+            "add",
+            "P001",
+            "--file",
+            str(asset),
+            "--kind",
+            "figure",
+            "--label",
+            "Fig. 1",
+            "--description-zh",
+            "关键结果图。",
+            "--added-by",
+            "zxy",
+        ]
+    )
+    asset_add_out = capsys.readouterr()
+    asset_validate = main(["--root", str(tmp_path), "asset", "validate", "P001"])
+    asset_validate_out = capsys.readouterr()
+    asset_status_code = main(["--root", str(tmp_path), "asset", "status", "P001"])
+    asset_status_out = capsys.readouterr()
+
+    assert source_add == 0
+    assert "已登记来源 S001" in source_add_out.out
+    assert source_validate == 0
+    assert "来源记录有效" in source_validate_out.out
+    assert source_status_code == 0
+    assert "total=1" in source_status_out.out
+    assert asset_add == 0
+    assert "已登记资产 A001" in asset_add_out.out
+    assert asset_validate == 0
+    assert "资产记录有效" in asset_validate_out.out
+    assert asset_status_code == 0
+    assert "total=1" in asset_status_out.out
+
+
+def test_cli_source_add_expected_error_has_no_traceback(tmp_path, capsys):
+    prepare_project(tmp_path)
+    exit_code = main(
+        [
+            "--root",
+            str(tmp_path),
+            "source",
+            "add",
+            "P001",
+            "--source-file",
+            str(tmp_path / "missing.pdf"),
+            "--authorization",
+            "provided",
+            "--license-note",
+            "用户提供。",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "来源操作失败" in captured.err
+    assert "Traceback" not in captured.err
 
 
 def test_cli_eval_run_baseline_and_compare(tmp_path, capsys):

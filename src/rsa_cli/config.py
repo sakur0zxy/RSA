@@ -63,6 +63,10 @@ class ProjectConfig:
         return self.literature_root / "pdf_acquisition_report.md"
 
     @property
+    def sources_root(self) -> Path:
+        return self.literature_root / "sources"
+
+    @property
     def notes_root(self) -> Path:
         return self.literature_root / "notes"
 

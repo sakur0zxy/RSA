@@ -14,6 +14,7 @@ LITERATURE_DIRECTORIES = [
     "agent_outputs",
     "notes",
     "synthesis",
+    "sources",
     "pdfs",
     "assets",
 ]

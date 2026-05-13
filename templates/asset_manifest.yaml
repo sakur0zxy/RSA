@@ -1,0 +1,15 @@
+# 字段说明
+# paper_id: 正式文献编号，必须已经存在于 metadata/P###.yaml。
+# assets: 与该文献相关的截图、图表、结果图或补充资产。
+# asset_id: 当前 paper_id 内部稳定资产编号，例如 A001。
+# kind: 资产类型，只能使用 figure、table、result、screenshot、supplement、other。
+# label: 人类可读标签，例如 Fig. 3 或 result-pslr。
+# description_zh: 中文说明，记录该资产为什么重要。
+# page: 可选页码。
+# figure: 可选图号、表号或结果编号。
+# original_path: 用户提供的原始本地路径。
+# local_path: RSA 工作区内的本地副本路径，实际文件不进入 git。
+# added_by: 添加人。
+# added_at: 添加日期。
+paper_id: P000
+assets: []

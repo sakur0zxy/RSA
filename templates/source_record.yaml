@@ -1,0 +1,15 @@
+# 字段说明
+# paper_id: 正式文献编号，必须已经存在于 metadata/P###.yaml。
+# sources: 与该文献相关的本地、用户提供或已授权全文/补充材料来源。
+# source_id: 当前 paper_id 内部稳定来源编号，例如 S001。
+# source_type: 来源类型，例如 pdf、supplement、dataset、web_page、other。
+# authorization: 授权方式，只能使用 provided、local、authorized、open_access、user_authorized。
+# source_url: 可选来源 URL；没有时留空。
+# license_note: 中文授权或来源说明，必须说明为什么可以本地保存/阅读。
+# original_path: 用户提供的原始本地路径。
+# local_path: RSA 工作区内的本地副本路径，实际文件不进入 git。
+# status: 来源状态，例如 available 或 blocked。
+# added_by: 添加人。
+# added_at: 添加日期。
+paper_id: P000
+sources: []

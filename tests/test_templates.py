@@ -165,6 +165,22 @@ def test_later_phase_seed_templates_are_safe_and_localized():
     assert_in_root_and_fallback("pdf_acquisition_report.md", "不得下载未授权 PDF")
     assert_in_root_and_fallback("reading_batch_report.md", "人工确认")
     assert_in_root_and_fallback(
+        "source_record.yaml",
+        "字段说明",
+        "authorization",
+        "license_note",
+        "local_path",
+        "provided",
+    )
+    assert_in_root_and_fallback(
+        "asset_manifest.yaml",
+        "字段说明",
+        "asset_id",
+        "description_zh",
+        "local_path",
+        "screenshot",
+    )
+    assert_in_root_and_fallback(
         "trace_summary.md",
         "Trace Summary",
         "tools_used",
@@ -211,6 +227,12 @@ def test_init_writes_localized_templates_and_formal_records(tmp_path):
     ).read_text(encoding="utf-8")
     assert "PDF 获取状态记录" in (
         tmp_path / "01_literature" / "pdf_acquisition_report.md"
+    ).read_text(encoding="utf-8")
+    assert "license_note" in (tmp_path / "templates" / "source_record.yaml").read_text(
+        encoding="utf-8"
+    )
+    assert "description_zh" in (
+        tmp_path / "templates" / "asset_manifest.yaml"
     ).read_text(encoding="utf-8")
     assert "tools_used" in (tmp_path / "templates" / "trace_summary.md").read_text(
         encoding="utf-8"

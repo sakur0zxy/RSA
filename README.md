@@ -27,6 +27,8 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Candidate staging | 候选文献和核验记录先停留在 staging，不会自动进入正式记录。 |
 | Literature map | 将已验证文献映射到 topic、priority question、章节和计划产出。 |
 | Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记。 |
+| Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
+| Asset manifest | 登记截图、图表、结果图和补充资产，真实文件 local-only，manifest 可审计。 |
 | Formal write guardrails | 正式写入必须通过 schema 校验、冲突检查和显式人工确认。 |
 | Harness evals | 用本地 deterministic fixtures 检查回归、越界写入和格式漂移。 |
 
@@ -117,6 +119,8 @@ rsa --root . eval compare
 | `rsa map propose` | 从 round 输出生成 map 建议，不写正式记录。 |
 | `rsa gap generate` | 生成研究空白报告。 |
 | `rsa note create` | 从已授权全文创建单篇 reading note。 |
+| `rsa source add` / `validate` / `status` | 登记、校验或查看本地/已授权全文来源。 |
+| `rsa asset add` / `validate` / `status` | 登记、校验或查看截图、图表和结果图资产。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
@@ -130,8 +134,9 @@ rsa --root . eval compare
   agent_outputs/            # 有边界的 round archive
   notes/                    # P###_reading_note.md
   synthesis/                # gap report 和 eval report
+  sources/                  # P###.yaml 来源 ledger
   pdfs/                     # 本地-only PDF，git 忽略
-  assets/                   # 本地-only 截图/结果图，git 忽略
+  assets/                   # 本地-only 截图/结果图；manifest.yaml 可审计
   paper_index.md            # 正式 metadata 索引
   literature_map.md         # 正式文献到主题的映射
   agent_research_notes.md   # 人工确认后的辅助研究笔记
@@ -145,6 +150,7 @@ tests/                      # 回归测试
 
 - 候选证据不会自动成为正式 metadata。
 - `metadata/P###.yaml` 写入必须带 `--human-confirmed` 和 `--confirmed-by`。
+- `rsa source add` 和 `rsa asset add` 只登记来源/资产 ledger，不自动修改正式 metadata。
 - 缺失或未授权 PDF 只会生成 blocked 状态记录，不会生成假的 reading note。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
@@ -176,8 +182,8 @@ rsa --root . eval compare
 ## 项目状态
 
 - 当前里程碑：`v1.0 Local Harness`
-- 当前版本：`v1.0`
-- 状态：已发布并归档
+- 当前版本：`v2.0` Phase 6 完成
+- 状态：v1.0 已归档；v2.0 已开始，下一步是 Phase 7
 - 主要用户语言：中文
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定
 
@@ -185,7 +191,7 @@ rsa --root . eval compare
 
 v2 建议优先扩展这些方向：
 
-1. PDF 和截图资产管理。
+1. PDF 和截图资产管理。Phase 6 已建立 source ledger 和 asset manifest 基础。
 2. 授权全文获取和自动下载。
 3. 自动阅读草稿。
 4. 结构化证据抽取。
