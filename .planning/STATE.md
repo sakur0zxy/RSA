@@ -81,7 +81,7 @@ Last activity: 2026-05-13 -- 完成 quick task 260513-001: 中文优先的用户
 
 | # | 描述 | 日期 | Commit | 目录 |
 |---|------|------|--------|------|
-| 260513-001 | 中文优先的用户可见内容 | 2026-05-13 | pending | [260513-001-zh-user-facing-language](./quick/260513-001-zh-user-facing-language/) |
+| 260513-001 | 中文优先的用户可见内容 | 2026-05-13 | `6773dba` | [260513-001-zh-user-facing-language](./quick/260513-001-zh-user-facing-language/) |
 
 ## 延后事项
 
