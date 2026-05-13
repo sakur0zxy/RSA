@@ -33,7 +33,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 ## 工作流
 
 ```mermaid
-flowchart LR
+flowchart TD
   A["Topic profile<br/>研究主题配置"] --> B["Research round<br/>有边界调研轮次"]
   B --> C["Candidate staging<br/>候选文献暂存"]
   C --> D["Human verification<br/>人工核验"]
