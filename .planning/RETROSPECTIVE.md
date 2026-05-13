@@ -1,53 +1,53 @@
-# Retrospective
+# 复盘
 
-## Milestone: v1.0 Local Harness
+## 里程碑: v1.0 Local Harness
 
-**Shipped:** 2026-05-13  
-**Phases:** 5  
-**Plans:** 14  
-**Primary stack:** Python 3.11+, PyYAML, argparse, Markdown/YAML files, pytest
+**发布时间:** 2026-05-13
+**Phases:** 5
+**Plans:** 14
+**主要技术栈:** Python 3.11+、PyYAML、argparse、Markdown/YAML files、pytest
 
-### What Was Built
+### 做成了什么
 
-- A local-first literature research harness with a stable `rsa` CLI.
-- Formal metadata, paper index, candidate review, literature map, gap report and reading-note workflows.
-- Human confirmation and conflict checks before formal writes.
-- Local-only PDF/assets policy.
-- Deterministic eval fixtures and trace summaries for regression visibility.
-- GSD phase artifacts for context, plans, summaries and verification.
+- 一个本地优先的 literature research harness，提供稳定的 `rsa` CLI。
+- Formal metadata、paper index、candidate review、literature map、gap report 和 reading-note workflows。
+- Formal writes 前的人类确认与冲突检查。
+- Local-only PDF/assets policy。
+- Deterministic eval fixtures 和 trace summaries，用于观察回归。
+- GSD phase artifacts，用于记录 context、plans、summaries 和 verification。
 
-### What Worked
+### 做得顺的地方
 
-- Keeping formal records separate from `agent_outputs` made the system easier to reason about.
-- English schema keys plus Chinese explanations gave stable machine-readable structure without sacrificing readability.
-- Small deterministic tests caught accidental SAR hard-coding and unsafe write behavior.
-- Phase-by-phase summaries made archive and README synthesis straightforward.
+- 将 formal records 和 `agent_outputs` 分开，让系统边界更清楚。
+- English schema keys + 中文解释，兼顾机器可读和用户可读。
+- 小型 deterministic tests 能捕获 SAR hard-coding 和 unsafe write behavior。
+- Phase-by-phase summaries 让 archive 和 README 的整理更顺畅。
 
-### What Was Inefficient
+### 不够高效的地方
 
-- Some earlier planning files had encoding artifacts, which makes later human reading less pleasant.
-- Markdown table parsing is simple and effective for v1, but will become brittle if records grow more complex.
-- GSD milestone audit helpers were not fully available in this runtime, so archive close used manual checks plus tests.
+- 早期部分 planning files 有编码痕迹，后续人工阅读不够舒服。
+- Markdown table parsing 对 v1 足够简单有效，但 record 复杂后会变脆。
+- 当前 runtime 里的 GSD milestone audit helper 不完整，所以归档时使用人工检查 + 测试作为证据。
 
-### Patterns Established
+### 已建立的模式
 
-- `validate` means read-only.
-- `generate` and `propose` can create generated artifacts but must not modify formal records.
-- Formal writes require explicit `--human-confirmed` and `--confirmed-by`.
-- Missing/unauthorized PDFs are represented as blocked status, not fabricated notes.
-- Eval baselines live under `01_literature/synthesis/`.
+- `validate` 表示只读。
+- `generate` 和 `propose` 可以生成 artifacts，但不能改 formal records。
+- Formal writes 必须带 `--human-confirmed` 和 `--confirmed-by`。
+- 缺失或未授权 PDF 记录为 blocked status，不生成假 note。
+- Eval baselines 放在 `01_literature/synthesis/`。
 
-### Key Lessons
+### 关键经验
 
-- The harness should keep evidence admission, reading notes and formal synthesis as separate steps.
-- Before scaling literature review, source retention and screenshot asset policy should be first-class.
-- v2 should prioritize ergonomics around batch review, citation APIs and review UI without weakening v1 guardrails.
+- Harness 应持续把 evidence admission、reading notes 和 formal synthesis 分成独立步骤。
+- 在扩展大规模文献调研前，source retention 和 screenshot asset policy 应先成为一等能力。
+- v2 应优先改善 batch review、citation API 和 review UI，同时保留 v1 guardrails。
 
-## Cross-Milestone Trends
+## 跨里程碑趋势
 
-| Theme | Observation |
-|-------|-------------|
-| Safety | Human-confirmed formal writes remain the central protection. |
-| Ergonomics | CLI is workable for v1; batch review will need better surfaces. |
-| Data model | Markdown/YAML is enough now; parser complexity should be monitored. |
-| Evaluation | Deterministic evals are valuable but do not replace semantic research-quality checks. |
+| 主题 | 观察 |
+|------|------|
+| 安全性 | Human-confirmed formal writes 仍是核心保护。 |
+| 易用性 | CLI 对 v1 足够；大批量 review 会需要更好的界面。 |
+| 数据模型 | Markdown/YAML 目前够用；parser 复杂度需要持续观察。 |
+| 评估 | Deterministic evals 很有价值，但不能替代语义层面的科研质量检查。 |

@@ -378,7 +378,7 @@ def run_eval_fixtures() -> EvalRunResult:
 
 def render_eval_report(result: EvalRunResult) -> str:
     lines = [
-        "# Harness Eval Report / Harness 评估报告",
+        "# Harness 评估报告 / Harness Eval Report",
         "",
         "本报告由本地 deterministic fixtures 生成，用于发现 harness 回归；它不是学术结论。",
         "",
@@ -463,7 +463,7 @@ def write_eval_regression_report(
     config: ProjectConfig, current: EvalRunResult, regressions: list[str]
 ) -> Path:
     lines = [
-        "# Eval Regression Report / 评估回归报告",
+        "# 评估回归报告 / Eval Regression Report",
         "",
         "本报告比较当前 fixture 结果与本地 baseline，用于发现 prompt、模板、工具或规则变更造成的退化。",
         "",

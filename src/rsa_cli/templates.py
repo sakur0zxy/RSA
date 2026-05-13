@@ -134,13 +134,13 @@ note_integration_requests: []
 - authorization:
 - 授权状态: 仅允许使用本地、用户提供或已授权内容；不得根据未授权来源生成全文阅读结论。
 
-## Source-Grounded Claims / 来源支撑判断
+## 来源支撑判断 / Source-Grounded Claims
 
-## Short Quotes / 短引用
+## 短引用 / Short Quotes
 
-## Agent Summary / Agent 摘要
+## Agent 摘要 / Agent Summary
 
-## Human Decision / 人工决策
+## 人工决策 / Human Decision
 
 - 是否可进入正式研究记录:
 - 需要补充核验:
@@ -222,21 +222,21 @@ human_approvals: []
 formal_write_request_count: 0
 ---
 
-# Trace Summary / 追踪摘要: {round_id}
+# 追踪摘要 / Trace Summary: {round_id}
 
 本文件用于快速审计研究轮次，不是正式文献事实源，也不会自动写入 metadata、map、reading note 或论文正文。
 
-## Tools Used / 使用工具
+## 使用工具 / Tools Used
 
-## Decisions Made / 决策记录
+## 决策记录 / Decisions Made
 
-## Rejected Items / 拒绝项
+## 拒绝项 / Rejected Items
 
-## Uncertain Items / 不确定项
+## 不确定项 / Uncertain Items
 
-## Human Approvals / 人工确认
+## 人工确认 / Human Approvals
 
-## Formal Write Requests / 正式写入请求
+## 正式写入请求 / Formal Write Requests
 
 - count: 0
 """,

@@ -142,25 +142,25 @@ def render_trace_summary(trace: TraceSummary) -> str:
         yaml.safe_dump(frontmatter, allow_unicode=True, sort_keys=False).strip(),
         "---",
         "",
-        f"# Trace Summary / 追踪摘要: {trace.round_id}",
+        f"# 追踪摘要 / Trace Summary: {trace.round_id}",
         "",
         "本文件用于快速审计研究轮次，不是正式文献事实源，也不会自动写入 metadata、map、reading note 或论文正文。",
         "",
-        "## Tools Used / 使用工具",
+        "## 使用工具 / Tools Used",
     ]
     lines.extend([f"- `{tool}`" for tool in trace.tools_used] or ["- none"])
-    lines.extend(["", "## Decisions Made / 决策记录"])
+    lines.extend(["", "## 决策记录 / Decisions Made"])
     lines.extend([f"- {item}" for item in trace.decisions_made] or ["- none"])
-    lines.extend(["", "## Rejected Items / 拒绝项"])
+    lines.extend(["", "## 拒绝项 / Rejected Items"])
     lines.extend([f"- {item}" for item in trace.rejected_items] or ["- none"])
-    lines.extend(["", "## Uncertain Items / 不确定项"])
+    lines.extend(["", "## 不确定项 / Uncertain Items"])
     lines.extend([f"- {item}" for item in trace.uncertain_items] or ["- none"])
-    lines.extend(["", "## Human Approvals / 人工确认"])
+    lines.extend(["", "## 人工确认 / Human Approvals"])
     lines.extend([f"- {item}" for item in trace.human_approvals] or ["- none"])
     lines.extend(
         [
             "",
-            "## Formal Write Requests / 正式写入请求",
+            "## 正式写入请求 / Formal Write Requests",
             f"- count: {trace.formal_write_request_count}",
             "",
         ]

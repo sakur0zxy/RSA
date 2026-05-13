@@ -36,13 +36,13 @@ note_integration_requests: []
 - authorization:
 - 授权状态: 仅允许使用本地、用户提供或已授权内容；不得根据未授权来源生成全文阅读结论。
 
-## Source-Grounded Claims / 来源支撑判断
+## 来源支撑判断 / Source-Grounded Claims
 
-## Short Quotes / 短引用
+## 短引用 / Short Quotes
 
-## Agent Summary / Agent 摘要
+## Agent 摘要 / Agent Summary
 
-## Human Decision / 人工决策
+## 人工决策 / Human Decision
 
 - 是否可进入正式研究记录:
 - 需要补充核验:

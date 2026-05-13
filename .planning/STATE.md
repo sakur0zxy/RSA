@@ -14,70 +14,76 @@ progress:
   percent: 100
 ---
 
-# Project State
+# 项目状态
 
-## Project Reference
+## 项目引用
 
-See: `.planning/PROJECT.md` (updated 2026-05-13)
+参见: `.planning/PROJECT.md`（更新于 2026-05-13）
 
-**Core value:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
+**核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**Current focus:** v2 discussion and requirement definition
+**当前重点:** v2 讨论和 requirements 定义
 
-## Current Position
+## 当前位置
 
 Phase: v2 planning
-Plan: Not started
-Status: v1.0 archived
-Last activity: 2026-05-13 -- v1.0 milestone archived
+Plan: 未开始
+Status: v1.0 已归档
+Last activity: 2026-05-13 -- 完成 quick task 260513-001: 中文优先的用户可见内容
 
-Progress: [██████████] 100%
+进度: [██████████] 100%
 
-## Performance Metrics
+## 进度指标
 
-**Velocity:**
+**速度:**
 
-- Total plans completed: 14
-- Average duration: N/A
-- Total execution time: 0 hours
+- 已完成 plans: 14
+- 平均耗时: N/A
+- 总执行时间: 0 hours
 
-**By Phase:**
+**按 Phase:**
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
+| Phase | Plans | 总耗时 | 平均耗时 |
+|-------|-------|--------|----------|
 | 1 | 3 | - | - |
 | 2 | 4 | - | - |
 | 3 | 3 | - | - |
 | 4 | 2 | - | - |
 | 5 | 2 | - | - |
 
-**Recent Trend:**
+**近期趋势:**
 
-- Last 5 plans: 03-03, 04-01, 04-02, 05-01, 05-02
-- Trend: N/A
+- 最近 5 个 plans: 03-03, 04-01, 04-02, 05-01, 05-02
+- 趋势: N/A
 
-## Accumulated Context
+## 累积上下文
 
-### Decisions
+### 决策
 
-Decisions are logged in `PROJECT.md` and phase context files.
+决策记录在 `PROJECT.md` 和 phase context files 中。
 
-- Initialization: v1 is a local-first Python/Markdown/YAML research harness, not a Web platform.
-- Initialization: formal records outrank `agent_outputs`; formal writes require validation and human approval.
-- Initialization: SAR noncontinuous aperture is the starter topic profile, not a hard-coded product assumption.
-- Phase 5: eval fixtures are deterministic local checks, not LLM grading or network-backed research.
-- Phase 5: trace summaries are audit artifacts and must not write formal records.
-- Milestone close: v1 requirements were archived; v2 should start from fresh requirements.
+- 初始化: v1 是本地优先的 Python/Markdown/YAML research harness，不是 Web 平台。
+- 初始化: formal records 的权威性高于 `agent_outputs`；formal writes 需要 validation 和 human approval。
+- 初始化: SAR noncontinuous aperture 是 starter topic profile，不是硬编码产品假设。
+- Phase 5: eval fixtures 是 deterministic local checks，不是 LLM grading 或网络调研。
+- Phase 5: trace summaries 是 audit artifacts，不得写 formal records。
+- Milestone close: v1 requirements 已归档；v2 应从新的 requirements 开始。
 
-### Pending Todos
+### 待办
 
-None.
+无。
 
-### Blockers/Concerns
+### 阻塞和关注点
 
-None.
+无。
 
-## Deferred Items
+### 已完成 Quick Tasks
+
+| # | 描述 | 日期 | Commit | 目录 |
+|---|------|------|--------|------|
+| 260513-001 | 中文优先的用户可见内容 | 2026-05-13 | pending | [260513-001-zh-user-facing-language](./quick/260513-001-zh-user-facing-language/) |
+
+## 延后事项
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
@@ -87,16 +93,16 @@ None.
 | Evaluation | LLM-judged semantic evals | v2 | Phase 5 |
 | Audit | Dedicated milestone audit file was not generated before v1 archive | acknowledged | v1.0 close |
 
-## Session Continuity
+## 会话连续性
 
 Last session: 2026-05-11T14:15:32.345Z
-Stopped at: v1.0 archived; ready to define v2 requirements
+Stopped at: v1.0 已归档；可以开始定义 v2 requirements
 Resume file: `.planning/ROADMAP.md`
 
-**Planned Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
-**Completed Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
-**Planned Phase:** 04 (Reading Note Workflow) - 2 plans - 2026-05-12
-**Completed Phase:** 04 (Reading Note Workflow) - 2 plans - 2026-05-12
-**Planned Phase:** 05 (Evaluation and Hardening) - 2 plans - 2026-05-13
-**Completed Phase:** 05 (Evaluation and Hardening) - 2 plans - 2026-05-13
-**Archived Milestone:** v1.0 (Local Harness) - 5 phases / 14 plans - 2026-05-13
+**已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
+**已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
+**已计划 Phase:** 04 (Reading Note Workflow) - 2 plans - 2026-05-12
+**已完成 Phase:** 04 (Reading Note Workflow) - 2 plans - 2026-05-12
+**已计划 Phase:** 05 (Evaluation and Hardening) - 2 plans - 2026-05-13
+**已完成 Phase:** 05 (Evaluation and Hardening) - 2 plans - 2026-05-13
+**已归档里程碑:** v1.0 (Local Harness) - 5 phases / 14 plans - 2026-05-13

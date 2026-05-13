@@ -1,115 +1,122 @@
-# v2 Discussion: What Should Come Next
+# v2 讨论稿: 下一步做什么
 
-**Created:** 2026-05-13  
-**Status:** Discussion draft, not locked requirements
+**创建时间:** 2026-05-13
+**状态:** 讨论稿，不是锁定 requirements
 
-## Recommended v2 Theme
+## 推荐 v2 主题
 
-v2 should turn the v1 local harness into a more scalable literature-review workstation while preserving the same evidence hierarchy:
+v2 建议把 v1 本地 harness 扩展成更适合大规模文献调研的 workstation，同时保留同一条证据链：
 
-candidate evidence -> verified metadata -> reading notes -> formal map/research notes -> synthesis guidance.
+candidate evidence -> verified metadata -> reading notes -> formal map/research notes -> synthesis guidance。
 
-## Candidate Workstreams
+## 候选工作流
 
-### 1. Large-Scale Literature Review
+### 1. 大规模文献调研
 
-**Goal:** Support larger batches without losing auditability.
+**目标:** 支持更大的文献批次，但不丢失可审计性。
 
-Possible features:
-- `rsa campaign create` for multi-round review campaigns.
-- Batch candidate import from CSV/BibTeX/RIS.
-- Deduplication by DOI, title and official URL.
-- Review queue states: `new`, `needs_verification`, `verified`, `rejected`, `uncertain`, `deferred`.
-- Progress reports by topic profile and priority question.
+可能功能：
 
-Why it matters: this matches the user's stated need for large-scale literature research while keeping v1's staged admission model.
+- `rsa campaign create`：创建多轮 review campaign。
+- 从 CSV/BibTeX/RIS 批量导入候选文献。
+- 按 DOI、title、official URL 去重。
+- Review queue 状态：`new`、`needs_verification`、`verified`、`rejected`、`uncertain`、`deferred`。
+- 按 topic profile 和 priority question 输出进度报告。
 
-### 2. Source File And Screenshot Asset Management
+价值：这直接对应大规模文献调研需求，同时保留 v1 的 staged admission 模型。
 
-**Goal:** Make local PDFs, screenshots and important figure/result captures easier to preserve.
+### 2. PDF 和截图资产管理
 
-Possible features:
-- `rsa asset add P001 --file <path> --kind figure|table|result|screenshot`.
-- Asset manifest under `assets/P###/manifest.yaml`.
-- Screenshot metadata: source paper, page, figure/table number, capture reason, thesis use.
-- Checks that formal notes reference assets through stable local paths.
+**目标:** 更方便地保存本地 PDF、重要截图、图表和结果图。
 
-Why it matters: the user explicitly wants PDF sources and important-result screenshots retained for later writing.
+可能功能：
 
-### 3. Scholarly API And Citation Manager Integrations
+- `rsa asset add P001 --file <path> --kind figure|table|result|screenshot`。
+- 在 `assets/P###/manifest.yaml` 中保存 asset manifest。
+- 截图 metadata：source paper、page、figure/table number、capture reason、thesis use。
+- 校验 formal notes 是否通过稳定本地路径引用 assets。
 
-**Goal:** Reduce manual metadata entry while preserving verification gates.
+价值：这对应后续写文章时保留 PDF 源文件和重要结果截图的需求。
 
-Possible features:
-- DOI lookup adapter with source labels.
-- Crossref/Semantic Scholar/OpenAlex/arXiv adapters.
-- Zotero/EndNote/BibTeX export or sync.
-- API result staging, never direct formal writes.
+### 3. 学术 API 和文献管理器集成
 
-Why it matters: metadata collection is a bottleneck at scale, but API data still needs review.
+**目标:** 降低手动录入 metadata 的成本，同时保留 verification gates。
 
-### 4. Review UI
+可能功能：
 
-**Goal:** Make candidate review and formal approval less CLI-heavy.
+- DOI lookup adapter，并标记来源。
+- Crossref / Semantic Scholar / OpenAlex / arXiv adapters。
+- Zotero / EndNote / BibTeX export 或 sync。
+- API 结果只进入 staging，不能直接写 formal records。
 
-Possible features:
-- Local Web UI for candidate verification.
-- Conflict review screen for formal writes.
-- Literature map and gap report visualization.
-- Reading note approval workflow.
+价值：规模化调研中 metadata 收集是瓶颈，但 API 数据仍需要人工核验。
 
-Why it matters: v1 CLI is precise, but long review sessions need lower-friction scanning and comparison.
+### 4. 本地 Review UI
 
-### 5. Claim-Level Citation Checks
+**目标:** 降低候选核验和正式批准的 CLI 操作负担。
 
-**Goal:** Help later writing by checking that claims are backed by approved sources.
+可能功能：
 
-Possible features:
-- Draft claim extraction into a staging file.
-- Link each claim to metadata, reading-note claim or map row.
-- Detect unsupported, weakly supported or overgeneralized claims.
-- Keep output as review guidance, not final academic prose.
+- 本地 Web UI，用于 candidate verification。
+- Formal write conflict review screen。
+- Literature map 和 gap report 可视化。
+- Reading note approval workflow。
 
-Why it matters: this directly supports article/thesis writing without letting the agent invent conclusions.
+价值：v1 CLI 很精确，但长时间 review 需要更易扫描和比较的界面。
 
-### 6. Smarter Evaluation
+### 5. Claim-level Citation Check
 
-**Goal:** Extend v1 deterministic evals with research-quality checks.
+**目标:** 在后续写作阶段检查 claim 是否有 approved source 支撑。
 
-Possible features:
-- Golden fixture sets for candidate review.
-- Regression checks for source attribution quality.
-- Optional LLM-judged evals with locked rubrics.
-- Scorecards for hallucination risk, source quality and schema drift.
+可能功能：
 
-Why it matters: v1 catches harness regressions; v2 should also catch quality regressions in research behavior.
+- 从 draft 中抽取 claim 到 staging file。
+- 将每个 claim 连接到 metadata、reading-note claim 或 map row。
+- 标记 unsupported、weakly supported 或 overgeneralized claim。
+- 输出保持为 review guidance，不生成最终学术正文。
 
-### 7. Optional Agent Runtime Orchestration
+价值：它直接服务文章/博士论文写作，同时避免 agent 自行发明结论。
 
-**Goal:** Add multi-agent workflows only after the harness is stable.
+### 6. 更强的 Eval
 
-Possible features:
-- Explicit roles for search, verification, mapping, reading and eval.
-- Per-role permissions and output schemas.
-- Checkpointed human approval between roles.
-- No direct formal writes from search or reading agents.
+**目标:** 在 v1 deterministic evals 基础上增加研究质量检查。
 
-Why it matters: multi-agent execution can speed work, but only if v1 guardrails remain enforceable.
+可能功能：
 
-## My Recommended v2 Order
+- Candidate review golden fixtures。
+- Source attribution quality 回归检查。
+- 可选 LLM-judged evals，但必须有锁定 rubrics。
+- Hallucination risk、source quality、schema drift scorecards。
 
-1. Asset management for PDFs/screenshots.
-2. Batch candidate import and campaign review queues.
-3. Scholarly API lookup into staging.
-4. Review UI for verification and approvals.
-5. Claim-level citation checks.
-6. Smarter evals.
-7. Optional multi-agent orchestration.
+价值：v1 能发现 harness 回归；v2 应进一步发现 research behavior 质量回归。
 
-## Open Decisions For v2 Planning
+### 7. 可选 Agent Runtime 编排
 
-- Should v2 stay CLI-first with generated reports, or introduce a local Web UI early?
-- Which citation source should be first: DOI/Crossref, Zotero, BibTeX import, or OpenAlex?
-- Should PDFs remain purely manually provided, or should v2 support controlled download only from user-authorized URLs?
-- How much screenshot metadata is enough without becoming annoying?
-- Should v2 introduce a database, or continue with Markdown/YAML plus indexes?
+**目标:** 只在 harness 稳定后加入多 agent 工作流。
+
+可能功能：
+
+- 明确 search、verification、mapping、reading、eval 等角色。
+- 每个角色有独立权限和输出 schema。
+- 角色之间必须有 checkpointed human approval。
+- Search 或 reading agent 不能直接写 formal records。
+
+价值：多 agent 可以提速，但前提是 v1 guardrails 仍能强制执行。
+
+## 我建议的 v2 顺序
+
+1. PDF/screenshots asset management。
+2. Batch candidate import 和 campaign review queue。
+3. Scholarly API lookup 进入 staging。
+4. Verification/approval 的本地 review UI。
+5. Claim-level citation check。
+6. 更强 evals。
+7. 可选 multi-agent orchestration。
+
+## v2 规划时需要决定的问题
+
+- v2 继续 CLI-first + generated reports，还是较早引入 local Web UI？
+- 第一个 citation source 选 DOI/Crossref、Zotero、BibTeX import 还是 OpenAlex？
+- PDF 是否继续完全手动提供，还是支持用户授权 URL 的受控下载？
+- Screenshot metadata 需要多详细，才不会变成负担？
+- v2 是否引入 database，还是继续 Markdown/YAML + indexes？

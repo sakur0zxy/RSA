@@ -1,4 +1,4 @@
-# Eval Regression Report / 评估回归报告
+# 评估回归报告 / Eval Regression Report
 
 本报告比较当前 fixture 结果与本地 baseline，用于发现 prompt、模板、工具或规则变更造成的退化。
 

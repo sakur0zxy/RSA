@@ -1,39 +1,39 @@
-# Milestones
+# 里程碑记录
 
 ## v1.0 Local Harness
 
-**Status:** shipped  
-**Shipped:** 2026-05-13  
-**Branch:** `v1phase3`  
+**状态:** 已发布
+**发布时间:** 2026-05-13
+**分支:** `v1phase3`
 **Tag:** `v1.0`  
 **Phases:** 5  
 **Plans:** 14  
-**Commits before archive:** 49  
-**Timeline:** 2026-05-11 to 2026-05-13  
-**Open artifact audit:** `gsd-sdk query audit-open` was unavailable in this local GSD install; no open audit artifacts were found by file scan.
+**归档前 commits:** 49
+**时间线:** 2026-05-11 到 2026-05-13
+**Open artifact audit:** 当前本地 GSD 安装不支持 `gsd-sdk query audit-open`；文件扫描未发现 open audit artifacts。
 
-### Delivered
+### 交付内容
 
-v1.0 delivered a local-first research agent harness for auditable literature workflows, with formal metadata gates, bounded research rounds, candidate staging, literature maps, reading notes, formal write guardrails, trace summaries and deterministic eval fixtures.
+v1.0 交付了一个本地优先的科研 agent harness，用于可审计文献工作流：formal metadata gates、bounded research rounds、candidate staging、literature maps、reading notes、formal write guardrails、trace summaries 和 deterministic eval fixtures。
 
-### Key Accomplishments
+### 关键成果
 
-1. Created the reusable project skeleton, topic profile system and CLI entry point.
-2. Built metadata-first paper records and `paper_index.md` consistency checks.
-3. Added staged candidate verification before formal admission.
-4. Connected research rounds to literature maps, gap reports and formal write requests.
-5. Added authorized reading notes and formal note-derived write gates.
-6. Added local eval fixtures, baselines and trace summaries for harness hardening.
+1. 创建可复用的项目骨架、topic profile 系统和 CLI 入口。
+2. 建立 metadata-first 文献记录和 `paper_index.md` 一致性检查。
+3. 增加 candidate verification staging，防止候选内容直接进入正式记录。
+4. 将 research rounds 连接到 literature maps、gap reports 和 formal write requests。
+5. 增加 authorized reading notes 和 formal note-derived write gates。
+6. 增加 local eval fixtures、baselines 和 trace summaries，用于 harness hardening。
 
-### Archives
+### 归档文件
 
-- Roadmap archive: `.planning/milestones/v1.0-ROADMAP.md`
-- Requirements archive: `.planning/milestones/v1.0-REQUIREMENTS.md`
-- Retrospective: `.planning/RETROSPECTIVE.md`
-- v2 discussion draft: `.planning/v2-DISCUSSION.md`
+- Roadmap 归档: `.planning/milestones/v1.0-ROADMAP.md`
+- Requirements 归档: `.planning/milestones/v1.0-REQUIREMENTS.md`
+- 复盘: `.planning/RETROSPECTIVE.md`
+- v2 讨论稿: `.planning/v2-DISCUSSION.md`
 
-### Known Gaps Accepted At Close
+### 归档时接受的已知缺口
 
-- No dedicated milestone audit file was produced before archive.
-- v1 evals are deterministic harness checks, not semantic LLM grading.
-- v1 does not include Web UI, scholarly API integration, citation manager sync or large-scale batch processing.
+- 归档前没有生成独立 milestone audit 文件。
+- v1 evals 是 deterministic harness checks，不是 semantic LLM grading。
+- v1 不包含 Web UI、scholarly API integration、citation manager sync 或 large-scale batch processing。

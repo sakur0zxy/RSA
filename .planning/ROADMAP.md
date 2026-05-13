@@ -1,44 +1,44 @@
-# Roadmap: RSA Research Agent Harness
+# Roadmap: RSA 科研 Agent Harness
 
-## Milestones
+## 里程碑
 
-- **v1.0 Local Harness** - Phases 1-5, shipped 2026-05-13. See `.planning/milestones/v1.0-ROADMAP.md`.
-- **v2.0 Scaled Literature Workstation** - discussion draft only. See `.planning/v2-DISCUSSION.md`.
+- **v1.0 Local Harness** - Phase 1-5，已于 2026-05-13 发布。详见 `.planning/milestones/v1.0-ROADMAP.md`。
+- **v2.0 Scaled Literature Workstation** - 目前只是讨论稿。详见 `.planning/v2-DISCUSSION.md`。
 
-## Phases
+## Phase 概览
 
 <details>
-<summary>v1.0 Local Harness - SHIPPED 2026-05-13</summary>
+<summary>v1.0 Local Harness - 已发布 2026-05-13</summary>
 
-- [x] Phase 1: Harness Foundation - 3/3 plans, completed 2026-05-11.
-- [x] Phase 2: Literature Records Pipeline - 4/4 plans, completed 2026-05-11.
-- [x] Phase 3: Research Round Integration - 3/3 plans, completed 2026-05-12.
-- [x] Phase 4: Reading Note Workflow - 2/2 plans, completed 2026-05-12.
-- [x] Phase 5: Evaluation and Hardening - 2/2 plans, completed 2026-05-13.
+- [x] Phase 1: Harness Foundation - 3/3 plans，完成于 2026-05-11。
+- [x] Phase 2: Literature Records Pipeline - 4/4 plans，完成于 2026-05-11。
+- [x] Phase 3: Research Round Integration - 3/3 plans，完成于 2026-05-12。
+- [x] Phase 4: Reading Note Workflow - 2/2 plans，完成于 2026-05-12。
+- [x] Phase 5: Evaluation and Hardening - 2/2 plans，完成于 2026-05-13。
 
 </details>
 
-## Next Milestone
+## 下一里程碑
 
-v2.0 is not planned yet. Recommended theme: scale the v1 harness into a larger literature-review workstation while preserving the formal-record guardrails.
+v2.0 尚未正式规划。建议主题：把 v1 harness 扩展成更适合大规模文献调研的本地 workstation，同时保留 formal-record guardrails。
 
-Recommended candidate sequence:
+建议候选顺序：
 
-1. Asset management for PDFs, screenshots and important result captures.
-2. Batch candidate import and campaign review queues.
-3. Scholarly API lookup into staging records.
-4. Local review UI for verification and approvals.
-5. Claim-level citation checks for draft writing.
-6. Smarter evals for research-quality regressions.
-7. Optional multi-agent orchestration with explicit permissions.
+1. PDF、截图和重要结果图的 asset management。
+2. Batch candidate import 和 campaign review queue。
+3. Scholarly API lookup 进入 staging records。
+4. 用于 verification 和 approval 的本地 review UI。
+5. 面向草稿写作的 claim-level citation check。
+6. 面向研究质量回归的 smarter evals。
+7. 带明确权限边界的可选 multi-agent orchestration。
 
-## Progress
+## 进度
 
-| Milestone | Phases | Plans Complete | Status | Completed |
-|-----------|--------|----------------|--------|-----------|
-| v1.0 Local Harness | 1-5 | 14/14 | Shipped | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | TBD | 0/0 | Discussion | - |
+| Milestone | Phases | Plans Complete | 状态 | 完成时间 |
+|-----------|--------|----------------|------|----------|
+| v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
+| v2.0 Scaled Literature Workstation | TBD | 0/0 | 讨论中 | - |
 
 ---
 
-*Roadmap reorganized after v1.0 archive: 2026-05-13*
+*Roadmap reorganized after Chinese-first user-facing language quick task: 2026-05-13*
