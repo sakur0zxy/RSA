@@ -23,7 +23,7 @@
 
 - [x] Phase 6: Asset & Source Foundation - 建立 PDF、截图、图表、结果图和 source ledger 的本地资产基础。
 - [x] Phase 7: Authorized Acquisition - 3/3 plans，完成于 2026-05-14；支持 open access、用户提供和用户授权来源的自动全文获取，不绕过 paywall。
-- [ ] Phase 7.1: Browser Session Provider (INSERTED) - 支持用户自行登录资料库后，RSA 复用本地授权浏览器会话检索和下载用户有权限访问的论文。
+- [x] Phase 7.1: Browser Session Provider (INSERTED) - 2/2 plans，完成于 2026-05-14；支持用户自行登录资料库后，RSA 复用本地授权浏览器会话检索和下载用户有权限访问的论文。
 - [ ] Phase 8: Auto Reading Draft - 基于本地或已授权全文生成可审阅 reading note draft。
 - [ ] Phase 9: Evidence Signals & AI Scoring - 抽取结构化证据，并生成 relevance、quality、read priority 辅助评分。
 - [ ] Phase 10: Workflow Orchestrator - 串联 v1/v2 命令，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
@@ -37,7 +37,7 @@
 
 ## 下一步
 
-当前执行目标：**Phase 7.1: Browser Session Provider**。
+当前执行目标：**Phase 8: Auto Reading Draft**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -54,15 +54,20 @@ Phase 7 已完成以下 3 个计划：
 
 Phase 7.1 是 Phase 7 的插入增强，目标是在不保存账号密码、不绕过 SSO/验证码/paywall 的前提下，让用户可以打开自定义资料库登录页并自行登录；RSA 只保存本地-only browser session state，后续用该授权会话检索和下载用户有权限访问的其它论文。
 
-Phase 7.1 应在 Phase 8 前完成，因为 Phase 8 将基于 Phase 7 / 7.1 获取到的本地 PDF/source ledger 生成可审阅的自动阅读草稿。
+Phase 7.1 已完成以下 2 个计划：
+
+1. `07.1-01 Browser Session Provider Schema And Session CLI`：建立 `browser_session` provider schema、`.rsa/sessions/` local-only session、`rsa source login` 和 `rsa source session status|clear`。
+2. `07.1-02 Session-Aware Acquisition Integration And Verification`：将 browser session provider 接入 Phase 7 source candidate、cookie-based direct PDF 下载、source ledger、PDF acquisition report 和中文文档。
+
+Phase 8 将基于 Phase 7 / 7.1 获取到的本地 PDF/source ledger 生成可审阅的自动阅读草稿。
 
 ## 进度
 
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-14 core + 7.1 inserted, 15 optional | 5/5 completed for Phase 6-7 | Phase 7.1 inserted，待讨论 | 2026-05-14 |
+| v2.0 Scaled Literature Workstation | 6-14 core + 7.1 inserted, 15 optional | 7/7 completed for Phase 6-7.1 | Phase 7.1 complete，next Phase 8 | 2026-05-14 |
 
 ---
 
-*Roadmap updated after Phase 7.1 insertion: 2026-05-14*
+*Roadmap updated after Phase 7.1 completion: 2026-05-14*
