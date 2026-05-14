@@ -221,12 +221,13 @@ ai_scoring:
 3. Auto reading draft。
 4. Evidence extraction / structured reading signals。
 5. AI-assisted scoring rubric。
-6. Batch candidate import 和 campaign review queue。
-7. Scholarly API lookup 进入 staging。
-8. Verification/approval/scoring 的本地 review UI。
-9. Claim-level citation check。
-10. 更强 evals。
-11. 可选 multi-agent orchestration。
+6. Workflow orchestrator，把已有命令和 v2 子能力串成默认自动运行、可监控、可调整的流程。
+7. Batch candidate import 和 campaign review queue。
+8. Scholarly API lookup 进入 staging。
+9. Verification/approval/scoring 的本地 review UI。
+10. Claim-level citation check。
+11. 更强 evals。
+12. 可选 multi-agent orchestration。
 
 ## 已采纳的外部建议: AI scoring
 

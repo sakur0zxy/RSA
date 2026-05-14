@@ -109,8 +109,9 @@ This phase does **not** implement automatic network download, automatic reading,
 - Automatic download from web sources - Phase 7.
 - Automatic PDF parsing and reading note drafts - Phase 8.
 - Structured evidence extraction and AI scoring - Phase 9.
-- Batch campaign queues - Phase 10.
-- Local review UI - Phase 12.
+- Workflow orchestrator - Phase 10.
+- Batch campaign queues - Phase 11.
+- Local review UI - Phase 13.
 
 </deferred>
 

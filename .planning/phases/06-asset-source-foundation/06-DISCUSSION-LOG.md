@@ -19,5 +19,6 @@
 - Automatic source discovery/download moves to Phase 7.
 - Auto reading draft moves to Phase 8.
 - Evidence extraction and AI scoring move to Phase 9.
-- Batch review queue moves to Phase 10.
-- Local review UI moves to Phase 12.
+- Workflow orchestrator moves to Phase 10.
+- Batch review queue moves to Phase 11.
+- Local review UI moves to Phase 13.

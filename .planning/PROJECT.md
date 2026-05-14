@@ -97,13 +97,14 @@ v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
 3. Auto reading draft，基于本地或已授权全文生成可审阅阅读草稿。
 4. Evidence extraction / structured reading signals，在评分前抽取结构化证据。
 5. AI-assisted scoring rubric，区分 relevance、quality 和 read priority，且不直接进入 formal records。
-6. Batch candidate import 和 campaign review queue。
-7. Scholarly API 或 citation manager 集成，但只进入 staging。
-8. 本地 review UI，用于 verification、formal approval 和 scoring review。
-9. 面向后续写作的 claim-level citation check。
+6. Workflow orchestrator，串联已有命令，自动跑到 review packet，同时允许用户监控关键环节和调整流程。
+7. Batch candidate import 和 campaign review queue。
+8. Scholarly API 或 citation manager 集成，但只进入 staging。
+9. 本地 review UI，用于 verification、formal approval 和 scoring review。
+10. 面向后续写作的 claim-level citation check。
 
 详见 `.planning/v2-DISCUSSION.md`。
 
 ---
 
-*Last updated: 2026-05-13 after Phase 6 Asset & Source Foundation*
+*Last updated: 2026-05-14 after Phase 10 workflow orchestrator resequencing*

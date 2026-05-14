@@ -35,6 +35,9 @@
 
 - [ ] **V2-DL-01:** User can discover open access or user-authorized full-text candidates from trusted metadata.
 - [ ] **V2-DL-02:** Download commands must record authorization mode and fail closed for uncertain or blocked sources.
+- [ ] **V2-DL-03:** `rsa source find P###` defaults to monitored automation: it searches, reviews and downloads rule-approved sources without requiring step-by-step user intervention.
+- [ ] **V2-DL-04:** User can monitor and adjust automatic acquisition through candidate records, status/report commands, provider configuration, `--no-download`, and explicit manual download commands.
+- [ ] **V2-DL-05:** Automatic acquisition must remain auditable: every downloaded, skipped, blocked, failed or duplicate source records match evidence, authorization/access mode, Chinese reason text and local file handling status.
 
 ### Phase 8: Auto Reading Draft
 
@@ -47,7 +50,14 @@
 - [ ] **V2-SCORE-02:** Scoring must record evidence level, confidence, structured basis, rubric details and human review override.
 - [ ] **V2-SCORE-03:** AI scoring is queue/review guidance only and cannot directly write formal records.
 
-### Phase 10-14
+### Phase 10: Workflow Orchestrator
+
+- [ ] **V2-WORKFLOW-01:** User can run one monitored workflow command that chains existing v1/v2 steps and advances automatically until review is needed.
+- [ ] **V2-WORKFLOW-02:** Workflow runs must be resumable: interrupted runs record current step, completed outputs, pending review items and next action.
+- [ ] **V2-WORKFLOW-03:** Workflow automation must stop before formal writes and produce a review packet for metadata, map, reading note or research-note approvals.
+- [ ] **V2-WORKFLOW-04:** User can monitor and adjust workflow execution through status commands, local config, step-level toggles and explicit rerun/resume commands.
+
+### Phase 11-15
 
 - [ ] **V2-CAMPAIGN-01:** Campaigns support batch candidate import, deduplication and review queues.
 - [ ] **V2-API-01:** Scholarly API results enter staging only.
