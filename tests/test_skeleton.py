@@ -11,6 +11,7 @@ REQUIRED_DIRECTORIES = {
     "notes",
     "synthesis",
     "sources",
+    "source_candidates",
     "pdfs",
     "assets",
 }
@@ -34,6 +35,7 @@ REQUIRED_TEMPLATES = {
     "pdf_acquisition_report.md",
     "reading_batch_report.md",
     "source_record.yaml",
+    "source_candidates.yaml",
     "asset_manifest.yaml",
 }
 

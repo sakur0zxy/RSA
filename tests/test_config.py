@@ -26,6 +26,7 @@ templates_root: custom_templates
     assert config.metadata_root == tmp_path / "custom_literature" / "metadata"
     assert config.paper_index_path == tmp_path / "custom_literature" / "paper_index.md"
     assert config.assets_root == tmp_path / "custom_literature" / "assets"
+    assert config.source_candidates_root == tmp_path / "custom_literature" / "source_candidates"
     assert config.pdfs_root == tmp_path / "custom_literature" / "pdfs"
     assert config.topic_profiles_root == tmp_path / "custom_literature" / "topic_profiles"
     assert config.default_max_candidates == 5
@@ -34,6 +35,9 @@ templates_root: custom_templates
     assert config.output_policy == "agent_outputs_only"
     assert config.approval_mode == "human_confirmed_formal_writes"
     assert config.campaign_id is None
+    assert config.source_discovery_automation_mode == "monitored_auto"
+    assert config.source_discovery_default_auto_download is True
+    assert config.custom_source_providers == []
 
 
 def test_local_overrides_win_over_project_defaults(tmp_path):
@@ -99,3 +103,30 @@ rounds:
 
     with pytest.raises(ConfigError, match="default_max_candidates"):
         load_project_config(tmp_path)
+
+
+def test_source_discovery_local_overrides_are_merged(tmp_path):
+    write(
+        tmp_path / "rsa.yaml",
+        """
+source_discovery:
+  default_auto_download: false
+  custom_providers:
+    - provider_id: project_source
+""",
+    )
+    write(
+        tmp_path / ".rsa" / "local.yaml",
+        """
+source_discovery:
+  automation_mode: monitored_auto
+  custom_providers:
+    - provider_id: local_source
+""",
+    )
+
+    config = load_project_config(tmp_path)
+
+    assert config.source_discovery_default_auto_download is False
+    assert config.source_discovery_automation_mode == "monitored_auto"
+    assert config.custom_source_providers == [{"provider_id": "local_source"}]

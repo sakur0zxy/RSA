@@ -198,6 +198,74 @@ def build_parser() -> argparse.ArgumentParser:
         "status", help="只读查看 source ledger 状态。"
     )
     source_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    source_find = source_subcommands.add_parser(
+        "find",
+        help="自动发现、审查并默认下载规则允许的授权全文来源。",
+    )
+    source_find.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    source_find.add_argument(
+        "--no-download",
+        action="store_true",
+        help="只生成候选来源，不执行自动下载。",
+    )
+    source_find.add_argument("--provider", help="只使用指定 provider_id。")
+    source_find.add_argument("--max-results", type=int, help="候选来源数量上限。")
+    source_candidates = source_subcommands.add_parser(
+        "candidates", help="只读查看 source candidate 审查状态。"
+    )
+    source_candidates.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    source_download = source_subcommands.add_parser(
+        "download", help="下载已审查通过的候选来源，或显式下载授权 URL。"
+    )
+    source_download.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    download_target = source_download.add_mutually_exclusive_group(required=True)
+    download_target.add_argument("--best", action="store_true", help="下载最佳已批准候选。")
+    download_target.add_argument("--candidate", help="下载指定候选编号，例如 SC001。")
+    download_target.add_argument("--url", help="显式授权的 PDF URL 或 file:// 路径。")
+    source_download.add_argument(
+        "--authorization-mode",
+        choices=[
+            "open_access",
+            "direct_access",
+            "user_authorized_access",
+            "institutional_subscription",
+            "personal_subscription",
+            "provided",
+            "local",
+        ],
+        help="手动 URL 下载的授权模式。",
+    )
+    source_download.add_argument(
+        "--access-mode",
+        choices=[
+            "open_access",
+            "direct_access",
+            "user_authorized_access",
+            "institutional_subscription",
+            "personal_subscription",
+            "provided",
+            "local",
+        ],
+        help="手动 URL 下载的访问方式。",
+    )
+    source_download.add_argument(
+        "--usage-restriction-zh",
+        help="中文使用限制，例如仅供个人科研阅读，不得公开分发 PDF。",
+    )
+    source_download.add_argument(
+        "--authorization-basis-zh",
+        help="中文授权依据说明；缺省时记录为用户显式提供授权 URL。",
+    )
+    source_download.add_argument(
+        "--provider-id",
+        default="manual_url",
+        help="手动 URL 对应的 provider_id；默认 manual_url。",
+    )
+    source_download.add_argument(
+        "--version-label",
+        default="publisher_version",
+        help="PDF 版本标签，例如 publisher_version、repository_copy、arxiv_preprint。",
+    )
 
     asset_group = subcommands.add_parser(
         "asset", help="登记、校验或查看截图/图表/结果图资产；validate/status 只读。"
@@ -523,6 +591,15 @@ def _run_source_command(args: argparse.Namespace, root: Path) -> int:
         source_status,
         validate_source_record,
     )
+    from .acquisition import (
+        AcquisitionError,
+        candidate_status,
+        download_best_candidate,
+        download_candidate,
+        download_direct_url,
+        find_sources,
+        load_candidate_record,
+    )
 
     config = load_project_config(root)
     try:
@@ -551,13 +628,73 @@ def _run_source_command(args: argparse.Namespace, root: Path) -> int:
             return 0
         if args.source_command == "status":
             status = source_status(config, args.paper_id)
+            candidates = candidate_status(config, args.paper_id)
             print(
                 f"来源状态: {args.paper_id} -> 总数={status.total_count}, "
                 f"可用={status.available_count}, 阻塞={status.blocked_count}; "
-                f"ledger={status.path}"
+                f"候选={candidates.total_count}, 已批准={candidates.approved_count}, "
+                f"已下载={candidates.downloaded_count}, 重复={candidates.duplicate_count}, "
+                f"失败={candidates.failed_count}; ledger={status.path}; "
+                f"candidates={candidates.path}"
             )
             return 0
-    except AssetError as exc:
+        if args.source_command == "find":
+            result = find_sources(
+                config,
+                args.paper_id,
+                auto_download=not args.no_download,
+                provider_filter=args.provider,
+                max_results=args.max_results,
+            )
+            mode = "仅生成候选" if args.no_download else "monitored_auto 自动审查/下载"
+            print(
+                f"来源发现完成: {args.paper_id} ({mode}) -> "
+                f"候选={result.candidates_found}, 已批准={result.approved_count}, "
+                f"已下载={result.downloaded_count}, 重复={result.duplicate_count}, "
+                f"阻塞={result.blocked_count}, 失败={result.failed_count}; "
+                f"记录={result.path}"
+            )
+            return 0
+        if args.source_command == "candidates":
+            record = load_candidate_record(config, args.paper_id)
+            candidates = record.get("candidates") if isinstance(record.get("candidates"), list) else []
+            print(f"候选来源: {args.paper_id} -> {len(candidates)} 项")
+            for item in candidates:
+                if not isinstance(item, dict):
+                    continue
+                print(
+                    "- "
+                    f"{item.get('candidate_id')} | provider={item.get('provider_id')} | "
+                    f"status={item.get('status')} | match_basis={item.get('match_basis')} | "
+                    f"authorization_mode={item.get('authorization_mode')} | "
+                    f"access_mode={item.get('access_mode')} | "
+                    f"reason={item.get('reason_zh')} | local_path={item.get('local_path')}"
+                )
+            return 0
+        if args.source_command == "download":
+            if args.best:
+                result = download_best_candidate(config, args.paper_id)
+            elif args.candidate:
+                result = download_candidate(config, args.paper_id, args.candidate)
+            else:
+                result = download_direct_url(
+                    config,
+                    args.paper_id,
+                    url=args.url,
+                    authorization_mode=args.authorization_mode,
+                    access_mode=args.access_mode,
+                    usage_restriction_zh=args.usage_restriction_zh,
+                    authorization_basis_zh=args.authorization_basis_zh,
+                    provider_id=args.provider_id,
+                    version_label=args.version_label,
+                )
+            print(
+                f"来源下载完成: {args.paper_id} {result.candidate_id} -> "
+                f"status={result.status}, source_id={result.source_id}, "
+                f"local_path={result.local_path}; {result.reason_zh}"
+            )
+            return 0
+    except (AssetError, AcquisitionError) as exc:
         print(f"来源操作失败: {exc}", file=sys.stderr)
         return 1
     return 2

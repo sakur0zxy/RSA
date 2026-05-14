@@ -15,6 +15,7 @@ LITERATURE_DIRECTORIES = [
     "notes",
     "synthesis",
     "sources",
+    "source_candidates",
     "pdfs",
     "assets",
 ]

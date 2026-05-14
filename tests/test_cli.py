@@ -16,7 +16,7 @@ def round_payloads(root):
     return [path for path in agent_outputs.iterdir() if path.name != ".gitkeep"]
 
 
-def add_paper_args(title="CLI Paper"):
+def add_paper_args(title="CLI Paper", *, official_url=None, doi="10.1234/cli"):
     return [
         "add-paper",
         "--title",
@@ -28,7 +28,8 @@ def add_paper_args(title="CLI Paper"):
         "--venue",
         "Journal of Tests",
         "--doi",
-        "10.1234/cli",
+        doi,
+        *(["--official-url", official_url] if official_url else []),
         "--source-reliability",
         "publisher",
         "--decision",
@@ -532,6 +533,137 @@ def test_cli_source_add_expected_error_has_no_traceback(tmp_path, capsys):
     assert exit_code == 1
     assert "来源操作失败" in captured.err
     assert "Traceback" not in captured.err
+
+
+def test_cli_source_phase7_help_lists_monitored_acquisition_commands(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["source", "--help"])
+
+    captured = capsys.readouterr()
+
+    assert exc.value.code == 0
+    assert "find" in captured.out
+    assert "candidates" in captured.out
+    assert "download" in captured.out
+
+    with pytest.raises(SystemExit) as download_exc:
+        main(["source", "download", "--help"])
+    download_help = capsys.readouterr()
+
+    assert download_exc.value.code == 0
+    for needle in [
+        "--best",
+        "--candidate",
+        "--authorization-mode",
+        "--usage-restriction-zh",
+    ]:
+        assert needle in download_help.out
+
+
+def test_cli_source_find_no_download_and_candidates_are_read_only(tmp_path, capsys):
+    prepare_project(tmp_path)
+    pdf = tmp_path / "authorized.pdf"
+    pdf.write_bytes(b"%PDF-1.4\ncli")
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Find No Download CLI Paper", official_url=pdf.as_uri()),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+
+    found = main(["--root", str(tmp_path), "source", "find", "P001", "--no-download"])
+    found_out = capsys.readouterr()
+    candidates_path = tmp_path / "01_literature" / "source_candidates" / "P001.yaml"
+    before = candidates_path.read_text(encoding="utf-8")
+    shown = main(["--root", str(tmp_path), "source", "candidates", "P001"])
+    shown_out = capsys.readouterr()
+
+    assert found == 0
+    assert "仅生成候选" in found_out.out
+    assert "已下载=0" in found_out.out
+    assert not (tmp_path / "01_literature" / "sources" / "P001.yaml").exists()
+    assert shown == 0
+    assert "候选来源" in shown_out.out
+    assert candidates_path.read_text(encoding="utf-8") == before
+
+
+def test_cli_source_find_default_downloads_approved_pdf(tmp_path, capsys):
+    prepare_project(tmp_path)
+    pdf = tmp_path / "authorized.pdf"
+    pdf.write_bytes(b"%PDF-1.4\ncli")
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Find Download CLI Paper", official_url=pdf.as_uri()),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+
+    found = main(["--root", str(tmp_path), "source", "find", "P001"])
+    found_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "source", "status", "P001"])
+    status_out = capsys.readouterr()
+
+    assert found == 0
+    assert "monitored_auto" in found_out.out
+    assert "已下载=1" in found_out.out
+    assert status == 0
+    assert "候选=" in status_out.out
+    assert "已下载=1" in status_out.out
+    assert (tmp_path / "01_literature" / "sources" / "P001.yaml").exists()
+
+
+def test_cli_source_download_url_requires_authorization_without_traceback(tmp_path, capsys):
+    prepare_project(tmp_path)
+    pdf = tmp_path / "manual.pdf"
+    pdf.write_bytes(b"%PDF-1.4\ncli")
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Manual URL CLI Paper"),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+
+    failed = main(["--root", str(tmp_path), "source", "download", "P001", "--url", pdf.as_uri()])
+    failed_out = capsys.readouterr()
+    ok = main(
+        [
+            "--root",
+            str(tmp_path),
+            "source",
+            "download",
+            "P001",
+            "--url",
+            pdf.as_uri(),
+            "--authorization-mode",
+            "direct_access",
+            "--access-mode",
+            "direct_access",
+            "--usage-restriction-zh",
+            "仅供个人科研阅读，不得公开分发 PDF。",
+        ]
+    )
+    ok_out = capsys.readouterr()
+
+    assert failed == 1
+    assert "来源操作失败" in failed_out.err
+    assert "Traceback" not in failed_out.err
+    assert ok == 0
+    assert "来源下载完成" in ok_out.out
 
 
 def test_cli_eval_run_baseline_and_compare(tmp_path, capsys):

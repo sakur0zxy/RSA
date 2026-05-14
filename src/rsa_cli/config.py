@@ -11,6 +11,11 @@ import yaml
 DEFAULT_CONFIG: dict[str, Any] = {
     "literature_root": "01_literature",
     "templates_root": "templates",
+    "source_discovery": {
+        "automation_mode": "monitored_auto",
+        "default_auto_download": True,
+        "custom_providers": [],
+    },
     "profiles": {
         "root": "topic_profiles",
     },
@@ -91,6 +96,10 @@ class ProjectConfig:
         return self.literature_root / "assets"
 
     @property
+    def source_candidates_root(self) -> Path:
+        return self.literature_root / "source_candidates"
+
+    @property
     def pdfs_root(self) -> Path:
         return self.literature_root / "pdfs"
 
@@ -106,6 +115,23 @@ class ProjectConfig:
     @property
     def rounds(self) -> dict[str, Any]:
         return dict(self.data.get("rounds", {}))
+
+    @property
+    def source_discovery(self) -> dict[str, Any]:
+        return dict(self.data.get("source_discovery", {}))
+
+    @property
+    def custom_source_providers(self) -> list[dict[str, Any]]:
+        providers = self.source_discovery.get("custom_providers", [])
+        return list(providers or [])
+
+    @property
+    def source_discovery_automation_mode(self) -> str:
+        return str(self.source_discovery.get("automation_mode", "monitored_auto"))
+
+    @property
+    def source_discovery_default_auto_download(self) -> bool:
+        return bool(self.source_discovery.get("default_auto_download", True))
 
     @property
     def default_max_candidates(self) -> int:
@@ -166,6 +192,8 @@ def validate_config(config: ProjectConfig) -> None:
     hard_max = config.hard_max_candidates
     if not isinstance(config.rounds.get("allowed_tools", []), list):
         raise ConfigError("rounds.allowed_tools 必须是 list")
+    if not isinstance(config.source_discovery.get("custom_providers", []), list):
+        raise ConfigError("source_discovery.custom_providers 必须是 list")
     if not config.output_policy:
         raise ConfigError("rounds.output_policy 不能为空")
     if not config.approval_mode:

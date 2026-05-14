@@ -177,6 +177,36 @@ sources: []
 paper_id: P000
 assets: []
 """,
+    "source_candidates.yaml": """# 字段说明
+# paper_id: 正式文献编号，必须已经存在于 metadata/P###.yaml。
+# generated_at: 候选来源生成日期。
+# automation_mode: 自动化模式；默认 monitored_auto 表示自动搜索、审查并下载规则允许的来源。
+# default_auto_download: 是否默认自动下载通过规则的候选来源。
+# candidates: 候选全文来源列表；候选不是正式科研结论。
+# candidate_id: 当前 paper_id 内稳定候选编号，例如 SC001。
+# provider_id: 来源提供方编号，可以是 builtin，也可以来自 source_discovery.custom_providers。
+# source_url: 候选来源 URL 或本地/授权下载入口。
+# result_type: 候选结果类型，例如 pdf、publisher_page、database_record、repository_record。
+# match_basis: 匹配依据，只能使用 doi、official_url、arxiv_id、title_year_first_author 或 title_only。
+# match_evidence: 机器可读匹配证据，例如 doi_match、title_match_score、year_match、author_match、source_domain_allowed。
+# authorization_mode: 授权模式，例如 open_access、direct_access、user_authorized_access、institutional_subscription、personal_subscription、provided、local、unknown、blocked。
+# access_mode: 访问方式，例如 open_access、direct_access、institutional_subscription、personal_subscription。
+# authorization_basis_zh: 中文说明为什么可以或不可以下载。
+# usage_restriction_zh: 中文使用限制，例如仅供个人科研阅读，不得公开分发 PDF。
+# approved_for_download: 是否通过规则审查，可由 monitored_auto 自动下载。
+# status: candidate、approved_for_download、downloaded、blocked、failed、duplicate 或 skipped。
+# reason_zh: 中文状态原因。
+# local_path: 下载成功后的本地 PDF 路径；未下载时留空。
+# sha256: 下载文件 hash；未下载时留空。
+# downloaded_source_id: 成功写入 source ledger 后的 source_id。
+# duplicate_of: 若重复下载，指向已有 source_id。
+# 字段名保持英文稳定，但用户可读说明必须中文优先。
+paper_id: P000
+generated_at:
+automation_mode: monitored_auto
+default_auto_download: true
+candidates: []
+""",
     "round_readme.md": """# 研究轮次 {round_id}
 
 ## 目标

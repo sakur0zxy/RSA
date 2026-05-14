@@ -20,6 +20,12 @@ SOURCE_AUTHORIZATIONS = {
     "authorized",
     "open_access",
     "user_authorized",
+    "direct_access",
+    "user_authorized_access",
+    "institutional_subscription",
+    "personal_subscription",
+    "unknown",
+    "blocked",
 }
 SOURCE_TYPES = {"pdf", "supplement", "dataset", "web_page", "other"}
 ASSET_KINDS = {"figure", "table", "result", "screenshot", "supplement", "other"}

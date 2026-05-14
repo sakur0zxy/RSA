@@ -173,6 +173,16 @@ def test_later_phase_seed_templates_are_safe_and_localized():
         "provided",
     )
     assert_in_root_and_fallback(
+        "source_candidates.yaml",
+        "字段说明",
+        "candidate_id",
+        "provider_id",
+        "authorization_mode",
+        "usage_restriction_zh",
+        "monitored_auto",
+        "字段名保持英文稳定",
+    )
+    assert_in_root_and_fallback(
         "asset_manifest.yaml",
         "字段说明",
         "asset_id",

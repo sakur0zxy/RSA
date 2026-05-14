@@ -90,6 +90,16 @@ Local-only asset policy:
 - PDFs are local-only by default and belong under `01_literature/pdfs/`.
 - Important screenshots and result assets are local-only by default and belong under `01_literature/assets/P###/`.
 - Metadata may reference local PDFs and assets, but agent round archives should reference those paths rather than storing PDF or screenshot payloads directly.
+
+Phase 7 authorized acquisition:
+
+- `rsa source find P001` uses monitored automation by default: discover candidates, review deterministic authorization/match rules, and download only approved direct PDF sources.
+- `rsa source find P001 --no-download` stops at candidate generation for monitoring and adjustment.
+- `rsa source candidates P001` is read-only and shows candidate status, match basis, authorization/access modes, Chinese reason text and local path.
+- `rsa source download P001 --best` or `--candidate SC001` retries approved candidates without modifying formal metadata.
+- `rsa source download P001 --url ... --authorization-mode ... --access-mode ... --usage-restriction-zh ...` is the explicit path for a user-authorized URL.
+- Custom providers belong in `.rsa/local.yaml` under `source_discovery.custom_providers`; keep English keys stable and include Chinese `usage_restriction_zh` / `notes_zh`.
+- Do not configure or suggest Sci-Hub, unauthorized mirrors, credential bypass, stored passwords, simulated login, captcha/SSO/paywall bypass, or any source that weakens the formal authorization boundary.
 <!-- GSD:rsa-cli-end -->
 
 <!-- GSD:profile-start -->
