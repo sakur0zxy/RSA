@@ -100,6 +100,16 @@ Phase 7 authorized acquisition:
 - `rsa source download P001 --url ... --authorization-mode ... --access-mode ... --usage-restriction-zh ...` is the explicit path for a user-authorized URL.
 - Custom providers belong in `.rsa/local.yaml` under `source_discovery.custom_providers`; keep English keys stable and include Chinese `usage_restriction_zh` / `notes_zh`.
 - Do not configure or suggest Sci-Hub, unauthorized mirrors, credential bypass, stored passwords, simulated login, captcha/SSO/paywall bypass, or any source that weakens the formal authorization boundary.
+
+Phase 7.1 browser session provider:
+
+- `provider_type: browser_session` is for user-authorized local browser sessions, not credential automation.
+- `rsa source login <provider_id>` opens the provider login page; the user logs in manually, and RSA stores only local browser storage state under `.rsa/sessions/`.
+- `rsa source session status <provider_id>` is read-only; `rsa source session clear <provider_id>` deletes local session files only.
+- Never print or commit cookie values. `.rsa/sessions/**` is local-only.
+- Session-backed downloads still go through source candidates, source ledger, hash/deduplication, PDF acquisition report and formal write guardrails.
+- A session-downloaded PDF is authorized reading material only; it must not automatically write `metadata`, `literature_map.md`, `agent_research_notes.md`, or thesis conclusions.
+- v1 browser session support is limited to cookie-based direct PDF URLs. DOM search, database page clicking and JS download flows belong in a later phase.
 <!-- GSD:rsa-cli-end -->
 
 <!-- GSD:profile-start -->

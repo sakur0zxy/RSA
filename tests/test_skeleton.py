@@ -36,6 +36,7 @@ REQUIRED_TEMPLATES = {
     "reading_batch_report.md",
     "source_record.yaml",
     "source_candidates.yaml",
+    "browser_session_provider.yaml",
     "asset_manifest.yaml",
 }
 
@@ -76,6 +77,7 @@ def test_gitignore_protects_local_settings_pdfs_and_assets():
     gitignore = (repo_root / ".gitignore").read_text(encoding="utf-8")
 
     assert ".rsa/local.yaml" in gitignore
+    assert ".rsa/sessions/**" in gitignore
     assert "01_literature/pdfs/**" in gitignore
     assert "!01_literature/pdfs/.gitkeep" in gitignore
     assert "01_literature/assets/**" in gitignore

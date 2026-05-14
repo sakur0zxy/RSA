@@ -28,6 +28,7 @@ templates_root: custom_templates
     assert config.assets_root == tmp_path / "custom_literature" / "assets"
     assert config.source_candidates_root == tmp_path / "custom_literature" / "source_candidates"
     assert config.pdfs_root == tmp_path / "custom_literature" / "pdfs"
+    assert config.sessions_root == tmp_path / ".rsa" / "sessions"
     assert config.topic_profiles_root == tmp_path / "custom_literature" / "topic_profiles"
     assert config.default_max_candidates == 5
     assert config.hard_max_candidates == 20

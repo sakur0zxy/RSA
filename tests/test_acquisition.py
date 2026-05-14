@@ -1,5 +1,8 @@
+import io
+import json
 from pathlib import Path
 
+import pytest
 import yaml
 
 from rsa_cli.acquisition import (
@@ -144,6 +147,153 @@ source_discovery:
     config = load_project_config(tmp_path)
     errors = validate_custom_providers(config)
     assert any("Sci-Hub" in error for error in errors)
+
+
+def write_browser_provider(tmp_path: Path, *, query_template: str | None = None) -> None:
+    (tmp_path / ".rsa").mkdir(exist_ok=True)
+    (tmp_path / ".rsa" / "local.yaml").write_text(
+        f"""
+source_discovery:
+  custom_providers:
+    - provider_id: library_browser
+      enabled: true
+      name_zh: 学校图书馆浏览器会话
+      provider_type: browser_session
+      base_url: https://library.example.edu
+      login_url: https://library.example.edu/login
+      session_storage: .rsa/sessions/library_browser.storage_state.json
+      session_required: true
+      query_mode: url_template
+      query_template: {query_template or "https://library.example.edu/papers/{doi}.pdf"}
+      allowed_domains:
+        - library.example.edu
+      allowed_result_types:
+        - pdf
+      access_mode: institutional_subscription
+      requires_login: true
+      user_access_confirmed: true
+      authorization_policy: user_authorized_access
+      usage_restriction_zh: 仅供个人科研阅读，不得公开分发 PDF。
+      notes_zh: 用户通过学校账号自行登录；RSA 不保存账号密码。
+""",
+        encoding="utf-8",
+    )
+
+
+def write_browser_state(tmp_path: Path, *, domain: str = "library.example.edu") -> None:
+    session = tmp_path / ".rsa" / "sessions" / "library_browser.storage_state.json"
+    session.parent.mkdir(parents=True, exist_ok=True)
+    session.write_text(
+        json.dumps(
+            {
+                "cookies": [
+                    {
+                        "name": "LIBSESSION",
+                        "value": "cookie-value",
+                        "domain": domain,
+                        "path": "/",
+                    }
+                ],
+                "origins": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+class FakePdfResponse(io.BytesIO):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        self.close()
+        return False
+
+
+def test_browser_session_provider_without_session_creates_blocked_candidate(tmp_path):
+    write_browser_provider(tmp_path)
+    config = load_project_config(tmp_path)
+    create_literature_skeleton(config)
+    write_metadata_record(
+        config,
+        metadata_values(),
+        human_confirmed=True,
+        confirmed_by="zxy",
+    )
+
+    path = discover_source_candidates(config, "P001", provider_filter="library_browser")
+
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    candidate = data["candidates"][0]
+    assert candidate["provider_type"] == "browser_session"
+    assert candidate["status"] == "blocked"
+    assert "尚未登录" in candidate["reason_zh"]
+    assert validate_candidate_record(config, "P001") == []
+
+
+def test_browser_session_provider_download_reuses_matching_cookie(tmp_path, monkeypatch):
+    write_browser_provider(tmp_path)
+    write_browser_state(tmp_path)
+    config = load_project_config(tmp_path)
+    create_literature_skeleton(config)
+    write_metadata_record(
+        config,
+        metadata_values(),
+        human_confirmed=True,
+        confirmed_by="zxy",
+    )
+    seen_cookie = {}
+
+    def fake_urlopen(request, timeout=30):
+        seen_cookie["value"] = request.get_header("Cookie")
+        assert timeout == 30
+        return FakePdfResponse(b"%PDF-1.4\nsession pdf")
+
+    monkeypatch.setattr("rsa_cli.acquisition.urllib.request.urlopen", fake_urlopen)
+
+    result = find_sources(config, "P001", provider_filter="library_browser")
+
+    assert result.downloaded_count == 1
+    assert seen_cookie["value"] == "LIBSESSION=cookie-value"
+    assert validate_candidate_record(config, "P001") == []
+    assert validate_source_record(config, "P001") == []
+
+
+def test_browser_session_download_fails_closed_without_matching_cookie(tmp_path):
+    write_browser_provider(tmp_path)
+    write_browser_state(tmp_path, domain="other.example.edu")
+    config = load_project_config(tmp_path)
+    create_literature_skeleton(config)
+    write_metadata_record(
+        config,
+        metadata_values(),
+        human_confirmed=True,
+        confirmed_by="zxy",
+    )
+    discover_source_candidates(config, "P001", provider_filter="library_browser")
+
+    with pytest.raises(AcquisitionError, match="没有匹配目标域名"):
+        download_best_candidate(config, "P001")
+
+
+def test_browser_session_provider_disallowed_domain_is_blocked(tmp_path):
+    write_browser_provider(tmp_path, query_template="https://evil.example/papers/{doi}.pdf")
+    write_browser_state(tmp_path)
+    config = load_project_config(tmp_path)
+    create_literature_skeleton(config)
+    write_metadata_record(
+        config,
+        metadata_values(),
+        human_confirmed=True,
+        confirmed_by="zxy",
+    )
+
+    path = discover_source_candidates(config, "P001", provider_filter="library_browser")
+
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    candidate = data["candidates"][0]
+    assert candidate["status"] == "blocked"
+    assert "allowed_domains" in candidate["reason_zh"]
 
 
 def test_find_sources_default_downloads_approved_candidate(tmp_path):

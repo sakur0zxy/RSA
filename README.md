@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-117%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-126%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -29,6 +29,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
+| Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
 | Asset manifest | 登记截图、图表、结果图和补充资产，真实文件 local-only，manifest 可审计。 |
 | Formal write guardrails | 正式写入必须通过 schema 校验、冲突检查和显式人工确认。 |
 | Harness evals | 用本地 deterministic fixtures 检查回归、越界写入和格式漂移。 |
@@ -48,7 +49,8 @@ flowchart TD
   C --> D["Human verification<br/>人工核验"]
   D --> E["Formal metadata<br/>正式文献记录"]
   E --> F["Authorized acquisition<br/>授权全文获取"]
-  F --> G["Reading note<br/>阅读笔记"]
+  F --> F2["Browser session provider<br/>用户授权浏览器会话"]
+  F2 --> G["Reading note<br/>阅读笔记"]
   E --> H["Literature map<br/>文献映射"]
   G --> I["Formal write gate<br/>正式写入门禁"]
   H --> J["Gap report<br/>研究空白报告"]
@@ -66,6 +68,13 @@ python -m venv .venv
 python -m pip install -e ".[dev]"
 
 rsa --help
+```
+
+需要浏览器登录资料库时，额外安装可选浏览器依赖：
+
+```powershell
+python -m pip install -e ".[browser]"
+python -m playwright install chromium
 ```
 
 如果没有安装 editable package，也可以用：
@@ -131,10 +140,49 @@ rsa --root . eval compare
 | `rsa source find` | 自动发现、审查并默认下载规则允许的授权全文来源。 |
 | `rsa source candidates` | 只读查看候选来源、匹配证据、授权模式和中文原因。 |
 | `rsa source download` | 下载最佳候选、指定候选，或显式下载用户授权 URL。 |
+| `rsa source login` | 打开 `browser_session` provider 登录页，用户手动登录后保存本地 session。 |
+| `rsa source session status` / `clear` | 只读查看或清除 `.rsa/sessions/` 下的本地 browser session。 |
 | `rsa asset add` / `validate` / `status` | 登记、校验或查看截图、图表和结果图资产。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
+
+## Browser Session Provider 示例
+
+把下面配置放入 `.rsa/local.yaml`，用于本地自定义资料库。字段名保持英文稳定，中文说明用于提醒授权边界。
+
+```yaml
+source_discovery:
+  custom_providers:
+    - provider_id: university_library_browser
+      enabled: true
+      name_zh: "学校图书馆浏览器会话"
+      provider_type: browser_session
+      base_url: "https://library.example.edu"
+      login_url: "https://library.example.edu/login"
+      session_storage: ".rsa/sessions/university_library_browser.storage_state.json"
+      session_required: true
+      query_mode: url_template
+      query_template: "https://library.example.edu/papers/{doi}.pdf"
+      allowed_domains:
+        - "library.example.edu"
+      allowed_result_types:
+        - pdf
+      access_mode: institutional_subscription
+      requires_login: true
+      user_access_confirmed: true
+      authorization_policy: user_authorized_access
+      usage_restriction_zh: "仅供个人科研阅读，不得公开分发 PDF。"
+      notes_zh: "用户自行登录；RSA 不保存账号密码，只保存本地 browser storage state。"
+```
+
+登录和复用流程：
+
+```powershell
+rsa --root . source login university_library_browser
+rsa --root . source session status university_library_browser
+rsa --root . source find P001 --provider university_library_browser
+```
 
 ## 项目结构
 
@@ -166,7 +214,9 @@ tests/                      # 回归测试
 - `rsa source find` 默认是 monitored automation：自动搜索、审查并下载规则允许的来源，但只写候选记录、source ledger、本地 PDF 和 PDF acquisition report。
 - `title_only` 只能生成候选，不能自动下载。
 - 自定义 provider 应写在 `.rsa/local.yaml`，使用 `source_discovery.custom_providers` 模板；字段名保持英文，说明和用途限制使用中文。
-- 学校账号、机构订阅和个人订阅只支持用户已授权访问后的链接或本地文件；RSA 不保存密码、不模拟登录、不绕过验证码/SSO/paywall。
+- 学校账号、机构订阅和个人订阅只支持用户已授权访问后的链接、本地文件或 `browser_session` 本地会话；RSA 不保存密码、不模拟登录、不绕过验证码/SSO/paywall。
+- `browser_session` provider 只能保存 `.rsa/sessions/` 下的本地 storage state；不会进入 git，也不会静默读取现有浏览器 cookies。
+- v1 browser session 自动下载只支持 cookie-based 直接 PDF URL；复杂数据库页面点击、DOM 解析和 JS 下载流属于后续扩展。
 - 不内置、不推荐、不自动化 Sci-Hub、盗版镜像或任何绕过访问控制的来源。
 - 缺失或未授权 PDF 只会生成 blocked 状态记录，不会生成假的 reading note。
 - `validate` 命令必须只读。
@@ -194,13 +244,13 @@ python -m pytest -q
 rsa --root . eval compare
 ```
 
-当前回归基线：117 个测试通过，`eval compare` 结果为回归数 0。
+当前回归基线：126 个测试通过，`eval compare` 结果为回归数 0。
 
 ## 项目状态
 
 - 当前里程碑：`v1.0 Local Harness`
-- 当前版本：`v2.0` Phase 7 执行中
-- 状态：v1.0 已归档；v2.0 已完成授权全文获取能力的实现与测试
+- 当前版本：`v2.0` Phase 7.1 完成
+- 状态：v1.0 已归档；v2.0 已完成授权全文获取能力和 browser session provider
 - 主要用户语言：中文优先
 - 语言策略：见 `.planning/LANGUAGE-POLICY.md`
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释
@@ -210,7 +260,7 @@ rsa --root . eval compare
 v2 建议优先扩展这些方向：
 
 1. PDF 和截图资产管理。Phase 6 已建立 source ledger 和 asset manifest 基础。
-2. 授权全文获取和自动下载。
+2. 授权全文获取、自动下载和本地 browser session provider。
 3. 自动阅读草稿。
 4. 结构化证据抽取。
 5. AI 辅助评分：相关性、质量和阅读优先级。

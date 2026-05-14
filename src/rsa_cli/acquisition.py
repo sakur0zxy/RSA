@@ -12,6 +12,15 @@ from typing import Any
 
 import yaml
 
+from .browser_session import (
+    BrowserSessionError,
+    browser_session_status,
+    cookie_header_for_url,
+    looks_like_browser_session_provider,
+    provider_allows_url,
+    resolve_session_storage,
+    validate_browser_session_provider_fields,
+)
 from .config import ProjectConfig
 from .metadata import PAPER_ID_PATTERN, load_metadata_record, validate_metadata_record
 from .notes import record_pdf_status
@@ -289,6 +298,8 @@ def validate_custom_providers(config: ProjectConfig) -> list[str]:
             errors.append(f"{provider_id} 必须填写 usage_restriction_zh 中文使用限制")
         if _contains_forbidden_provider_text(provider):
             errors.append(f"{provider_id} 不允许配置 Sci-Hub、盗版镜像或绕过访问控制的来源")
+        if looks_like_browser_session_provider(provider):
+            errors.extend(validate_browser_session_provider_fields(provider, config=config))
     return errors
 
 
@@ -403,6 +414,7 @@ def _custom_provider_candidates(
             continue
         if provider_filter and provider.get("provider_id") != provider_filter:
             continue
+        is_browser_provider = looks_like_browser_session_provider(provider)
         source_url = _render_url_template(str(provider["query_template"]), metadata, paper_id)
         result_types = [str(item) for item in provider.get("allowed_result_types", [])]
         result_type = "pdf" if "pdf" in result_types else result_types[0]
@@ -413,36 +425,63 @@ def _custom_provider_candidates(
         source_domain_allowed = _domain_from_url(source_url) in [
             str(domain).lower() for domain in provider.get("allowed_domains", [])
         ]
+        browser_missing_session = False
+        if is_browser_provider:
+            source_domain_allowed = provider_allows_url(provider, source_url)
+            provider_id = str(provider["provider_id"])
+            session_status = browser_session_status(config, provider_id)
+            if not session_status.exists:
+                browser_missing_session = True
+                approved = False
+                reason = "browser_session provider 尚未登录；请先运行 rsa source login 保存本地授权 session。"
+            elif result_type != "pdf":
+                approved = False
+                reason = "browser_session v1 只自动下载直接 PDF URL；数据库页面候选需人工处理。"
         if not source_domain_allowed:
             approved = False
             reason = "候选 URL 域名不在 allowed_domains 中，已阻止自动下载。"
         provider_id = str(provider["provider_id"])
-        candidates.append(
-            _candidate(
-                candidate_id=_next_id(existing + candidates, key="candidate_id", prefix="SC"),
-                provider_id=provider_id,
-                provider_name_zh=str(provider["name_zh"]),
-                source_url=source_url,
-                result_type=result_type,
-                match_basis=basis,
-                match_evidence={
-                    "doi_match": bool(metadata.get("doi")),
-                    "title_match_score": 1.0 if metadata.get("title") else 0.0,
-                    "year_match": bool(metadata.get("year")),
-                    "author_match": bool(_first_author(metadata)),
-                    "source_domain_allowed": source_domain_allowed,
-                },
-                authorization_mode=str(provider.get("authorization_policy") or provider.get("access_mode")),
-                access_mode=str(provider["access_mode"]),
-                authorization_basis_zh=str(provider.get("notes_zh") or "用户配置的自定义来源。"),
-                usage_restriction_zh=str(provider["usage_restriction_zh"]),
-                version_label="institutional_subscription"
-                if provider.get("access_mode") in SUBSCRIPTION_ACCESS_MODES
-                else "repository_copy",
-                approved_for_download=approved,
-                reason_zh=reason,
-            )
+        candidate = _candidate(
+            candidate_id=_next_id(existing + candidates, key="candidate_id", prefix="SC"),
+            provider_id=provider_id,
+            provider_name_zh=str(provider["name_zh"]),
+            source_url=source_url,
+            result_type=result_type,
+            match_basis=basis,
+            match_evidence={
+                "doi_match": bool(metadata.get("doi")),
+                "title_match_score": 1.0 if metadata.get("title") else 0.0,
+                "year_match": bool(metadata.get("year")),
+                "author_match": bool(_first_author(metadata)),
+                "source_domain_allowed": source_domain_allowed,
+                "browser_session_available": browser_session_status(config, provider_id).exists
+                if is_browser_provider
+                else None,
+            },
+            authorization_mode=str(provider.get("authorization_policy") or provider.get("access_mode")),
+            access_mode=str(provider["access_mode"]),
+            authorization_basis_zh=str(provider.get("notes_zh") or "用户配置的自定义来源。"),
+            usage_restriction_zh=str(provider["usage_restriction_zh"]),
+            version_label="institutional_subscription"
+            if provider.get("access_mode") in SUBSCRIPTION_ACCESS_MODES
+            else "repository_copy",
+            approved_for_download=approved,
+            reason_zh=reason,
         )
+        if is_browser_provider:
+            candidate["provider_type"] = "browser_session"
+            candidate["requires_browser_session"] = True
+            candidate["session_provider_id"] = provider_id
+            candidate["session_state_path"] = _display_path(
+                config,
+                resolve_session_storage(config, provider),
+            )
+            if browser_missing_session or not source_domain_allowed:
+                candidate["authorization_mode"] = "blocked"
+                candidate["access_mode"] = "blocked"
+                candidate["status"] = "blocked"
+                candidate["approved_for_download"] = False
+        candidates.append(candidate)
     return candidates
 
 
@@ -629,6 +668,10 @@ def validate_candidate_record(config: ProjectConfig, paper_id: str) -> list[str]
             errors.append(f"candidates 第 {index} 项 match_evidence 必须是 mapping")
         if candidate.get("match_basis") == "title_only" and candidate.get("approved_for_download"):
             errors.append("title_only 候选不得 approved_for_download")
+        if candidate.get("requires_browser_session") is True and _is_blank(
+            candidate.get("session_provider_id")
+        ):
+            errors.append(f"candidates 第 {index} 项 browser_session 候选缺少 session_provider_id")
         local_path = candidate.get("local_path")
         if not _is_blank(local_path) and not _resolve_project_path(config, str(local_path)).is_file():
             errors.append(f"candidates 第 {index} 项 local_path 不存在: {local_path}")
@@ -654,7 +697,13 @@ def candidate_status(config: ProjectConfig, paper_id: str) -> CandidateStatus:
     )
 
 
-def _download_to_tmp(config: ProjectConfig, source_url: str, tmp_path: Path) -> None:
+def _download_to_tmp(
+    config: ProjectConfig,
+    source_url: str,
+    tmp_path: Path,
+    *,
+    session_provider_id: str | None = None,
+) -> None:
     parsed = urllib.parse.urlparse(source_url)
     tmp_path.parent.mkdir(parents=True, exist_ok=True)
     if parsed.scheme == "file":
@@ -664,7 +713,11 @@ def _download_to_tmp(config: ProjectConfig, source_url: str, tmp_path: Path) -> 
     if parsed.scheme == "" and resolved.exists():
         shutil.copy2(resolved, tmp_path)
         return
-    with urllib.request.urlopen(source_url, timeout=30) as response:
+    headers = {"User-Agent": "RSA Research Agent Harness"}
+    if session_provider_id:
+        headers["Cookie"] = cookie_header_for_url(config, session_provider_id, source_url)
+    request = urllib.request.Request(source_url, headers=headers)
+    with urllib.request.urlopen(request, timeout=30) as response:
         with tmp_path.open("wb") as target:
             shutil.copyfileobj(response, target)
 
@@ -793,7 +846,7 @@ def _load_candidate(config: ProjectConfig, paper_id: str, candidate_id: str) -> 
     raise AcquisitionError(f"candidate 不存在: {candidate_id}")
 
 
-def _preflight_download(candidate: dict[str, Any]) -> None:
+def _preflight_download(config: ProjectConfig, candidate: dict[str, Any]) -> None:
     if candidate.get("match_basis") == "title_only":
         raise AcquisitionError("title_only 候选不能自动下载")
     if candidate.get("result_type") != "pdf":
@@ -805,6 +858,14 @@ def _preflight_download(candidate: dict[str, Any]) -> None:
     for field in ["authorization_basis_zh", "usage_restriction_zh"]:
         if _is_blank(candidate.get(field)):
             raise AcquisitionError(f"缺少 {field}，不能下载")
+    if candidate.get("requires_browser_session") is True:
+        provider_id = str(candidate.get("session_provider_id") or "")
+        if not provider_id:
+            raise AcquisitionError("browser_session 候选缺少 session_provider_id，不能下载")
+        try:
+            cookie_header_for_url(config, provider_id, str(candidate.get("source_url") or ""))
+        except BrowserSessionError as exc:
+            raise AcquisitionError(str(exc)) from exc
 
 
 def download_candidate(config: ProjectConfig, paper_id: str, candidate_id: str) -> DownloadResult:
@@ -812,8 +873,15 @@ def download_candidate(config: ProjectConfig, paper_id: str, candidate_id: str) 
     candidate = _load_candidate(config, paper_id, candidate_id)
     tmp_path = config.pdfs_root / paper_id / f".{candidate_id}.pdf.tmp"
     try:
-        _preflight_download(candidate)
-        _download_to_tmp(config, str(candidate.get("source_url") or ""), tmp_path)
+        _preflight_download(config, candidate)
+        _download_to_tmp(
+            config,
+            str(candidate.get("source_url") or ""),
+            tmp_path,
+            session_provider_id=str(candidate.get("session_provider_id"))
+            if candidate.get("requires_browser_session") is True
+            else None,
+        )
         _verify_pdf(tmp_path)
         sha256 = _sha256(tmp_path)
         source_record = _load_source_record(config, paper_id)

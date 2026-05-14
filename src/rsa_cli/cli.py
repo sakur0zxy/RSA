@@ -198,6 +198,34 @@ def build_parser() -> argparse.ArgumentParser:
         "status", help="只读查看 source ledger 状态。"
     )
     source_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    source_login = source_subcommands.add_parser(
+        "login", help="打开 browser_session provider 登录页，并保存本地授权 session。"
+    )
+    source_login.add_argument("provider_id", help="browser_session provider_id。")
+    source_login.add_argument(
+        "--headless",
+        action="store_true",
+        help="无头浏览器模式；通常只用于自动化测试，并需要 --wait-seconds。",
+    )
+    source_login.add_argument(
+        "--wait-seconds",
+        type=int,
+        help="打开登录页后等待的秒数；未提供时会等待用户按 Enter。",
+    )
+    source_session = source_subcommands.add_parser(
+        "session", help="查看或清除 browser_session 本地会话；不修改正式记录。"
+    )
+    session_subcommands = source_session.add_subparsers(
+        dest="session_command", required=True
+    )
+    session_status = session_subcommands.add_parser(
+        "status", help="只读查看 browser_session 是否已登录和本地 session 状态。"
+    )
+    session_status.add_argument("provider_id", help="browser_session provider_id。")
+    session_clear = session_subcommands.add_parser(
+        "clear", help="删除指定 provider 的本地 browser session 文件。"
+    )
+    session_clear.add_argument("provider_id", help="browser_session provider_id。")
     source_find = source_subcommands.add_parser(
         "find",
         help="自动发现、审查并默认下载规则允许的授权全文来源。",
@@ -600,6 +628,12 @@ def _run_source_command(args: argparse.Namespace, root: Path) -> int:
         find_sources,
         load_candidate_record,
     )
+    from .browser_session import (
+        BrowserSessionError,
+        browser_session_status,
+        clear_browser_session,
+        login_browser_session,
+    )
 
     config = load_project_config(root)
     try:
@@ -638,6 +672,40 @@ def _run_source_command(args: argparse.Namespace, root: Path) -> int:
                 f"candidates={candidates.path}"
             )
             return 0
+        if args.source_command == "login":
+            result = login_browser_session(
+                config,
+                args.provider_id,
+                headless=args.headless,
+                wait_seconds=args.wait_seconds,
+            )
+            print(
+                f"浏览器会话已保存: provider={result.provider_id}, "
+                f"cookies={result.cookie_count}, origins={result.origin_count}; "
+                f"session={result.session_path}; metadata={result.metadata_path}"
+            )
+            return 0
+        if args.source_command == "session":
+            if args.session_command == "status":
+                status = browser_session_status(config, args.provider_id)
+                state = "已登录" if status.exists else "未登录"
+                print(
+                    f"浏览器会话状态: provider={status.provider_id} "
+                    f"({status.provider_name_zh}) -> {state}; "
+                    f"cookies={status.cookie_count}, origins={status.origin_count}; "
+                    f"allowed_domains={','.join(status.allowed_domains)}; "
+                    f"session={status.session_path}; updated_at={status.updated_at}; "
+                    f"{status.reason_zh}"
+                )
+                return 0
+            if args.session_command == "clear":
+                removed = clear_browser_session(config, args.provider_id)
+                if removed:
+                    removed_text = ", ".join(str(path) for path in removed)
+                    print(f"已清除浏览器会话: provider={args.provider_id}; removed={removed_text}")
+                else:
+                    print(f"无需清除: provider={args.provider_id} 没有本地 browser session。")
+                return 0
         if args.source_command == "find":
             result = find_sources(
                 config,
@@ -694,7 +762,7 @@ def _run_source_command(args: argparse.Namespace, root: Path) -> int:
                 f"local_path={result.local_path}; {result.reason_zh}"
             )
             return 0
-    except (AssetError, AcquisitionError) as exc:
+    except (AssetError, AcquisitionError, BrowserSessionError) as exc:
         print(f"来源操作失败: {exc}", file=sys.stderr)
         return 1
     return 2

@@ -183,6 +183,16 @@ def test_later_phase_seed_templates_are_safe_and_localized():
         "字段名保持英文稳定",
     )
     assert_in_root_and_fallback(
+        "browser_session_provider.yaml",
+        "browser_session provider 模板",
+        "provider_type",
+        "login_url",
+        "session_storage",
+        ".rsa/sessions",
+        "不保存账号密码",
+        "仅供个人科研阅读",
+    )
+    assert_in_root_and_fallback(
         "asset_manifest.yaml",
         "字段说明",
         "asset_id",

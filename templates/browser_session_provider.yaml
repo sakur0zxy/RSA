@@ -1,0 +1,45 @@
+# browser_session provider 模板
+# 建议复制到 .rsa/local.yaml 的 source_discovery.custom_providers 下使用。
+# provider_id: 稳定英文编号，用于 rsa source login/session/find --provider。
+# enabled: 是否启用该来源。
+# name_zh: 中文名称，显示给用户看。
+# provider_type: 必须是 browser_session，表示需要用户手动登录后复用本地 session。
+# base_url: 资料库或平台入口。
+# login_url: 登录页面；用户自行登录，RSA 不保存账号密码。
+# session_storage: 本地 session JSON，必须在 .rsa/sessions/ 下，且不会进入 git。
+# session_required: 必须为 true，表示下载前必须存在本地 session。
+# query_mode: v1 只支持 url_template。
+# query_template: 检索或直接 PDF URL 模板，可使用 {doi}、{title}、{year}、{first_author}、{paper_id}。
+# allowed_domains: 允许复用 session 的域名白名单。
+# allowed_result_types: 允许的结果类型；v1 自动下载只支持 pdf。
+# access_mode: 访问方式，例如 institutional_subscription 或 personal_subscription。
+# requires_login: 是否需要登录。
+# user_access_confirmed: 用户是否确认自己有权访问该资料库。
+# authorization_policy: 授权策略，例如 user_authorized_access。
+# usage_restriction_zh: 中文使用限制，例如仅供个人科研阅读，不得公开分发 PDF。
+# notes_zh: 中文备注，说明来源边界和授权依据。
+source_discovery:
+  custom_providers:
+    - provider_id: university_library_browser
+      enabled: true
+      name_zh: "学校图书馆浏览器会话"
+      provider_type: browser_session
+      base_url: "https://library.example.edu"
+      login_url: "https://library.example.edu/login"
+      session_storage: ".rsa/sessions/university_library_browser.storage_state.json"
+      session_required: true
+      query_mode: url_template
+      query_template: "https://library.example.edu/papers/{doi}.pdf"
+      allowed_domains:
+        - "library.example.edu"
+      allowed_result_types:
+        - pdf
+      access_mode: institutional_subscription
+      requires_login: true
+      user_access_confirmed: true
+      authorization_policy: user_authorized_access
+      usage_restriction_zh: "仅供个人科研阅读，不得公开分发 PDF。"
+      max_results: 5
+      timeout_seconds: 30
+      rate_limit_seconds: 3
+      notes_zh: "用户通过学校账号或机构订阅自行登录；RSA 只保存本地 browser storage state，不保存账号密码。"

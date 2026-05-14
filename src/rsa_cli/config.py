@@ -104,6 +104,10 @@ class ProjectConfig:
         return self.literature_root / "pdfs"
 
     @property
+    def sessions_root(self) -> Path:
+        return self.root / ".rsa" / "sessions"
+
+    @property
     def topic_profiles_root(self) -> Path:
         profiles_root = self.data.get("profiles", {}).get("root", "topic_profiles")
         return self.literature_root / str(profiles_root)

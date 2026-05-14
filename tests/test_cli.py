@@ -545,6 +545,8 @@ def test_cli_source_phase7_help_lists_monitored_acquisition_commands(capsys):
     assert "find" in captured.out
     assert "candidates" in captured.out
     assert "download" in captured.out
+    assert "login" in captured.out
+    assert "session" in captured.out
 
     with pytest.raises(SystemExit) as download_exc:
         main(["source", "download", "--help"])
@@ -558,6 +560,20 @@ def test_cli_source_phase7_help_lists_monitored_acquisition_commands(capsys):
         "--usage-restriction-zh",
     ]:
         assert needle in download_help.out
+
+    with pytest.raises(SystemExit) as login_exc:
+        main(["source", "login", "--help"])
+    login_help = capsys.readouterr()
+    assert login_exc.value.code == 0
+    assert "--wait-seconds" in login_help.out
+    assert "browser_session" in login_help.out
+
+    with pytest.raises(SystemExit) as session_exc:
+        main(["source", "session", "--help"])
+    session_help = capsys.readouterr()
+    assert session_exc.value.code == 0
+    assert "status" in session_help.out
+    assert "clear" in session_help.out
 
 
 def test_cli_source_find_no_download_and_candidates_are_read_only(tmp_path, capsys):
@@ -664,6 +680,50 @@ def test_cli_source_download_url_requires_authorization_without_traceback(tmp_pa
     assert "Traceback" not in failed_out.err
     assert ok == 0
     assert "来源下载完成" in ok_out.out
+
+
+def test_cli_source_session_status_and_clear_are_chinese(tmp_path, capsys):
+    prepare_project(tmp_path)
+    local_yaml = tmp_path / ".rsa" / "local.yaml"
+    local_yaml.parent.mkdir(parents=True, exist_ok=True)
+    local_yaml.write_text(
+        """
+source_discovery:
+  custom_providers:
+    - provider_id: library_browser
+      enabled: true
+      name_zh: 学校图书馆浏览器会话
+      provider_type: browser_session
+      base_url: https://library.example.edu
+      login_url: https://library.example.edu/login
+      session_storage: .rsa/sessions/library_browser.storage_state.json
+      session_required: true
+      query_mode: url_template
+      query_template: https://library.example.edu/papers/{doi}.pdf
+      allowed_domains:
+        - library.example.edu
+      allowed_result_types:
+        - pdf
+      access_mode: institutional_subscription
+      requires_login: true
+      user_access_confirmed: true
+      authorization_policy: user_authorized_access
+      usage_restriction_zh: 仅供个人科研阅读，不得公开分发 PDF。
+      notes_zh: 用户通过学校账号自行登录；RSA 不保存账号密码。
+""",
+        encoding="utf-8",
+    )
+
+    status = main(["--root", str(tmp_path), "source", "session", "status", "library_browser"])
+    status_out = capsys.readouterr()
+    clear = main(["--root", str(tmp_path), "source", "session", "clear", "library_browser"])
+    clear_out = capsys.readouterr()
+
+    assert status == 0
+    assert "浏览器会话状态" in status_out.out
+    assert "未登录" in status_out.out
+    assert clear == 0
+    assert "无需清除" in clear_out.out
 
 
 def test_cli_eval_run_baseline_and_compare(tmp_path, capsys):

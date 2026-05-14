@@ -16,6 +16,9 @@ dependencies = [
 dev = [
   "pytest>=8",
 ]
+browser = [
+  "playwright>=1.48",
+]
 
 [project.scripts]
 rsa = "rsa_cli.cli:main"
