@@ -22,7 +22,7 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 - Roadmap 归档：`.planning/milestones/v1.0-ROADMAP.md`
 - Requirements 归档：`.planning/milestones/v1.0-REQUIREMENTS.md`
 - 运行形态：Python CLI、Markdown/YAML 文件、pytest 回归测试
-- 当前验证：103 个测试通过，`rsa eval compare` 报告回归数 0
+- 当前验证：117 个测试通过，`rsa eval compare` 报告回归数 0
 
 ## Requirements
 
@@ -39,11 +39,12 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 - 本地 deterministic eval fixtures - v1.0
 - 通过 `AGENTS.md` 提供项目级 agent 指引 - v1.0
 - Source ledger 和 asset manifest foundation - v2 Phase 6
+- Authorized acquisition workflow - v2 Phase 7
 
-### 下一里程碑待定义
+### 下一阶段
 
-- Phase 6 执行后，继续推进 Phase 7 Authorized Acquisition。
-- 增加规模化、集成、自动阅读或 UI 能力时，必须保留 v1 guardrails。
+- Phase 7 已完成授权全文获取能力，下一步推进 Phase 8 Auto Reading Draft。
+- 增加自动阅读、评分、批量 campaign 或 UI 能力时，必须保留 v1 formal write guardrails 和 Phase 7 授权边界。
 
 ### 除非重新打开，否则不做
 
@@ -61,6 +62,7 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 - `01_literature/agent_outputs/` 存放有边界的 research round archive。
 - `01_literature/notes/` 存放结构化 reading note。
 - `01_literature/sources/` 存放每篇文献的 source ledger。
+- `01_literature/source_candidates/` 存放授权获取候选、匹配证据、审查状态和下载结果。
 - `01_literature/assets/P###/manifest.yaml` 存放截图、图表和结果图 manifest。
 - `01_literature/literature_map.md` 将已验证文献连接到 topic question 和 planned output。
 - `01_literature/synthesis/` 存放 gap report 和 eval report。
@@ -87,14 +89,16 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 | Formal writes 必须人工确认 | 降低 hallucination 和学术诚信风险 | v1.0 已验证 |
 | SAR starter profile + generic harness | 服务当前博士课题，同时不把 SAR 硬编码进 Python source | v1.0 已验证 |
 | 先做 deterministic evals，再考虑编排 | Harness 可靠性应先于更大的 agent system | v1.0 已验证 |
+| 授权全文获取默认 monitored_auto | 用户希望系统可自动推进，同时保留监控和调整入口 | v2 Phase 7 已验证 |
+| 不自动化 Sci-Hub 或绕过访问控制 | 避免让自动下载污染合法来源链和正式科研记录 | v2 Phase 7 已验证 |
 
 ## 下一里程碑目标
 
 v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
 
 1. PDF、截图和重要结果图的 asset management。
-2. Authorized download / source trace，只允许 open access、用户提供或用户授权来源。
-3. Auto reading draft，基于本地或已授权全文生成可审阅阅读草稿。
+2. Authorized download / source trace，只允许 open access、用户提供或用户授权来源。已在 Phase 7 完成。
+3. Auto reading draft，基于本地或已授权全文生成可审阅阅读草稿。下一步。
 4. Evidence extraction / structured reading signals，在评分前抽取结构化证据。
 5. AI-assisted scoring rubric，区分 relevance、quality 和 read priority，且不直接进入 formal records。
 6. Workflow orchestrator，串联已有命令，自动跑到 review packet，同时允许用户监控关键环节和调整流程。
@@ -107,4 +111,4 @@ v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
 
 ---
 
-*Last updated: 2026-05-14 after Phase 10 workflow orchestrator resequencing*
+*Last updated: 2026-05-14 after Phase 7 Authorized Acquisition execution*

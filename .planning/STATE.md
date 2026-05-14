@@ -2,42 +2,42 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: Phase 7 planned
-stopped_at: Phase 7 planned; ready to execute Phase 7 Authorized Acquisition
-last_updated: "2026-05-14T20:23:50+08:00"
-last_activity: 2026-05-14 -- 完成 Phase 7 planning，生成 3 个执行计划
+status: Phase 7 complete
+stopped_at: Phase 7 complete; ready to discuss Phase 8 Auto Reading Draft
+last_updated: "2026-05-14T21:24:00+08:00"
+last_activity: 2026-05-14 -- 完成 Phase 7 Authorized Acquisition 执行和验证
 progress:
   total_phases: 14
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 19
-  completed_plans: 16
-  percent: 43
+  completed_plans: 19
+  percent: 50
 ---
 
 # 项目状态
 
 ## 项目引用
 
-参见: `.planning/PROJECT.md`（更新于 2026-05-13）
+参见: `.planning/PROJECT.md`（更新于 2026-05-14）
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** Phase 7 Authorized Acquisition
+**当前重点:** Phase 8 Auto Reading Draft
 
 ## 当前位置
 
-Phase: 7 Authorized Acquisition
-Plan: 3 个计划已生成（07-01, 07-02, 07-03）
-Status: Phase 7 已计划，待执行
-Last activity: 2026-05-14 -- 完成 Phase 7 planning，生成 3 个执行计划
+Phase: 8 Auto Reading Draft
+Plan: 未开始
+Status: Phase 7 已完成
+Last activity: 2026-05-14 -- 完成 Phase 7 Authorized Acquisition 执行和验证
 
-进度: [████░░░░░░] 43%
+进度: [█████░░░░░] 50%
 
 ## 进度指标
 
 **速度:**
 
-- 已完成 plans: 16
+- 已完成 plans: 19
 - 平均耗时: N/A
 - 总执行时间: 0 hours
 
@@ -51,7 +51,7 @@ Last activity: 2026-05-14 -- 完成 Phase 7 planning，生成 3 个执行计划
 | 4 | 2 | - | - |
 | 5 | 2 | - | - |
 | 6 | 2 | - | - |
-| 7 | 3 planned | - | - |
+| 7 | 3 | - | - |
 
 **近期趋势:**
 
@@ -72,6 +72,10 @@ Last activity: 2026-05-14 -- 完成 Phase 7 planning，生成 3 个执行计划
 - Milestone close: v1 requirements 已归档；v2 应从新的 requirements 开始。
 - Phase 6: source ledger 和 asset manifest 可以记录本地来源/资产，但不得自动修改 formal metadata。
 - Phase 6: binary PDFs/assets 仍然 local-only；可审计 manifest/source YAML 可以进入 git。
+- Phase 7: `rsa source find P###` 默认 monitored_auto，自动发现、审查并下载规则允许的授权 PDF。
+- Phase 7: `--no-download`、`source candidates`、`source status` 和显式 `source download` 是用户监控和调整入口。
+- Phase 7: 自定义 provider 应放在 `.rsa/local.yaml`，使用固定 schema；不得配置 Sci-Hub、盗版镜像、账号密码保存、模拟登录或绕过访问控制。
+- Phase 7: PDF 下载使用 `.tmp`、PDF 校验、`sha256` 去重、多版本保存和主版本选择。
 - v2 resequence: Phase 10 定为 Workflow Orchestrator，用于串联已有命令并自动跑到 review packet；原 Campaign/Metadata/UI/Writing/Multi-Agent 阶段顺延。
 
 ### 待办
@@ -101,8 +105,8 @@ Last activity: 2026-05-14 -- 完成 Phase 7 planning，生成 3 个执行计划
 
 ## 会话连续性
 
-Last session: Phase 7 planning complete
-Stopped at: Phase 7 has 3 plans ready for `$gsd-execute-phase 7`.
+Last session: Phase 7 execution complete
+Stopped at: Phase 7 verification passed; ready for `$gsd-discuss-phase 8`.
 Resume file: `.planning/ROADMAP.md`
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
@@ -115,5 +119,5 @@ Resume file: `.planning/ROADMAP.md`
 **已计划 Phase:** 06 (Asset & Source Foundation) - 2 plans - 2026-05-13
 **已完成 Phase:** 06 (Asset & Source Foundation) - 2 plans - 2026-05-13
 **已调整 Roadmap:** Phase 10 (Workflow Orchestrator) 成为自动工作流调度阶段 - 2026-05-14
-
 **已计划 Phase:** 07 (Authorized Acquisition) - 3 plans - 2026-05-14
+**已完成 Phase:** 07 (Authorized Acquisition) - 3 plans - 2026-05-14

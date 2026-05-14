@@ -17,7 +17,7 @@
 - [x] **LANG-01:** 当前项目入口文档记录中文优先语言策略，并说明英文标识保留范围。
 - [x] **LANG-02:** 已实现 CLI 的主要 help、成功提示、错误信息和状态输出使用中文优先文案。
 - [x] **LANG-03:** 模板和正式记录 seed 文件保留英文 key/列名，同时提供中文说明。
-- [ ] **LANG-04:** 后续新增 phase 必须在计划和测试中显式覆盖中文用户可见内容。
+- [x] **LANG-04:** 后续新增 phase 必须在计划和测试中显式覆盖中文用户可见内容。
 
 ## Phase 6: Asset & Source Foundation
 
@@ -33,11 +33,11 @@
 
 ### Phase 7: Authorized Acquisition
 
-- [ ] **V2-DL-01:** User can discover open access or user-authorized full-text candidates from trusted metadata.
-- [ ] **V2-DL-02:** Download commands must record authorization mode and fail closed for uncertain or blocked sources.
-- [ ] **V2-DL-03:** `rsa source find P###` defaults to monitored automation: it searches, reviews and downloads rule-approved sources without requiring step-by-step user intervention.
-- [ ] **V2-DL-04:** User can monitor and adjust automatic acquisition through candidate records, status/report commands, provider configuration, `--no-download`, and explicit manual download commands.
-- [ ] **V2-DL-05:** Automatic acquisition must remain auditable: every downloaded, skipped, blocked, failed or duplicate source records match evidence, authorization/access mode, Chinese reason text and local file handling status.
+- [x] **V2-DL-01:** User can discover open access or user-authorized full-text candidates from trusted metadata.
+- [x] **V2-DL-02:** Download commands must record authorization mode and fail closed for uncertain or blocked sources.
+- [x] **V2-DL-03:** `rsa source find P###` defaults to monitored automation: it searches, reviews and downloads rule-approved sources without requiring step-by-step user intervention.
+- [x] **V2-DL-04:** User can monitor and adjust automatic acquisition through candidate records, status/report commands, provider configuration, `--no-download`, and explicit manual download commands.
+- [x] **V2-DL-05:** Automatic acquisition must remain auditable: every downloaded, skipped, blocked, failed or duplicate source records match evidence, authorization/access mode, Chinese reason text and local file handling status.
 
 ### Phase 8: Auto Reading Draft
 

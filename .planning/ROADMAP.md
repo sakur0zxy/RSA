@@ -22,7 +22,7 @@
 <summary>v2.0 Scaled Literature Workstation - 规划中</summary>
 
 - [x] Phase 6: Asset & Source Foundation - 建立 PDF、截图、图表、结果图和 source ledger 的本地资产基础。
-- [ ] Phase 7: Authorized Acquisition - 已计划 3/3 plans；支持 open access、用户提供和用户授权来源的自动全文获取，不绕过 paywall。
+- [x] Phase 7: Authorized Acquisition - 3/3 plans，完成于 2026-05-14；支持 open access、用户提供和用户授权来源的自动全文获取，不绕过 paywall。
 - [ ] Phase 8: Auto Reading Draft - 基于本地或已授权全文生成可审阅 reading note draft。
 - [ ] Phase 9: Evidence Signals & AI Scoring - 抽取结构化证据，并生成 relevance、quality、read priority 辅助评分。
 - [ ] Phase 10: Workflow Orchestrator - 串联 v1/v2 命令，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
@@ -36,7 +36,7 @@
 
 ## 下一步
 
-当前执行目标：**执行 Phase 7: Authorized Acquisition**。
+当前执行目标：**Phase 8: Auto Reading Draft**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -45,19 +45,21 @@ Phase 6 已完成本地资产和来源记录基础：
 3. `rsa source ...` 和 `rsa asset ...`：提供 CLI 添加、校验和查看状态。
 4. 保持 PDF 和真实图片文件 local-only；只跟踪可审计 metadata/manifest。
 
-Phase 7 已完成计划拆分，接下来执行以下 3 个计划：
+Phase 7 已完成以下 3 个计划：
 
 1. `07-01 Source Candidate Model And Provider Configuration`：建立候选来源记录、自定义 provider schema、匹配证据和自动下载资格判定。
 2. `07-02 Authorized Download Engine And Source Ledger Integration`：实现授权下载、`.tmp` 临时文件、hash 去重、多版本主版本选择和 source ledger 写入。
 3. `07-03 CLI Workflow, Documentation And Regression Coverage`：接入 `rsa source find|candidates|download`，补齐中文文档、监控入口和回归测试。
+
+Phase 8 将基于 Phase 7 的本地 PDF/source ledger，生成可审阅的自动阅读草稿。
 
 ## 进度
 
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-14 core, 15 optional | 2/5 completed, 3 ready | Phase 7 已计划，待执行 | - |
+| v2.0 Scaled Literature Workstation | 6-14 core, 15 optional | 5/5 completed for Phase 6-7 | Phase 7 完成，下一步 Phase 8 | 2026-05-14 |
 
 ---
 
-*Roadmap updated after Phase 7 planning: 2026-05-14*
+*Roadmap updated after Phase 7 execution: 2026-05-14*
