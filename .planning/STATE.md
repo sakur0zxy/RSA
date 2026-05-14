@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Scaled Literature Workstation
-status: Phase 7 complete
-stopped_at: Phase 7 complete; ready to discuss Phase 8 Auto Reading Draft
-last_updated: "2026-05-14T21:24:00+08:00"
-last_activity: 2026-05-14 -- 完成 Phase 7 Authorized Acquisition 执行和验证
+milestone: v1.0
+milestone_name: milestone
+status: Phase 7 已完成；Phase 7.1 已插入，待讨论
+stopped_at: Phase 7.1 Browser Session Provider inserted; ready for `$gsd-discuss-phase 7.1`.
+last_updated: "2026-05-14T14:06:48.864Z"
+last_activity: 2026-05-14 -- 插入 Phase 7.1 Browser Session Provider
 progress:
-  total_phases: 14
+  total_phases: 8
   completed_phases: 7
-  total_plans: 19
+  total_plans: 21
   completed_plans: 19
-  percent: 50
+  percent: 90
 ---
 
 # 项目状态
@@ -22,16 +22,16 @@ progress:
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** Phase 8 Auto Reading Draft
+**当前重点:** Phase 7.1 Browser Session Provider
 
 ## 当前位置
 
-Phase: 8 Auto Reading Draft
+Phase: 7.1 Browser Session Provider
 Plan: 未开始
-Status: Phase 7 已完成
-Last activity: 2026-05-14 -- 完成 Phase 7 Authorized Acquisition 执行和验证
+Status: Phase 7 已完成；Phase 7.1 已插入，待讨论
+Last activity: 2026-05-14 -- 插入 Phase 7.1 Browser Session Provider
 
-进度: [█████░░░░░] 50%
+进度: [████░░░░░░] 47%
 
 ## 进度指标
 
@@ -52,6 +52,7 @@ Last activity: 2026-05-14 -- 完成 Phase 7 Authorized Acquisition 执行和验�
 | 5 | 2 | - | - |
 | 6 | 2 | - | - |
 | 7 | 3 | - | - |
+| 7.1 | not planned | - | - |
 
 **近期趋势:**
 
@@ -76,6 +77,7 @@ Last activity: 2026-05-14 -- 完成 Phase 7 Authorized Acquisition 执行和验�
 - Phase 7: `--no-download`、`source candidates`、`source status` 和显式 `source download` 是用户监控和调整入口。
 - Phase 7: 自定义 provider 应放在 `.rsa/local.yaml`，使用固定 schema；不得配置 Sci-Hub、盗版镜像、账号密码保存、模拟登录或绕过访问控制。
 - Phase 7: PDF 下载使用 `.tmp`、PDF 校验、`sha256` 去重、多版本保存和主版本选择。
+- Phase 7.1 inserted: Browser Session Provider 用于用户自行登录资料库后复用本地授权浏览器会话；session 文件 local-only，不保存密码，不从已有浏览器静默提取 cookies，不绕过验证码/SSO/paywall。
 - v2 resequence: Phase 10 定为 Workflow Orchestrator，用于串联已有命令并自动跑到 review packet；原 Campaign/Metadata/UI/Writing/Multi-Agent 阶段顺延。
 
 ### 待办
@@ -84,7 +86,7 @@ Last activity: 2026-05-14 -- 完成 Phase 7 Authorized Acquisition 执行和验�
 
 ### 阻塞和关注点
 
-无。
+- Phase 7.1 需要在 discuss 阶段明确浏览器自动化实现方式、session 文件格式、过期检测、provider 查询规则和下载链接识别策略。
 
 ### 已完成 Quick Tasks
 
@@ -105,8 +107,8 @@ Last activity: 2026-05-14 -- 完成 Phase 7 Authorized Acquisition 执行和验�
 
 ## 会话连续性
 
-Last session: Phase 7 execution complete
-Stopped at: Phase 7 verification passed; ready for `$gsd-discuss-phase 8`.
+Last session: Phase 7.1 inserted
+Stopped at: Phase 7.1 Browser Session Provider inserted; ready for `$gsd-discuss-phase 7.1`.
 Resume file: `.planning/ROADMAP.md`
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
@@ -121,3 +123,6 @@ Resume file: `.planning/ROADMAP.md`
 **已调整 Roadmap:** Phase 10 (Workflow Orchestrator) 成为自动工作流调度阶段 - 2026-05-14
 **已计划 Phase:** 07 (Authorized Acquisition) - 3 plans - 2026-05-14
 **已完成 Phase:** 07 (Authorized Acquisition) - 3 plans - 2026-05-14
+**已插入 Phase:** 07.1 (Browser Session Provider) - 2026-05-14
+
+**Planned Phase:** 07.1 (browser-session-provider) — 2 plans — 2026-05-14T14:06:48.856Z

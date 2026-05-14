@@ -39,6 +39,14 @@
 - [x] **V2-DL-04:** User can monitor and adjust automatic acquisition through candidate records, status/report commands, provider configuration, `--no-download`, and explicit manual download commands.
 - [x] **V2-DL-05:** Automatic acquisition must remain auditable: every downloaded, skipped, blocked, failed or duplicate source records match evidence, authorization/access mode, Chinese reason text and local file handling status.
 
+### Phase 7.1: Browser Session Provider
+
+- [ ] **V2-BROWSER-01:** User can define a `browser_session` custom provider with `login_url`, `allowed_domains`, local-only `session_storage`, query rules and Chinese usage restrictions.
+- [ ] **V2-BROWSER-02:** User can run `rsa source login <provider_id>` to open the provider login page, complete login manually, and store browser session state under `.rsa/sessions/` without saving passwords.
+- [ ] **V2-BROWSER-03:** RSA can reuse a user-authorized browser session to search and download papers the user has access to, while preserving Phase 7 candidate/source ledger audit records for every paper.
+- [ ] **V2-BROWSER-04:** User can inspect and clear provider sessions through Chinese-first CLI commands such as `rsa source session status <provider_id>` and `rsa source session clear <provider_id>`.
+- [ ] **V2-BROWSER-05:** Browser session providers must fail closed: no password storage, no silent extraction from existing browsers, no captcha/SSO/paywall bypass, no unauthorized mirrors, and all session files remain local-only and ignored by git.
+
 ### Phase 8: Auto Reading Draft
 
 - [ ] **V2-READ-01:** User can generate reading note drafts only from local or authorized full text.
