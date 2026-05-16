@@ -9,6 +9,32 @@ v2 建议把 v1 本地 harness 扩展成更适合大规模文献调研、授权�
 
 candidate evidence -> verified metadata -> authorized sources/assets -> reading notes -> AI-assisted scoring -> formal map/research notes -> synthesis guidance。
 
+## 全局依赖设计原则
+
+依赖设计是全局原则，不属于某一个 phase 的局部实现细节。普通用户基础版必须能够实现当前 agent 的核心闭环；optional extras 只服务非核心增强、未来扩展或开发测试。
+
+基础安装 `python -m pip install -e .` 应包含当前核心功能所需 Python 依赖，包括本地 Markdown/YAML harness、授权来源获取、browser session provider、PDF 文本提取和自动阅读草稿。无法由 pip 可靠安装的外部资源，例如 Playwright Chromium，应通过 `rsa doctor` 或命令级 preflight check 自动检查，并给出中文修复命令。
+
+后续 README 和帮助文档需要提供中文功能依赖矩阵，明确区分基础安装、一次性环境初始化、非核心 extras 和开发依赖。详见 `.planning/DEPENDENCY-POLICY.md`。
+
+## 已收敛的 v2 总原则
+
+- 默认自动运行，用户主要负责监管、异常审阅、人工覆盖和 formal 批准。
+- 所有 AI 产物默认只进入 `staging / review packet`，不直接进入 `formal records`。
+- 所有自动产物必须标记 `evidence_level`。
+- 所有失败必须写状态记录，至少区分 `blocked` / `partial`，并提供中文原因和修复建议。
+- 视觉证据只作为候选证据，不直接形成正式学术结论。
+- `formal write gate` 不得被 orchestrator、batch、UI 或后续 agent 编排绕过。
+- Phase 7.1 是 Phase 7 授权获取体系下的浏览器会话子能力，不是一套独立下载系统。
+
+## 已收敛的 v2 主链
+
+核心顺序收敛为：
+
+Phase 6 -> Phase 7 -> Phase 7.1 -> Phase 8 -> Phase 8.1 -> Phase 9 -> Phase 10 -> Phase 11 -> Phase 12 -> Phase 13。
+
+重型 scholarly metadata 深集成、高级图表智能和 multi-agent 编排不纳入 v2 主闭环。
+
 ## 候选工作流
 
 ### 1. 大规模文献调研
@@ -49,6 +75,7 @@ candidate evidence -> verified metadata -> authorized sources/assets -> reading 
 - 下载结果写入 source ledger 和 PDF status report，不直接进入 formal records。
 - 记录 `source_url`、`source_type`、`license_note`、`authorization_mode`、`local_pdf`、`downloaded_at`。
 - 对未授权、找不到全文、访问失败的文献生成 blocked 状态，不生成假阅读笔记。
+- Phase 7.1 的 browser session provider 属于本能力下的一种授权来源 provider；它复用用户本地登录会话，但不改变 Phase 7 的授权边界。
 
 价值：它能减少手动下载和整理 PDF 的负担，同时保留 v1 的版权和人工确认边界。
 
@@ -62,9 +89,36 @@ candidate evidence -> verified metadata -> authorized sources/assets -> reading 
 - 输出 title/abstract/method/experiment/dataset/key findings/limitations/uncertain points。
 - 每条关键判断尽量记录页码、章节或局部证据。
 - 保存 short quotes、source-grounded claims、agent summary 和 human decision 的边界。
-- 生成 candidate screenshot requests，方便后续保存重要图表和结果截图。
+- 生成候选 `asset_suggestions`，记录可能值得后续视觉处理的图表/表格、推荐原因、置信度和证据依据。
 
 价值：它让自动阅读成为“有证据的初稿”，而不是不可追溯的摘要。
+
+边界：
+
+- `asset_suggestions` 只是候选建议，不能直接断言“这是论文重要图表”。
+- Phase 8 不自动截图、不自动裁图、不做 OCR、不写 asset manifest。
+
+### 4.1. 视觉证据候选提取 / Phase 8.1
+
+**目标:** 在自动阅读草稿之后、AI 评分之前，处理最小必要视觉证据候选。
+
+可能功能：
+
+- 基于 Phase 8 `asset_suggestions`、授权 PDF 或本地资产生成裁图/裁表候选。
+- 提取 figure/table caption。
+- 对图题、表题、坐标轴标签、图例和表格可见文字做基础 OCR。
+- 记录 `page`、`region`、`source_file`、`source_hash`、`asset_id`、`confidence` 和中文不确定性说明。
+- 输出 local-only 视觉资产和可审阅 manifest/suggestions。
+
+边界：
+
+- 不做曲线数据自动还原。
+- 不做高级表格结构理解。
+- 不从图表自动生成正式 scientific conclusion。
+- 不把图片 payload 或大段 OCR 原文提交进 git。
+- 视觉证据在人工确认前只能作为 review/scoring 候选。
+
+价值：它让图像能力足够早地服务 Phase 9 评分和后续 review，同时不污染 Phase 8 的正文阅读主链。
 
 ### 5. Evidence extraction / structured reading signals
 
@@ -146,32 +200,42 @@ ai_scoring:
     override_reason_zh: null
 ```
 
-### 7. 学术 API 和文献管理器集成
+### 7. 轻量 metadata enrichment
 
-**目标:** 降低手动录入 metadata 的成本，同时保留 verification gates。
+**目标:** 只保留主闭环真正需要的轻量补全，不在 v2 主链中过早接入重型 scholarly integrations。
 
 可能功能：
 
-- DOI lookup adapter，并标记来源。
-- Crossref / Semantic Scholar / OpenAlex / arXiv adapters。
-- Zotero / EndNote / BibTeX export 或 sync。
-- API 结果只进入 staging，不能直接写 formal records。
+- DOI/BibTeX 基础补全。
+- title/author/year 标准化。
+- dedup 辅助。
+- 补全结果只进入 staging/review，不直接写 formal records。
 
-价值：规模化调研中 metadata 收集是瓶颈，但 API 数据仍需要人工核验。
+价值：规模化调研中 metadata 收集是瓶颈，但 v2 不需要先做完整 Crossref/OpenAlex/Zotero 生态集成。
 
-### 8. 本地 Review UI
+边界：
 
-**目标:** 降低候选核验和正式批准的 CLI 操作负担。
+- Crossref/OpenAlex/Zotero 深集成进入 deferred。
+- 轻量补全可以并入 Phase 9，为 evidence signals、scoring 和 batch review 服务。
+
+### 8. 本地 Review Workspace
+
+**目标:** 提供本地监管台，降低候选核验和正式批准的 CLI 操作负担。
 
 可能功能：
 
 - 本地 Web UI，用于 candidate verification。
-- 下载状态、阅读草稿、AI scoring 和人工覆盖的 review queue。
+- 下载状态、阅读草稿、视觉证据候选、AI scoring 和人工覆盖的 review queue。
 - Formal write conflict review screen。
 - Literature map 和 gap report 可视化。
 - Reading note approval workflow。
 
 价值：v1 CLI 很精确，但长时间 review 需要更易扫描和比较的界面。
+
+边界：
+
+- 只做监管台，不做复杂运营面板。
+- 不绕过 formal write gate。
 
 ### 9. Claim-level Citation Check
 
@@ -185,6 +249,25 @@ ai_scoring:
 - 输出保持为 review guidance，不生成最终学术正文。
 
 价值：它直接服务文章/博士论文写作，同时避免 agent 自行发明结论。
+
+### Deferred A. Advanced Figure Intelligence
+
+**目标:** 记录暂不纳入 v2 主闭环的高级图表能力，避免 Phase 8.1 过度膨胀。
+
+延后能力：
+
+- 曲线数据自动还原。
+- 高级表格结构理解。
+- 图表数值自动恢复。
+- 图表驱动的自动结论生成。
+- 复杂视觉问答或多模态 agent 推理。
+
+边界：
+
+- Advanced figure intelligence 只能在 Phase 8.1 最小视觉证据链稳定后重新打开。
+- 即使未来实现，也不得绕过人工确认和 formal write gate。
+
+Phase 8.1 只覆盖候选裁图/裁表、caption 提取、基础 OCR 和来源追踪。
 
 ### 10. 更强的 Eval
 
@@ -216,18 +299,18 @@ ai_scoring:
 
 ## 我建议的 v2 顺序
 
-1. PDF/screenshots asset management。
-2. Authorized download / source trace。
-3. Auto reading draft。
-4. Evidence extraction / structured reading signals。
-5. AI-assisted scoring rubric。
-6. Workflow orchestrator，把已有命令和 v2 子能力串成默认自动运行、可监控、可调整的流程。
-7. Batch candidate import 和 campaign review queue。
-8. Scholarly API lookup 进入 staging。
-9. Verification/approval/scoring 的本地 review UI。
-10. Claim-level citation check。
-11. 更强 evals。
-12. 可选 multi-agent orchestration。
+1. Phase 6: PDF/screenshots asset management。
+2. Phase 7: Authorized download / source trace。
+3. Phase 7.1: Browser session provider，作为 Phase 7 的授权会话子能力。
+4. Phase 8: Auto reading draft，只生成正文阅读草稿和候选 `asset_suggestions`。
+5. Phase 8.1: Visual evidence extraction，做候选裁图/裁表、caption、基础 OCR 和来源追踪。
+6. Phase 9: Evidence signals & AI-assisted scoring，融合正文证据和视觉证据候选，并做轻量 metadata enrichment。
+7. Phase 10: Workflow orchestrator，把已有命令和 v2 子能力串成默认自动运行、可监控、可调整的流程。
+8. Phase 11: Batch candidate import 和 campaign review queue。
+9. Phase 12: Local review workspace，用于监管候选、PDF、阅读草稿、视觉证据、评分和 formal approval。
+10. Phase 13: Writing safety & hardening，包含 claim-level citation check、更强 eval、回归测试和 guardrails。
+
+Deferred：Scholarly metadata deep integrations、advanced figure intelligence、multi-agent orchestration。
 
 ## 已采纳的外部建议: AI scoring
 
@@ -250,12 +333,11 @@ ai_scoring:
 - 不允许未人工确认的质量结论或推荐标签直接进入 formal records。
 - 不让 `ai_read_priority_score` 完全由模型自由生成；应有规则、证据范围和中文理由。
 
-## v2 规划时需要决定的问题
+## 已解决或收敛的问题
 
-- v2 继续 CLI-first + generated reports，还是较早引入 local Web UI？
-- 第一个 citation source 选 DOI/Crossref、Zotero、BibTeX import 还是 OpenAlex？
-- PDF 是否继续完全手动提供，还是支持用户授权 URL 的受控下载？
-- Screenshot metadata 需要多详细，才不会变成负担？
-- v2 是否引入 database，还是继续 Markdown/YAML + indexes？
-- AI scoring 的 1-5 分制是否足够，还是需要后续支持自定义 rubric 权重？
-- `ai_read_priority_score` 是完全 rule-based、AI-generated，还是 AI proposal + rule cap？
+- v2 继续 CLI-first + generated reports；Local Review Workspace 放到 Phase 12，只做监管台。
+- PDF 支持 open access、用户提供和用户授权来源的受控下载；已由 Phase 7/7.1 处理。
+- v2 主闭环继续 Markdown/YAML + local-only assets，不在当前主链引入 database。
+- Screenshot / visual metadata 在 Phase 8.1 只保留最小必要字段：source、page、region、caption/OCR、confidence、method、Chinese uncertainty note。
+- AI scoring 采用 relevance、quality、read priority 三分离；read priority 采用 AI proposal + rule cap，不作为正式学术结论。
+- Metadata enrichment 收缩为轻量 DOI/BibTeX 基础补全、title/author/year 标准化和 dedup 辅助；Crossref/OpenAlex/Zotero 深集成延后。

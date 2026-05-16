@@ -28,6 +28,7 @@ templates_root: custom_templates
     assert config.assets_root == tmp_path / "custom_literature" / "assets"
     assert config.source_candidates_root == tmp_path / "custom_literature" / "source_candidates"
     assert config.pdfs_root == tmp_path / "custom_literature" / "pdfs"
+    assert config.extracted_root == tmp_path / "custom_literature" / "extracted"
     assert config.sessions_root == tmp_path / ".rsa" / "sessions"
     assert config.topic_profiles_root == tmp_path / "custom_literature" / "topic_profiles"
     assert config.default_max_candidates == 5
@@ -39,6 +40,8 @@ templates_root: custom_templates
     assert config.source_discovery_automation_mode == "monitored_auto"
     assert config.source_discovery_default_auto_download is True
     assert config.custom_source_providers == []
+    assert config.reading_draft_llm["provider"] is None
+    assert config.reading_draft_ready_score_threshold == 6
 
 
 def test_local_overrides_win_over_project_defaults(tmp_path):
@@ -131,3 +134,34 @@ source_discovery:
     assert config.source_discovery_default_auto_download is False
     assert config.source_discovery_automation_mode == "monitored_auto"
     assert config.custom_source_providers == [{"provider_id": "local_source"}]
+
+
+def test_reading_draft_local_llm_overrides_are_merged(tmp_path):
+    write(
+        tmp_path / "rsa.yaml",
+        """
+reading_draft:
+  llm:
+    provider: openai_compatible
+    model: project-model
+    language: zh
+  review:
+    ready_score_threshold: 7
+""",
+    )
+    write(
+        tmp_path / ".rsa" / "local.yaml",
+        """
+reading_draft:
+  llm:
+    provider: mock
+    model: local-mock
+""",
+    )
+
+    config = load_project_config(tmp_path)
+
+    assert config.reading_draft_llm["provider"] == "mock"
+    assert config.reading_draft_llm["model"] == "local-mock"
+    assert config.reading_draft_llm["language"] == "zh"
+    assert config.reading_draft_ready_score_threshold == 7

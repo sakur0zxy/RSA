@@ -303,7 +303,7 @@ def _validate_note_requests(requests: Any) -> list[str]:
 
 def _quote_text(value: Any) -> str:
     if isinstance(value, dict):
-        return str(value.get("text", "") or "")
+        return str(value.get("quote", "") or value.get("text", "") or "")
     return str(value or "")
 
 
@@ -343,12 +343,45 @@ def validate_reading_note(config: ProjectConfig, paper_id: str) -> list[str]:
     for field in ["source_grounded_claims", "short_quotes", "note_integration_requests"]:
         if not isinstance(fm.get(field), list):
             errors.append(f"{field} 必须是 YAML list")
+    if "asset_suggestions" in fm and not isinstance(fm.get("asset_suggestions"), list):
+        errors.append("asset_suggestions 必须是 YAML list")
+    if "uncertain_points_zh" in fm and not isinstance(fm.get("uncertain_points_zh"), list):
+        errors.append("uncertain_points_zh 必须是 YAML list")
 
     short_quotes = fm.get("short_quotes")
     if isinstance(short_quotes, list):
         for index, quote in enumerate(short_quotes, start=1):
             if len(_quote_text(quote).split()) > 25:
                 errors.append(f"short_quotes 第 {index} 项超过 25 个词，不能保留长段原文")
+
+    if "source_grounded_claims" in fm and isinstance(fm.get("source_grounded_claims"), list):
+        for index, claim in enumerate(fm.get("source_grounded_claims") or [], start=1):
+            if not isinstance(claim, dict):
+                errors.append(f"source_grounded_claims 第 {index} 项必须是 mapping")
+                continue
+            for field in [
+                "claim_zh",
+                "evidence_page",
+                "evidence_section",
+                "source_chunk_id",
+                "evidence_snippet",
+                "needs_human_check",
+            ]:
+                if field in claim and _is_blank(claim.get(field)):
+                    errors.append(f"source_grounded_claims 第 {index} 项缺少 {field}")
+
+    if "agent_review_score_10" in fm:
+        try:
+            score = int(fm.get("agent_review_score_10"))
+        except (TypeError, ValueError):
+            errors.append("agent_review_score_10 必须是 0 到 10 的整数")
+        else:
+            if score < 0 or score > 10:
+                errors.append("agent_review_score_10 必须在 0 到 10 之间")
+
+    if note_status == "ready_for_review":
+        if fm.get("human_confirmed") is True:
+            errors.append("ready_for_review 仍是待人工监管状态，不能设置 human_confirmed: true")
 
     errors.extend(_validate_note_requests(fm.get("note_integration_requests")))
 

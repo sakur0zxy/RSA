@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: Phase 7.1 complete; ready to discuss Phase 8
-stopped_at: Phase 7.1 complete; next recommended step is `$gsd-discuss-phase 8`
-last_updated: "2026-05-14T22:40:00+08:00"
-last_activity: 2026-05-14 -- 完成 Phase 7.1 Browser Session Provider
+status: Phase 8 complete; ready to discuss Phase 8.1
+stopped_at: Phase 8 complete; next recommended step is `$gsd-discuss-phase 8.1`
+last_updated: "2026-05-16T00:00:00+08:00"
+last_activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
 progress:
   total_phases: 15
-  completed_phases: 8
-  total_plans: 21
-  completed_plans: 21
-  percent: 53
+  completed_phases: 9
+  total_plans: 24
+  completed_plans: 24
+  percent: 60
 ---
 
 # 项目状态
@@ -22,22 +22,22 @@ progress:
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** Phase 8 Auto Reading Draft
+**当前重点:** Phase 8.1 Visual Evidence Extraction
 
 ## 当前位置
 
-Phase: 8 Auto Reading Draft
+Phase: 8.1 Visual Evidence Extraction
 Plan: 未开始
-Status: Phase 7.1 已完成；下一步建议讨论 Phase 8
-Last activity: 2026-05-14 -- 完成 Phase 7.1 Browser Session Provider
+Status: Phase 8 已完成；下一步建议讨论 Phase 8.1
+Last activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
 
-进度: [█████░░░░░] 53%
+进度: [██████░░░░] 60%
 
 ## 进度指标
 
 **速度:**
 
-- 已完成 plans: 21
+- 已完成 plans: 24
 - 平均耗时: N/A
 - 总执行时间: 0 hours
 
@@ -53,7 +53,8 @@ Last activity: 2026-05-14 -- 完成 Phase 7.1 Browser Session Provider
 | 6 | 2 | complete |
 | 7 | 3 | complete |
 | 7.1 | 2 | complete |
-| 8 | not planned | next |
+| 8 | 3 | complete |
+| 8.1 | not planned | next |
 
 ## 累积上下文
 
@@ -71,6 +72,8 @@ Last activity: 2026-05-14 -- 完成 Phase 7.1 Browser Session Provider
 - Phase 7.1 Browser Session Provider 支持用户自行登录资料库后复用本地授权浏览器会话；session 文件 local-only，不保存密码，不从已有浏览器静默提取 cookies，不绕过验证码/SSO/paywall。
 - Phase 7.1 v1 支持 cookie-based direct PDF URL；复杂 DOM 搜索、点击下载和 JS 下载流后续再做。
 - v2 resequence: Phase 10 定为 Workflow Orchestrator，用于串联已有命令并自动跑到 review packet；原 Campaign/Metadata/UI/Writing/Multi-Agent 阶段顺延。
+- Phase 8 Auto Reading Draft 支持 `rsa note draft P###`，从 source ledger 或 `--source-file` 生成中文自动阅读草稿、AI 初审分、review packet、local-only extraction cache 和 prompt packet。
+- Phase 8 `ready_for_review` 只表示 AI 初审后建议人工监管，不等于 `approved`，也不允许绕过 formal write gate。
 
 ### 待办
 
@@ -78,14 +81,14 @@ Last activity: 2026-05-14 -- 完成 Phase 7.1 Browser Session Provider
 
 ### 阻塞和关注点
 
-- Phase 8 需要保持 Phase 4 reading note guardrails：自动阅读草稿只能基于本地、用户提供或已授权全文。
+- Phase 8.1 需要保持 Phase 8 边界：视觉输出只能作为候选证据，不得自动生成正式学术结论。
 - Browser session 下载得到的 PDF 只是本地授权阅读材料，不能自动写入 metadata、literature_map、agent_research_notes 或论文正文。
 
 ## 会话连续性
 
-Last session: Phase 7.1 complete
-Stopped at: Phase 7.1 Browser Session Provider complete; ready for `$gsd-discuss-phase 8`.
-Resume file: `.planning/phases/07.1-browser-session-provider/07.1-VERIFICATION.md`
+Last session: Phase 8 complete
+Stopped at: Phase 8 Auto Reading Draft complete; ready for `$gsd-discuss-phase 8.1`.
+Resume file: `.planning/phases/08-auto-reading-draft/08-VERIFICATION.md`
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
@@ -102,3 +105,5 @@ Resume file: `.planning/phases/07.1-browser-session-provider/07.1-VERIFICATION.m
 **已插入 Phase:** 07.1 (Browser Session Provider) - 2026-05-14
 **已计划 Phase:** 07.1 (Browser Session Provider) - 2 plans - 2026-05-14
 **已完成 Phase:** 07.1 (Browser Session Provider) - 2 plans - 2026-05-14
+**已计划 Phase:** 08 (Auto Reading Draft) - 3 plans - 2026-05-16
+**已完成 Phase:** 08 (Auto Reading Draft) - 3 plans - 2026-05-16

@@ -26,7 +26,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Metadata gate | 只有经过人工确认的文献才能进入 `metadata/P###.yaml`。 |
 | Candidate staging | 候选文献和核验记录先停留在 staging，不会自动进入正式记录。 |
 | Literature map | 将已验证文献映射到 topic、priority question、章节和计划产出。 |
-| Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记。 |
+| Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记；`rsa note draft` 可生成中文自动阅读草稿和监管包。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
@@ -135,7 +135,8 @@ rsa --root . eval compare
 | `rsa map validate` | 只读校验 `literature_map.md`。 |
 | `rsa map propose` | 从 round 输出生成 map 建议，不写正式记录。 |
 | `rsa gap generate` | 生成研究空白报告。 |
-| `rsa note create` | 从已授权全文创建单篇 reading note。 |
+| `rsa note create` | 从已授权全文创建空白/结构化 reading note。 |
+| `rsa note draft` | 从 source ledger 或显式 `--source-file` 生成中文自动阅读草稿、AI 初审分和 review packet。 |
 | `rsa source add` / `validate` / `status` | 登记、校验或查看本地/已授权全文来源。 |
 | `rsa source find` | 自动发现、审查并默认下载规则允许的授权全文来源。 |
 | `rsa source candidates` | 只读查看候选来源、匹配证据、授权模式和中文原因。 |
@@ -191,12 +192,13 @@ rsa --root . source find P001 --provider university_library_browser
   metadata/                 # 正式文献 metadata: P###.yaml
   topic_profiles/           # 研究主题 profile
   agent_outputs/            # 有边界的 round archive
-  notes/                    # P###_reading_note.md
+  notes/                    # P###_reading_note.md 和 P###_review_packet.md
   synthesis/                # gap report 和 eval report
   sources/                  # P###.yaml 来源 ledger
   source_candidates/        # P###.yaml 候选来源、匹配证据和下载状态
   pdfs/                     # 本地-only PDF，git 忽略
   assets/                   # 本地-only 截图/结果图；manifest.yaml 可审计
+  extracted/                # 本地-only PDF 文本提取缓存和脱敏 prompt packet，git 忽略
   paper_index.md            # 正式 metadata 索引
   literature_map.md         # 正式文献到主题的映射
   agent_research_notes.md   # 人工确认后的辅助研究笔记
@@ -219,6 +221,8 @@ tests/                      # 回归测试
 - v1 browser session 自动下载只支持 cookie-based 直接 PDF URL；复杂数据库页面点击、DOM 解析和 JS 下载流属于后续扩展。
 - 不内置、不推荐、不自动化 Sci-Hub、盗版镜像或任何绕过访问控制的来源。
 - 缺失或未授权 PDF 只会生成 blocked 状态记录，不会生成假的 reading note。
+- `rsa note draft` 的 `ready_for_review` 只表示 AI 初审后建议人工监管，不代表 `approved`，也不是论文质量分或相关性分。
+- `agent_review_score_10` 只评价阅读草稿是否完整、可追溯、适合交给用户复核，不能当作正式学术结论。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。

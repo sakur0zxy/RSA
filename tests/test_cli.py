@@ -431,6 +431,68 @@ def test_cli_note_create_validate_and_status(tmp_path, capsys):
     assert "draft" in status_out.out
 
 
+def test_cli_note_draft_generates_ready_review_packet(tmp_path, capsys):
+    prepare_project(tmp_path)
+    local_yaml = tmp_path / ".rsa" / "local.yaml"
+    local_yaml.parent.mkdir(parents=True, exist_ok=True)
+    local_yaml.write_text(
+        """
+reading_draft:
+  llm:
+    provider: mock
+    model: mock-reading-draft
+""",
+        encoding="utf-8",
+    )
+    source = tmp_path / "authorized-full-text.pdf"
+    source.write_text(
+        (
+            "This paper studies gapped aperture SAR imaging with reconstruction experiments. "
+            "Figure 3 reports results and Table 1 lists metrics. "
+        )
+        * 8,
+        encoding="utf-8",
+    )
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Draft CLI Paper"),
+            "--pdf-status",
+            "local",
+            "--local-pdf",
+            str(source),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+
+    drafted = main(
+        [
+            "--root",
+            str(tmp_path),
+            "note",
+            "draft",
+            "P001",
+            "--source-file",
+            str(source),
+        ]
+    )
+    drafted_out = capsys.readouterr()
+    valid = main(["--root", str(tmp_path), "note", "validate", "P001"])
+    valid_out = capsys.readouterr()
+
+    assert drafted == 0
+    assert "已生成自动阅读草稿" in drafted_out.out
+    assert "ready_for_review" in drafted_out.out
+    assert "score=" in drafted_out.out
+    assert valid == 0
+    assert "阅读笔记有效" in valid_out.out
+    assert (tmp_path / "01_literature" / "notes" / "P001_review_packet.md").exists()
+
+
 def test_cli_source_and_asset_add_validate_status(tmp_path, capsys):
     prepare_project(tmp_path)
     main(

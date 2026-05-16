@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from rsa_cli.assets import add_source_record
 from rsa_cli.config import load_project_config
 from rsa_cli.metadata import write_metadata_record
 from rsa_cli.notes import (
@@ -12,6 +13,7 @@ from rsa_cli.notes import (
     note_status,
     validate_reading_note,
 )
+from rsa_cli.reading_draft import DraftError, draft_reading_note
 from rsa_cli.skeleton import create_literature_skeleton
 
 
@@ -47,6 +49,35 @@ def prepare_project(tmp_path: Path):
 def write_source(config, name="P001.pdf") -> Path:
     source = config.pdfs_root / name
     source.write_text("authorized local full text placeholder", encoding="utf-8")
+    return source
+
+
+def write_mock_llm_config(config) -> None:
+    local = config.root / ".rsa" / "local.yaml"
+    local.parent.mkdir(parents=True, exist_ok=True)
+    local.write_text(
+        """
+reading_draft:
+  llm:
+    provider: mock
+    model: mock-reading-draft
+""",
+        encoding="utf-8",
+    )
+
+
+def write_long_source(tmp_path: Path) -> Path:
+    source = tmp_path / "authorized-full-text.pdf"
+    source.write_text(
+        (
+            "This paper studies gapped aperture SAR imaging. "
+            "The method compares reconstruction results with baseline methods. "
+            "Figure 3 reports the reconstruction quality and Table 1 lists metrics. "
+            "The experiment uses simulated sparse aperture observations and evaluates sidelobe artifacts. "
+        )
+        * 6,
+        encoding="utf-8",
+    )
     return source
 
 
@@ -161,3 +192,82 @@ def test_note_status_reports_missing_note_with_metadata_pdf_status(tmp_path):
     )
 
     assert note_status(config, "P001") == "no_note; pdf_status=not_acquired"
+
+
+def test_draft_reading_note_from_source_ledger_generates_review_packet(tmp_path):
+    config = prepare_project(tmp_path)
+    write_mock_llm_config(config)
+    config = load_project_config(tmp_path)
+    write_metadata_record(
+        config,
+        metadata_values(pdf_status="authorized"),
+        human_confirmed=True,
+        confirmed_by="zxy",
+    )
+    source = write_long_source(tmp_path)
+    add_source_record(
+        config,
+        "P001",
+        source_file=str(source),
+        authorization="authorized",
+        source_type="pdf",
+        license_note="用户已授权本地科研阅读。",
+        added_by="zxy",
+    )
+
+    result = draft_reading_note(config, "P001")
+    note = load_reading_note(config, "P001")
+
+    assert result.note_status == "ready_for_review"
+    assert result.agent_review_score_10 >= 6
+    assert result.review_packet_path.exists()
+    assert result.prompt_packet_path.exists()
+    assert result.extraction_cache_path.exists()
+    assert note.frontmatter["human_confirmed"] is False
+    assert note.frontmatter["note_status"] == "ready_for_review"
+    assert note.frontmatter["agent_review_score_10"] >= 6
+    assert "prompt_packet" in note.frontmatter
+    assert "asset_suggestions" in note.frontmatter
+    assert validate_reading_note(config, "P001") == []
+
+
+def test_draft_reading_note_missing_llm_config_blocks_without_note(tmp_path):
+    config = prepare_project(tmp_path)
+    source = write_long_source(tmp_path)
+    write_metadata_record(
+        config,
+        metadata_values(local_pdf=str(source), pdf_status="local"),
+        human_confirmed=True,
+        confirmed_by="zxy",
+    )
+
+    with pytest.raises(DraftError) as exc:
+        draft_reading_note(config, "P001", source_file=str(source))
+
+    assert "reading_draft.llm.provider" in str(exc.value)
+    assert not (config.notes_root / "P001_reading_note.md").exists()
+    assert (config.extracted_root / "P001" / "prompt_packet.yaml").exists()
+
+
+def test_draft_reading_note_does_not_overwrite_ready_note(tmp_path):
+    config = prepare_project(tmp_path)
+    write_mock_llm_config(config)
+    config = load_project_config(tmp_path)
+    source = write_long_source(tmp_path)
+    write_metadata_record(
+        config,
+        metadata_values(local_pdf=str(source), pdf_status="local"),
+        human_confirmed=True,
+        confirmed_by="zxy",
+    )
+    draft_reading_note(config, "P001", source_file=str(source))
+
+    with pytest.raises(DraftError) as exc:
+        draft_reading_note(
+            config,
+            "P001",
+            source_file=str(source),
+            overwrite_draft=True,
+        )
+
+    assert "note_status: draft" in str(exc.value)

@@ -153,6 +153,25 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["provided", "local", "authorized"],
         help="全文授权来源；只能是 provided/local/authorized。",
     )
+    note_draft = note_subcommands.add_parser(
+        "draft",
+        help="基于本地/用户提供/已授权全文自动生成中文 reading note draft 和 review packet。",
+    )
+    note_draft.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    note_draft.add_argument(
+        "--source-file",
+        help="可选：临时指定本地全文文件；缺省时从 sources/P###.yaml 选择可用 PDF。",
+    )
+    note_draft.add_argument(
+        "--overwrite-draft",
+        action="store_true",
+        help="只允许覆盖已有 note_status: draft 的阅读笔记；不会覆盖 ready_for_review/approved。",
+    )
+    note_draft.add_argument(
+        "--retry",
+        action="store_true",
+        help="模型输出 schema 不合格时允许一次安全重试。",
+    )
     note_validate = note_subcommands.add_parser(
         "validate", help="只读校验 P###_reading_note.md 的 schema 和人工确认状态。"
     )
@@ -583,6 +602,7 @@ def _run_gap_command(args: argparse.Namespace, root: Path) -> int:
 
 def _run_note_command(args: argparse.Namespace, root: Path) -> int:
     from .notes import NoteError, create_reading_note, note_status, validate_reading_note
+    from .reading_draft import DraftError, draft_reading_note
 
     config = load_project_config(root)
     try:
@@ -595,6 +615,21 @@ def _run_note_command(args: argparse.Namespace, root: Path) -> int:
             )
             print(f"已创建阅读笔记: {result.path}")
             return 0
+        if args.note_command == "draft":
+            result = draft_reading_note(
+                config,
+                args.paper_id,
+                source_file=args.source_file,
+                overwrite_draft=args.overwrite_draft,
+                retry=args.retry,
+            )
+            print(
+                "已生成自动阅读草稿: "
+                f"{result.note_path}; status={result.note_status}; "
+                f"score={result.agent_review_score_10}/10; "
+                f"review_packet={result.review_packet_path}"
+            )
+            return 0
         if args.note_command == "validate":
             errors = validate_reading_note(config, args.paper_id)
             if errors:
@@ -606,6 +641,9 @@ def _run_note_command(args: argparse.Namespace, root: Path) -> int:
         if args.note_command == "status":
             print(f"阅读笔记状态: {args.paper_id} -> {note_status(config, args.paper_id)}")
             return 0
+    except DraftError as exc:
+        print(f"自动阅读草稿生成失败: {exc}", file=sys.stderr)
+        return 1
     except NoteError as exc:
         print(f"阅读笔记操作失败: {exc}", file=sys.stderr)
         return 1

@@ -151,6 +151,10 @@ def test_later_phase_seed_templates_are_safe_and_localized():
         "人工决策",
         "source_grounded_claims",
         "short_quotes",
+        "asset_suggestions",
+        "agent_review_score_10",
+        "recommended_human_action_zh",
+        "prompt_packet",
         "note_integration_requests",
     )
     assert_in_root_and_fallback(

@@ -101,10 +101,40 @@ paper_id: P000
 metadata: metadata/P000.yaml
 note_status: draft
 source_file:
+source_id:
+source_hash:
 authorization:
+extraction_status:
+evidence_level:
+extraction_cache:
+llm_provider:
+llm_model:
+prompt_version:
+prompt_packet:
+review_packet:
+draft_created_at:
+research_problem_zh:
+method_summary_zh:
+experiment_summary_zh:
+dataset_or_scene_zh:
+metrics_zh:
+main_findings_zh:
+limitations_zh:
+topic_relevance_zh:
+uncertain_points_zh: []
 source_grounded_claims: []
 short_quotes: []
+asset_suggestions: []
 agent_summary:
+agent_review_status:
+agent_reviewed_at:
+agent_review_score_10:
+agent_review_grade:
+agent_review_rationale_zh:
+score_breakdown: {}
+agent_review_warnings: []
+recommended_human_action_zh:
+needs_human_review: true
 human_decision:
 human_confirmed: false
 confirmed_by:

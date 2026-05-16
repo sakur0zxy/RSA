@@ -9,3 +9,17 @@ rounds:
   output_policy: "agent_outputs_only"
   approval_mode: "human_confirmed_formal_writes"
   campaign_id:
+reading_draft:
+  llm:
+    provider:
+    model:
+    api_key_env:
+    base_url:
+    timeout_seconds: 60
+    max_chunks: 8
+    max_input_tokens: 12000
+    temperature: 0
+    language: "zh"
+    prompt_profile: "default"
+  review:
+    ready_score_threshold: 6

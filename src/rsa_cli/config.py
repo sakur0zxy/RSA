@@ -27,6 +27,23 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "approval_mode": "human_confirmed_formal_writes",
         "campaign_id": None,
     },
+    "reading_draft": {
+        "llm": {
+            "provider": None,
+            "model": None,
+            "api_key_env": None,
+            "base_url": None,
+            "timeout_seconds": 60,
+            "max_chunks": 8,
+            "max_input_tokens": 12000,
+            "temperature": 0,
+            "language": "zh",
+            "prompt_profile": "default",
+        },
+        "review": {
+            "ready_score_threshold": 6,
+        },
+    },
 }
 
 
@@ -104,6 +121,10 @@ class ProjectConfig:
         return self.literature_root / "pdfs"
 
     @property
+    def extracted_root(self) -> Path:
+        return self.literature_root / "extracted"
+
+    @property
     def sessions_root(self) -> Path:
         return self.root / ".rsa" / "sessions"
 
@@ -123,6 +144,22 @@ class ProjectConfig:
     @property
     def source_discovery(self) -> dict[str, Any]:
         return dict(self.data.get("source_discovery", {}))
+
+    @property
+    def reading_draft(self) -> dict[str, Any]:
+        return dict(self.data.get("reading_draft", {}))
+
+    @property
+    def reading_draft_llm(self) -> dict[str, Any]:
+        return dict(self.reading_draft.get("llm", {}))
+
+    @property
+    def reading_draft_review(self) -> dict[str, Any]:
+        return dict(self.reading_draft.get("review", {}))
+
+    @property
+    def reading_draft_ready_score_threshold(self) -> int:
+        return int(self.reading_draft_review.get("ready_score_threshold", 6))
 
     @property
     def custom_source_providers(self) -> list[dict[str, Any]]:
@@ -198,6 +235,10 @@ def validate_config(config: ProjectConfig) -> None:
         raise ConfigError("rounds.allowed_tools 必须是 list")
     if not isinstance(config.source_discovery.get("custom_providers", []), list):
         raise ConfigError("source_discovery.custom_providers 必须是 list")
+    if not isinstance(config.reading_draft.get("llm", {}), dict):
+        raise ConfigError("reading_draft.llm 必须是 mapping")
+    if not isinstance(config.reading_draft.get("review", {}), dict):
+        raise ConfigError("reading_draft.review 必须是 mapping")
     if not config.output_policy:
         raise ConfigError("rounds.output_policy 不能为空")
     if not config.approval_mode:
@@ -210,6 +251,9 @@ def validate_config(config: ProjectConfig) -> None:
         raise ConfigError(
             "rounds.default_max_candidates 不能超过 rounds.hard_max_candidates"
         )
+    threshold = config.reading_draft_ready_score_threshold
+    if threshold < 0 or threshold > 10:
+        raise ConfigError("reading_draft.review.ready_score_threshold 必须在 0 到 10 之间")
 
 
 def load_project_config(root: Path | str = ".") -> ProjectConfig:

@@ -16,6 +16,18 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 
 字段名、YAML key、Markdown 表格列、CLI flag、命令名、状态枚举和代码标识保持英文稳定；当这些英文标识出现在用户需要阅读或填写的位置时，必须提供中文解释或中文上下文。详见 `.planning/LANGUAGE-POLICY.md`。
 
+## 依赖策略
+
+RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`python -m pip install -e .` 应安装当前核心功能所需的 Python 依赖；optional extras 只用于非核心增强、未来扩展或开发测试。
+
+当前核心能力包括本地 Markdown/YAML harness、metadata/round/map/gap、source ledger、授权来源获取、browser session provider、PDF 文本提取和自动阅读草稿。不能把这些核心能力拆成用户必须手动猜测的 optional extras。
+
+无法由 pip 可靠安装的外部资源，例如 Playwright Chromium、本地浏览器运行资源或未来模型/工具资源，应通过 `rsa doctor` 或命令级 preflight check 自动检查。缺失时必须用中文说明缺什么、影响哪个功能、如何修复，并且不得生成伪结果。
+
+依赖策略必须维护命令级核心闭环契约、功能-依赖矩阵、`OK`/`WARN`/`BLOCKED` 自检状态、doctor 与命令 preflight 的边界，以及 fail closed 的统一定义。
+
+详见 `.planning/DEPENDENCY-POLICY.md`。
+
 ## 当前状态
 
 - 已发布里程碑：`v1.0 Local Harness`
@@ -40,11 +52,13 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 - 通过 `AGENTS.md` 提供项目级 agent 指引 - v1.0
 - Source ledger 和 asset manifest foundation - v2 Phase 6
 - Authorized acquisition workflow - v2 Phase 7
+- Browser session provider 作为授权获取子能力 - v2 Phase 7.1
 
 ### 下一阶段
 
-- Phase 7 已完成授权全文获取能力，下一步推进 Phase 8 Auto Reading Draft。
-- 增加自动阅读、评分、批量 campaign 或 UI 能力时，必须保留 v1 formal write guardrails 和 Phase 7 授权边界。
+- Phase 7/7.1 已完成授权全文获取和浏览器会话复用能力，下一步推进 Phase 8 Auto Reading Draft。
+- Phase 8 只生成阅读草稿和候选 `asset_suggestions`；Phase 8.1 再处理最小必要视觉证据候选。
+- 增加自动阅读、视觉证据、评分、批量 campaign 或 review workspace 能力时，必须保留 v1 formal write guardrails 和 Phase 7 授权边界。
 
 ### 除非重新打开，否则不做
 
@@ -78,6 +92,7 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 - 人工审阅：formal writes 必须显式确认。
 - 评估：修改 prompt、template、parser 或 formal-write 逻辑后，应运行 `rsa eval compare`。
 - 语言：用户可见内容中文优先；schema name、CLI flag、YAML key、表格列、状态枚举和代码标识保持英文，并提供中文解释。
+- 依赖：普通用户基础版必须覆盖当前核心 agent 闭环；optional extras 只用于非核心增强、未来扩展或开发测试。
 
 ## 关键决策
 
@@ -91,24 +106,30 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 | 先做 deterministic evals，再考虑编排 | Harness 可靠性应先于更大的 agent system | v1.0 已验证 |
 | 授权全文获取默认 monitored_auto | 用户希望系统可自动推进，同时保留监控和调整入口 | v2 Phase 7 已验证 |
 | 不自动化 Sci-Hub 或绕过访问控制 | 避免让自动下载污染合法来源链和正式科研记录 | v2 Phase 7 已验证 |
+| Phase 7.1 是 Phase 7 的子能力 | 浏览器会话复用只是授权获取的一种 provider，不是独立下载政策 | v2 Phase 7.1 已验证 |
+| Phase 8 `asset_suggestions` 只做候选建议 | 正文阅读可提示可能值得处理的图表，但不能直接断言图表重要性 | v2 Phase 8 设计约束 |
+| 图像能力放入 Phase 8.1 | 让视觉证据在 Phase 9 评分前进入证据链，同时不扩大 Phase 8 正文阅读主流程 | v2 Roadmap 已调整 |
+| 基础版覆盖核心 agent 功能 | 普通用户不应为了当前核心闭环手动猜 optional extras；缺外部资源由自检给中文修复路径 | 全局设计已锁定，待 Phase 8/后续实现落地 |
 
 ## 下一里程碑目标
 
 v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
 
 1. PDF、截图和重要结果图的 asset management。
-2. Authorized download / source trace，只允许 open access、用户提供或用户授权来源。已在 Phase 7 完成。
+2. Authorized download / source trace，只允许 open access、用户提供或用户授权来源。已在 Phase 7/7.1 完成。
 3. Auto reading draft，基于本地或已授权全文生成可审阅阅读草稿。下一步。
-4. Evidence extraction / structured reading signals，在评分前抽取结构化证据。
-5. AI-assisted scoring rubric，区分 relevance、quality 和 read priority，且不直接进入 formal records。
-6. Workflow orchestrator，串联已有命令，自动跑到 review packet，同时允许用户监控关键环节和调整流程。
-7. Batch candidate import 和 campaign review queue。
-8. Scholarly API 或 citation manager 集成，但只进入 staging。
-9. 本地 review UI，用于 verification、formal approval 和 scoring review。
+4. Visual evidence extraction，把 Phase 8 的候选 `asset_suggestions` 转成可审阅裁图、caption、基础 OCR 和来源追踪。
+5. Evidence extraction / structured reading signals，在评分前抽取正文证据和视觉证据候选。
+6. AI-assisted scoring rubric，区分 relevance、quality 和 read priority，且不直接进入 formal records。
+7. Workflow orchestrator，串联已有命令，自动跑到 review packet，同时允许用户监控关键环节和调整流程。
+8. Batch candidate import 和 campaign review queue。
+9. Local review workspace，用于监管候选、PDF、阅读草稿、视觉证据、评分和 formal approval。
 10. 面向后续写作的 claim-level citation check。
+
+重型 Crossref/OpenAlex/Zotero 深集成、高级图表智能和 multi-agent 编排不纳入 v2 主闭环；只有 DOI/BibTeX 基础补全、title/author/year 标准化和 dedup 辅助可以按 Phase 9 主闭环需要收窄实现。
 
 详见 `.planning/v2-DISCUSSION.md`。
 
 ---
 
-*Last updated: 2026-05-14 after Phase 7 Authorized Acquisition execution*
+*Last updated: 2026-05-16 after Phase 8/8.1 roadmap alignment*

@@ -14,6 +14,7 @@ REQUIRED_DIRECTORIES = {
     "source_candidates",
     "pdfs",
     "assets",
+    "extracted",
 }
 
 REQUIRED_FILES = {
@@ -83,6 +84,8 @@ def test_gitignore_protects_local_settings_pdfs_and_assets():
     assert "01_literature/assets/**" in gitignore
     assert "!01_literature/assets/.gitkeep" in gitignore
     assert "!01_literature/assets/*/manifest.yaml" in gitignore
+    assert "01_literature/extracted/**" in gitignore
+    assert "!01_literature/extracted/.gitkeep" in gitignore
 
 
 def test_templates_and_starter_profile_are_substantive():
