@@ -28,6 +28,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Literature map | 将已验证文献映射到 topic、priority question、章节和计划产出。 |
 | Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记；`rsa note draft` 可生成中文自动阅读草稿和监管包。 |
 | Visual evidence candidates | `rsa visual extract` 从已授权/本地 PDF 提取图表/表格候选、裁图和本地上下文包；候选 YAML 进入 staging/review，不是正式科研记录。 |
+| Campaign foundation | `rsa campaign create/import/validate/status` 管理批量候选队列、轻量去重和正式 metadata 链接；不依赖 AI 评分或 workflow orchestrator。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
@@ -150,6 +151,9 @@ rsa --root . eval compare
 | `rsa asset add` / `validate` / `status` | 登记、校验或查看截图、图表和结果图资产。 |
 | `rsa visual extract P001` | 从已授权/本地 PDF 生成图表/表格视觉证据候选、裁图和本地上下文包。 |
 | `rsa visual validate P001` / `status P001` | 只读校验或查看 `visual_evidence_candidates.yaml`，不修改正式记录。 |
+| `rsa campaign create` | 创建批量候选队列，写入 `01_literature/campaigns/C###.yaml`。 |
+| `rsa campaign import C001 --file candidates.csv` | 导入 CSV/TSV/YAML 候选，做 DOI/URL/title-year-author 轻量去重和正式 metadata 链接。 |
+| `rsa campaign validate C001` / `status C001` | 只读校验或查看批量队列状态、重复项、阻塞项和已链接项。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
@@ -173,6 +177,35 @@ rsa --root . visual status P001
 - `01_literature/assets/P###/visual_evidence_candidates.yaml` 是可追踪的候选记录，包含 `candidate_id`、`visual_type`、`page`、`region_bbox`、`evidence_level`、`status`、`warning_zh` 和回源链接。
 - `01_literature/assets/P###/crops/` 与 `visual_context_packets/` 是本地-only，保存截图和 Phase 9 可用的上下文包，不进入 git。
 - Phase 8.1 不做曲线数据自动还原、高级表格结构重建、LLM 图像结论、AI 评分或正式写入；视觉候选只是 staging/review 材料，不是 formal record。
+
+## Campaign Foundation Workflow
+
+Phase 8.2 先实现不依赖 Phase 9/10 的批量基础层：只管理候选队列、导入、去重、状态和正式 metadata 轻量链接，不执行 AI 评分、不自动串联下载/阅读/视觉提取，也不写入 formal records。
+
+```powershell
+rsa --root . campaign create `
+  --name-zh "SAR 批量候选" `
+  --objective-zh "导入一组待处理 SAR 文献候选"
+
+rsa --root . campaign import C001 --file candidates.csv
+rsa --root . campaign validate C001
+rsa --root . campaign status C001
+```
+
+导入文件可以是 CSV、TSV 或 YAML。建议字段：
+
+| 字段 | 中文说明 |
+|------|----------|
+| `title` | 候选论文标题。 |
+| `doi` | DOI；优先作为去重键。 |
+| `official_url` | 官方或可信页面 URL；无 DOI 时用于去重。 |
+| `year` | 发表年份。 |
+| `first_author` | 第一作者；无 DOI/URL 时辅助 title/year 去重。 |
+| `topic_profile` | 可选 topic profile。 |
+| `priority_question` | 可选优先问题。 |
+| `candidate_key` | 外部来源中的候选编号。 |
+| `source_candidate_id` | Phase 7 source candidate 编号。 |
+| `note_zh` | 中文备注或导入原因。 |
 
 ## Browser Session Provider 示例
 
@@ -222,6 +255,7 @@ rsa --root . source find P001 --provider university_library_browser
   synthesis/                # gap report 和 eval report
   sources/                  # P###.yaml 来源 ledger
   source_candidates/        # P###.yaml 候选来源、匹配证据和下载状态
+  campaigns/                # C###.yaml 批量候选队列、轻量去重和状态汇总
   pdfs/                     # 本地-only PDF，git 忽略
   assets/                   # 本地-only 截图/结果图；manifest.yaml 与 visual_evidence_candidates.yaml 可审计
     P###/crops/             # 本地-only 视觉候选裁图
@@ -254,6 +288,8 @@ tests/                      # 回归测试
 - `rsa visual extract` 只生成视觉证据候选、裁图和本地上下文包；`visual_evidence_candidates.yaml` 属于 staging/review，不得被当作正式学术结论或 formal write。
 - `rsa visual extract --all-detected` 是显式扩展模式，可能产生大量候选；默认模式不会盲目裁取整篇论文所有图片/表格。
 - Phase 8.1 不还原曲线数值、不做高级表格结构理解、不让 LLM 直接给图像学术结论；这些能力必须在后续阶段继续保留证据链、置信度和人工监管。
+- `rsa campaign ...` 只管理批量候选队列和去重状态，不执行 AI scoring、workflow orchestration、review UI 或 formal write。
+- Campaign 中的 `linked` 只表示候选匹配到现有 `metadata/P###.yaml`，不代表论文已经完成阅读、评分或正式结论。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。

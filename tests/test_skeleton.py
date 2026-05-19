@@ -12,6 +12,7 @@ REQUIRED_DIRECTORIES = {
     "synthesis",
     "sources",
     "source_candidates",
+    "campaigns",
     "pdfs",
     "assets",
     "extracted",

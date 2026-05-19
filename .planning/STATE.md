@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: Phase 8.1 complete; next recommended step is Phase 9 planning
-stopped_at: Phase 8.1 complete; next recommended step is `$gsd-plan-phase 9`
-last_updated: "2026-05-19T11:30:00+08:00"
-last_activity: 2026-05-19 -- 完成 Phase 8.1 Visual Evidence Extraction 实现与验证
+status: Phase 8.2 complete; next recommended step is Phase 9 planning
+stopped_at: Phase 8.2 complete; next recommended step is `$gsd-plan-phase 9`
+last_updated: "2026-05-19T12:20:00+08:00"
+last_activity: 2026-05-19 -- 完成 Phase 8.2 Campaign Foundation 实现与验证
 progress:
-  total_phases: 15
-  completed_phases: 10
-  total_plans: 27
-  completed_plans: 27
-  percent: 67
+  total_phases: 16
+  completed_phases: 11
+  total_plans: 28
+  completed_plans: 28
+  percent: 69
 ---
 
 # 项目状态
@@ -26,18 +26,18 @@ progress:
 
 ## 当前位置
 
-Phase: 8.1 Visual Evidence Extraction
-Plan: 3 plans completed
-Status: Phase 8.1 complete；下一步建议规划 Phase 9
-Last activity: 2026-05-19 -- 完成 Phase 8.1 Visual Evidence Extraction 实现与验证
+Phase: 8.2 Campaign Foundation
+Plan: 1 plan completed
+Status: Phase 8.2 complete；下一步建议规划 Phase 9
+Last activity: 2026-05-19 -- 完成 Phase 8.2 Campaign Foundation 实现与验证
 
-进度: [███████░░░] 67%
+进度: [███████░░░] 69%
 
 ## 进度指标
 
 **速度:**
 
-- 已完成 plans: 27
+- 已完成 plans: 28
 - 平均耗时: N/A
 - 总执行时间: 0 hours
 
@@ -55,6 +55,7 @@ Last activity: 2026-05-19 -- 完成 Phase 8.1 Visual Evidence Extraction 实现�
 | 7.1 | 2 | complete |
 | 8 | 3 | complete |
 | 8.1 | 3 | complete |
+| 8.2 | 1 | complete |
 
 ## 累积上下文
 
@@ -82,14 +83,15 @@ Last activity: 2026-05-19 -- 完成 Phase 8.1 Visual Evidence Extraction 实现�
 ### 阻塞和关注点
 
 - Phase 8.1 已完成视觉候选提取闭环：`rsa visual extract|validate|status`、`visual_evidence_candidates.yaml`、local-only crops/context packets 和 PyMuPDF fail-closed 边界。
+- Phase 8.2 已完成不依赖 Phase 9/10 的 campaign foundation：`rsa campaign create|import|validate|status`、`01_literature/campaigns/C###.yaml`、CSV/TSV/YAML 导入、轻量去重和 formal metadata 链接。
 - Phase 9 需要消费正文证据与 Phase 8.1 视觉候选，但仍不能把未人工确认的 AI 评分或图像解释写入 formal records。
 - Browser session 下载得到的 PDF 只是本地授权阅读材料，不能自动写入 metadata、literature_map、agent_research_notes 或论文正文。
 
 ## 会话连续性
 
-Last session: Phase 8.1 complete
-Stopped at: Phase 8.1 complete; next recommended step is `$gsd-plan-phase 9`
-Resume file: `.planning/phases/08.1-visual-evidence-extraction/08.1-VERIFICATION.md`
+Last session: Phase 8.2 complete
+Stopped at: Phase 8.2 complete; next recommended step is `$gsd-plan-phase 9`
+Resume file: `.planning/phases/08.2-campaign-foundation/08.2-VERIFICATION.md`
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
@@ -111,3 +113,5 @@ Resume file: `.planning/phases/08.1-visual-evidence-extraction/08.1-VERIFICATION
 
 **Planned Phase:** 08.1 (visual-evidence-extraction) — 3 plans — 2026-05-19T02:54:58.164Z
 **Completed Phase:** 08.1 (visual-evidence-extraction) — 3 plans — 2026-05-19
+**Inserted Phase:** 08.2 (campaign-foundation) — 1 plan — 2026-05-19
+**Completed Phase:** 08.2 (campaign-foundation) — 1 plan — 2026-05-19

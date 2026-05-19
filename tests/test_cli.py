@@ -68,6 +68,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "source" in captured.out
     assert "asset" in captured.out
     assert "visual" in captured.out
+    assert "campaign" in captured.out
     assert "eval" in captured.out
     assert "formal" in captured.out
 
@@ -672,6 +673,63 @@ def test_cli_visual_help_validate_status_and_expected_error(tmp_path, capsys):
     assert missing_source == 1
     assert "视觉证据操作失败" in missing_out.err
     assert "Traceback" not in missing_out.err
+
+
+def test_cli_campaign_create_import_validate_status(tmp_path, capsys):
+    prepare_project(tmp_path)
+    csv_path = tmp_path / "campaign.csv"
+    csv_path.write_text(
+        "title,doi,year,first_author\n"
+        "Campaign CLI Paper,10.1234/campaign-cli,2025,Ada\n"
+        "Campaign CLI Paper Duplicate,10.1234/campaign-cli,2025,Ada\n",
+        encoding="utf-8",
+    )
+
+    created = main(
+        [
+            "--root",
+            str(tmp_path),
+            "campaign",
+            "create",
+            "--name-zh",
+            "CLI 批量队列",
+            "--objective-zh",
+            "导入 CLI 候选并做去重。",
+            "--created-by",
+            "zxy",
+        ]
+    )
+    created_out = capsys.readouterr()
+    imported = main(
+        [
+            "--root",
+            str(tmp_path),
+            "campaign",
+            "import",
+            "C001",
+            "--file",
+            str(csv_path),
+        ]
+    )
+    imported_out = capsys.readouterr()
+    candidate_path = tmp_path / "01_literature" / "campaigns" / "C001.yaml"
+    before = candidate_path.read_text(encoding="utf-8")
+    valid = main(["--root", str(tmp_path), "campaign", "validate", "C001"])
+    valid_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "campaign", "status", "C001"])
+    status_out = capsys.readouterr()
+
+    assert created == 0
+    assert "已创建批量队列 C001" in created_out.out
+    assert imported == 0
+    assert "导入=2" in imported_out.out
+    assert "重复=1" in imported_out.out
+    assert valid == 0
+    assert "批量队列有效" in valid_out.out
+    assert status == 0
+    assert "批量队列状态" in status_out.out
+    assert "duplicate=1" in status_out.out
+    assert candidate_path.read_text(encoding="utf-8") == before
 
 
 def test_cli_source_phase7_help_lists_monitored_acquisition_commands(capsys):

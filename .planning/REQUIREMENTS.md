@@ -81,6 +81,14 @@
 - [x] **V2-VIS-04:** Visual extraction must fail closed on unreadable PDFs/images, low confidence, ambiguous regions, unsupported chart types, or missing trace information; it must not invent numeric data.
 - [x] **V2-VIS-05:** Phase 8.1 must not perform curve data restoration, advanced table reconstruction, chart-driven formal conclusions, or direct formal writes; those remain deferred advanced figure intelligence.
 
+### Phase 8.2: Campaign Foundation
+
+- [x] **V2-CAMP-FND-01:** User can create a campaign queue record under `01_literature/campaigns/C###.yaml` with Chinese name, objective, status and automation boundary.
+- [x] **V2-CAMP-FND-02:** User can import batch candidates from CSV/TSV/YAML into a campaign without requiring Phase 9 scoring or Phase 10 workflow orchestration.
+- [x] **V2-CAMP-FND-03:** Campaign import performs lightweight dedup using DOI, URL, or title/year/first_author and marks duplicates without deleting source rows.
+- [x] **V2-CAMP-FND-04:** Campaign import can link items to existing formal `metadata/P###.yaml`, while keeping `linked` distinct from reading/scoring/formal approval.
+- [x] **V2-CAMP-FND-05:** Campaign validate/status commands are read-only, Chinese-first, and report queued, linked, duplicate, needs_review and blocked counts.
+
 ### Phase 9: Evidence Signals & AI Scoring
 
 - [ ] **V2-SCORE-01:** AI scoring separates relevance, quality and read priority.
@@ -98,7 +106,7 @@
 
 ### Phase 11-13
 
-- [ ] **V2-CAMPAIGN-01:** Campaigns support batch candidate import, deduplication and review queues.
+- [ ] **V2-CAMPAIGN-01:** Campaigns integrate Phase 8.2 queues with Phase 9 scoring, Phase 10 workflow runs, ranking/filtering and batch review automation.
 - [ ] **V2-WORKSPACE-01:** Local review workspace supports verification, approval, reading draft review, visual evidence review and scoring review.
 - [ ] **V2-WRITE-01:** Claim-level citation checks produce review guidance, not final academic conclusions.
 

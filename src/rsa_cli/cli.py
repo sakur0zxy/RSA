@@ -380,6 +380,43 @@ def build_parser() -> argparse.ArgumentParser:
     )
     visual_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
 
+    campaign_group = subcommands.add_parser(
+        "campaign",
+        help="创建、导入、校验或查看批量文献候选队列；不执行评分、自动工作流或正式写入。",
+    )
+    campaign_subcommands = campaign_group.add_subparsers(
+        dest="campaign_command", required=True
+    )
+    campaign_create = campaign_subcommands.add_parser(
+        "create",
+        help="创建一个批量文献候选 campaign，用于后续导入和队列管理。",
+    )
+    campaign_create.add_argument("--name-zh", required=True, help="中文 campaign 名称。")
+    campaign_create.add_argument("--objective-zh", required=True, help="中文批量任务目标。")
+    campaign_create.add_argument("--topic-profile", help="可选 topic profile id。")
+    campaign_create.add_argument("--created-by", help="创建人。")
+    campaign_import = campaign_subcommands.add_parser(
+        "import",
+        help="从 CSV/TSV/YAML 导入候选文献条目，执行轻量去重和正式 metadata 链接。",
+    )
+    campaign_import.add_argument("campaign_id", help="campaign 编号，例如 C001。")
+    campaign_import.add_argument("--file", required=True, dest="source_file", help="CSV/TSV/YAML 导入文件。")
+    campaign_import.add_argument(
+        "--no-dedup",
+        action="store_true",
+        help="关闭 campaign 内部去重；默认会按 DOI、URL 或 title/year/author 去重。",
+    )
+    campaign_validate = campaign_subcommands.add_parser(
+        "validate",
+        help="只读校验 campaign YAML 的 schema、去重键、状态和回源字段。",
+    )
+    campaign_validate.add_argument("campaign_id", help="campaign 编号，例如 C001。")
+    campaign_status = campaign_subcommands.add_parser(
+        "status",
+        help="只读查看 campaign 队列数量、重复项、已链接项和阻塞项。",
+    )
+    campaign_status.add_argument("campaign_id", help="campaign 编号，例如 C001。")
+
     eval_group = subcommands.add_parser(
         "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
     )
@@ -941,6 +978,64 @@ def _run_visual_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_campaign_command(args: argparse.Namespace, root: Path) -> int:
+    from .campaign import (
+        CampaignError,
+        campaign_status,
+        create_campaign,
+        import_campaign_items,
+        validate_campaign,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.campaign_command == "create":
+            result = create_campaign(
+                config,
+                name_zh=args.name_zh,
+                objective_zh=args.objective_zh,
+                topic_profile=args.topic_profile,
+                created_by=args.created_by,
+            )
+            print(f"已创建批量队列 {result.campaign_id}: {result.path}")
+            return 0
+        if args.campaign_command == "import":
+            result = import_campaign_items(
+                config,
+                args.campaign_id,
+                source_file=args.source_file,
+                dedup=not args.no_dedup,
+            )
+            print(
+                f"批量候选导入完成: {result.campaign_id} -> "
+                f"导入={result.imported_count}, 重复={result.duplicate_count}, "
+                f"已链接正式文献={result.linked_count}, 阻塞={result.blocked_count}; "
+                f"文件={result.path}"
+            )
+            return 0
+        if args.campaign_command == "validate":
+            errors = validate_campaign(config, args.campaign_id)
+            if errors:
+                for error in errors:
+                    print(f"批量队列无效: {error}", file=sys.stderr)
+                return 1
+            print(f"批量队列有效: {args.campaign_id}")
+            return 0
+        if args.campaign_command == "status":
+            status = campaign_status(config, args.campaign_id)
+            print(
+                f"批量队列状态: {args.campaign_id} -> 总数={status.total_count}, "
+                f"queued={status.queued_count}, linked={status.linked_count}, "
+                f"duplicate={status.duplicate_count}, needs_review={status.needs_review_count}, "
+                f"blocked={status.blocked_count}; 文件={status.path}"
+            )
+            return 0
+    except CampaignError as exc:
+        print(f"批量队列操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -1053,6 +1148,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_asset_command(args, root)
         if args.command == "visual":
             return _run_visual_command(args, root)
+        if args.command == "campaign":
+            return _run_campaign_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":

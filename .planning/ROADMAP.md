@@ -34,6 +34,7 @@
 - [x] Phase 7.1: Browser Session Provider (INSERTED) - 2/2 plans，完成于 2026-05-14；作为 Phase 7 的浏览器会话子能力，支持用户自行登录资料库后，RSA 复用本地授权浏览器会话检索和下载用户有权限访问的论文。
 - [x] Phase 8: Auto Reading Draft - 3/3 plans，完成于 2026-05-16；基于本地或已授权全文生成中文自动 reading note draft、AI 初审分、review packet，并输出候选 `asset_suggestions`。
 - [x] Phase 8.1: Visual Evidence Extraction (INSERTED) - 3/3 plans，完成于 2026-05-19；基于 Phase 8 候选建议和授权/本地 PDF 生成图表/表格视觉证据候选、裁图、本地 context packet 和 page/region/source trace；输出只作为 staging/review 候选。
+- [x] Phase 8.2: Campaign Foundation (INSERTED) - 1/1 plan，完成于 2026-05-19；提前实现不依赖 Phase 9/10 的批量候选队列、CSV/TSV/YAML 导入、轻量去重、正式 metadata 链接和只读状态校验。
 - [ ] Phase 9: Evidence Signals & AI Scoring - 融合正文证据和视觉证据候选，生成 relevance、quality、read priority 辅助评分。
 - [ ] Phase 10: Workflow Orchestrator - 串联 v1/v2 命令，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
 - [ ] Phase 11: Campaign & Batch Review - 支持批量候选导入、去重、review queue、状态流转和排序。
@@ -70,6 +71,8 @@ Phase 8 已基于 Phase 7 / 7.1 获取到的本地 PDF/source ledger 生成可�
 
 Phase 8.1 已完成 Phase 8 之后的插入增强：在评分前处理最小必要视觉证据，从授权 PDF 或本地资产中生成裁图/裁表候选、提取 caption/region text、写入本地 context packet，并记录 page/region/source trace。Phase 8.1 不做曲线数据自动还原、高级表格结构理解、LLM 图像结论或图表驱动的自动结论生成；这些内容进入 Phase 9 或 deferred advanced figure intelligence。
 
+Phase 8.2 已完成提前拆出的 Campaign Foundation：它只负责批量候选队列、导入、轻量去重、状态汇总和 formal metadata 轻量链接；不做 AI scoring、不调用 workflow orchestrator、不做 UI，也不执行 formal write。完整 Campaign & Batch Review 仍留在 Phase 11，并在 Phase 9/10 完成后接入评分和自动运行状态。
+
 Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成、高级图表智能、复杂多 agent 编排。轻量 DOI/BibTeX 补全、title/author/year 标准化和 dedup 辅助可在 Phase 9 内按主闭环需要处理。
 
 ## 进度
@@ -77,8 +80,8 @@ Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-13 core + 7.1 and 8.1 inserted; deferred advanced integrations | 13/13 completed for Phase 6-8.1 | Phase 8.1 complete，next plan Phase 9 | 2026-05-19 |
+| v2.0 Scaled Literature Workstation | 6-13 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 14/14 completed for Phase 6-8.2 | Phase 8.2 complete，next plan Phase 9 | 2026-05-19 |
 
 ---
 
-*Roadmap updated after Phase 8.1 implementation: 2026-05-19*
+*Roadmap updated after Phase 8.2 campaign foundation implementation: 2026-05-19*
