@@ -67,6 +67,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "note" in captured.out
     assert "source" in captured.out
     assert "asset" in captured.out
+    assert "visual" in captured.out
     assert "eval" in captured.out
     assert "formal" in captured.out
 
@@ -595,6 +596,82 @@ def test_cli_source_add_expected_error_has_no_traceback(tmp_path, capsys):
     assert exit_code == 1
     assert "来源操作失败" in captured.err
     assert "Traceback" not in captured.err
+
+
+def test_cli_visual_help_validate_status_and_expected_error(tmp_path, capsys):
+    from rsa_cli.config import load_project_config
+    from rsa_cli.visual import default_advanced_analysis, write_visual_candidates
+
+    prepare_project(tmp_path)
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Visual CLI Paper"),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+    config = load_project_config(tmp_path)
+    write_visual_candidates(
+        config,
+        "P001",
+        {
+            "paper_id": "P001",
+            "candidates": [
+                {
+                    "candidate_id": "V001",
+                    "paper_id": "P001",
+                    "asset_id": None,
+                    "visual_type": "figure",
+                    "page": 1,
+                    "region_bbox": [10, 20, 120, 160],
+                    "source_rects": [[10, 20, 120, 160]],
+                    "source_text": "Figure 1. Reconstruction result.",
+                    "caption_zh": "Figure 1. Reconstruction result.",
+                    "ocr_summary_zh": "已提取嵌入文本。",
+                    "confidence": "medium",
+                    "evidence_level": "caption_visual_text",
+                    "status": "cropped",
+                    "source_links": {
+                        "metadata": "01_literature/metadata/P001.yaml",
+                        "source_ledger": "01_literature/sources/P001.yaml",
+                        "asset_manifest": "01_literature/assets/P001/manifest.yaml",
+                    },
+                    "advanced_analysis": default_advanced_analysis(),
+                    "llm_visual_analysis": {"status": "not_run"},
+                }
+            ],
+        },
+    )
+    candidate_path = tmp_path / "01_literature" / "assets" / "P001" / "visual_evidence_candidates.yaml"
+    before = candidate_path.read_text(encoding="utf-8")
+
+    with pytest.raises(SystemExit) as help_exc:
+        main(["visual", "extract", "--help"])
+    help_out = capsys.readouterr()
+    valid = main(["--root", str(tmp_path), "visual", "validate", "P001"])
+    valid_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "visual", "status", "P001"])
+    status_out = capsys.readouterr()
+    missing_source = main(["--root", str(tmp_path), "visual", "extract", "P001"])
+    missing_out = capsys.readouterr()
+
+    assert help_exc.value.code == 0
+    assert "--all-detected" in help_out.out
+    assert "--pages" in help_out.out
+    assert "--asset-suggestions-only" in help_out.out
+    assert valid == 0
+    assert "视觉证据候选有效" in valid_out.out
+    assert status == 0
+    assert "视觉证据候选状态" in status_out.out
+    assert "总数=1" in status_out.out
+    assert candidate_path.read_text(encoding="utf-8") == before
+    assert missing_source == 1
+    assert "视觉证据操作失败" in missing_out.err
+    assert "Traceback" not in missing_out.err
 
 
 def test_cli_source_phase7_help_lists_monitored_acquisition_commands(capsys):

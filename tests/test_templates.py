@@ -229,6 +229,15 @@ def test_formal_record_seeds_are_chinese_readable():
         assert needle in FORMAL_RECORD_FILES[name]
 
 
+def test_readme_documents_visual_evidence_workflow():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "rsa visual extract P001" in text
+    assert "--all-detected" in text
+    assert "视觉候选只是 staging/review 材料，不是 formal record" in text
+    assert "PyMuPDF" in text
+
+
 def test_init_writes_localized_templates_and_formal_records(tmp_path):
     config = load_project_config(tmp_path)
 

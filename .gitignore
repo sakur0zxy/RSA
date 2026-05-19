@@ -15,5 +15,6 @@ dist/
 !01_literature/assets/.gitkeep
 !01_literature/assets/*/
 !01_literature/assets/*/manifest.yaml
+!01_literature/assets/*/visual_evidence_candidates.yaml
 01_literature/extracted/**
 !01_literature/extracted/.gitkeep

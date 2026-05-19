@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-126%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-143%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -27,6 +27,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Candidate staging | 候选文献和核验记录先停留在 staging，不会自动进入正式记录。 |
 | Literature map | 将已验证文献映射到 topic、priority question、章节和计划产出。 |
 | Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记；`rsa note draft` 可生成中文自动阅读草稿和监管包。 |
+| Visual evidence candidates | `rsa visual extract` 从已授权/本地 PDF 提取图表/表格候选、裁图和本地上下文包；候选 YAML 进入 staging/review，不是正式科研记录。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
@@ -51,8 +52,9 @@ flowchart TD
   E --> F["Authorized acquisition<br/>授权全文获取"]
   F --> F2["Browser session provider<br/>用户授权浏览器会话"]
   F2 --> G["Reading note<br/>阅读笔记"]
+  G --> V["Visual evidence candidates<br/>图表/表格候选证据"]
   E --> H["Literature map<br/>文献映射"]
-  G --> I["Formal write gate<br/>正式写入门禁"]
+  V --> I["Formal write gate<br/>正式写入门禁"]
   H --> J["Gap report<br/>研究空白报告"]
   I --> H
 ```
@@ -69,6 +71,8 @@ python -m pip install -e ".[dev]"
 
 rsa --help
 ```
+
+基础安装包含当前核心闭环需要的 Python 依赖：`PyYAML` 用于 YAML 记录，`pypdf` 用于正文文本提取，`PyMuPDF` 用于 Phase 8.1 图表/表格视觉候选裁图。缺少核心依赖时，相关命令会 fail closed，并给出中文修复提示。
 
 需要浏览器登录资料库时，额外安装可选浏览器依赖：
 
@@ -144,9 +148,31 @@ rsa --root . eval compare
 | `rsa source login` | 打开 `browser_session` provider 登录页，用户手动登录后保存本地 session。 |
 | `rsa source session status` / `clear` | 只读查看或清除 `.rsa/sessions/` 下的本地 browser session。 |
 | `rsa asset add` / `validate` / `status` | 登记、校验或查看截图、图表和结果图资产。 |
+| `rsa visual extract P001` | 从已授权/本地 PDF 生成图表/表格视觉证据候选、裁图和本地上下文包。 |
+| `rsa visual validate P001` / `status P001` | 只读校验或查看 `visual_evidence_candidates.yaml`，不修改正式记录。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
+
+## Visual Evidence Workflow
+
+Phase 8.1 负责把已授权/本地 PDF 中的图表、表格和 caption 转成可审阅候选。默认流程会优先使用 Phase 8 reading note 里的 `asset_suggestions`，再扫描 PDF 中带 caption、图表块或高置信页面区域的候选；不会默认裁取整篇论文的所有图片。
+
+```powershell
+rsa --root . visual extract P001
+rsa --root . visual validate P001
+rsa --root . visual status P001
+```
+
+扩展模式：
+- `--asset-suggestions-only`：只把 reading note 的候选建议转成视觉候选，不扫描全文页面。
+- `--pages 3,5-7`：只处理指定页码，适合用户已经知道重点图表所在页面时使用。
+- `--all-detected`：裁取检测到的所有图表/表格样候选，适合需要更完整检查时使用。
+
+产物边界：
+- `01_literature/assets/P###/visual_evidence_candidates.yaml` 是可追踪的候选记录，包含 `candidate_id`、`visual_type`、`page`、`region_bbox`、`evidence_level`、`status`、`warning_zh` 和回源链接。
+- `01_literature/assets/P###/crops/` 与 `visual_context_packets/` 是本地-only，保存截图和 Phase 9 可用的上下文包，不进入 git。
+- Phase 8.1 不做曲线数据自动还原、高级表格结构重建、LLM 图像结论、AI 评分或正式写入；视觉候选只是 staging/review 材料，不是 formal record。
 
 ## Browser Session Provider 示例
 
@@ -197,7 +223,9 @@ rsa --root . source find P001 --provider university_library_browser
   sources/                  # P###.yaml 来源 ledger
   source_candidates/        # P###.yaml 候选来源、匹配证据和下载状态
   pdfs/                     # 本地-only PDF，git 忽略
-  assets/                   # 本地-only 截图/结果图；manifest.yaml 可审计
+  assets/                   # 本地-only 截图/结果图；manifest.yaml 与 visual_evidence_candidates.yaml 可审计
+    P###/crops/             # 本地-only 视觉候选裁图
+    P###/visual_context_packets/ # 本地-only 图表上下文包，供 Phase 9 使用
   extracted/                # 本地-only PDF 文本提取缓存和脱敏 prompt packet，git 忽略
   paper_index.md            # 正式 metadata 索引
   literature_map.md         # 正式文献到主题的映射
@@ -223,6 +251,9 @@ tests/                      # 回归测试
 - 缺失或未授权 PDF 只会生成 blocked 状态记录，不会生成假的 reading note。
 - `rsa note draft` 的 `ready_for_review` 只表示 AI 初审后建议人工监管，不代表 `approved`，也不是论文质量分或相关性分。
 - `agent_review_score_10` 只评价阅读草稿是否完整、可追溯、适合交给用户复核，不能当作正式学术结论。
+- `rsa visual extract` 只生成视觉证据候选、裁图和本地上下文包；`visual_evidence_candidates.yaml` 属于 staging/review，不得被当作正式学术结论或 formal write。
+- `rsa visual extract --all-detected` 是显式扩展模式，可能产生大量候选；默认模式不会盲目裁取整篇论文所有图片/表格。
+- Phase 8.1 不还原曲线数值、不做高级表格结构理解、不让 LLM 直接给图像学术结论；这些能力必须在后续阶段继续保留证据链、置信度和人工监管。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。
@@ -248,13 +279,13 @@ python -m pytest -q
 rsa --root . eval compare
 ```
 
-当前回归基线：126 个测试通过，`eval compare` 结果为回归数 0。
+当前回归基线：143 个测试通过；`rsa eval compare` 仍用于本地 harness 基线比较。
 
 ## 项目状态
 
 - 当前里程碑：`v1.0 Local Harness`
-- 当前版本：`v2.0` Phase 7.1 完成
-- 状态：v1.0 已归档；v2.0 已完成授权全文获取能力和 browser session provider
+- 当前版本：`v2.0` Phase 8.1 完成
+- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿和视觉证据候选提取
 - 主要用户语言：中文优先
 - 语言策略：见 `.planning/LANGUAGE-POLICY.md`
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释
@@ -266,14 +297,15 @@ v2 建议优先扩展这些方向：
 1. PDF 和截图资产管理。Phase 6 已建立 source ledger 和 asset manifest 基础。
 2. 授权全文获取、自动下载和本地 browser session provider。
 3. 自动阅读草稿。
-4. 结构化证据抽取。
-5. AI 辅助评分：相关性、质量和阅读优先级。
-6. 批量候选文献导入和 campaign review queue。
-7. DOI/Crossref/OpenAlex 等 scholarly API 进入 staging。
-8. 本地 review UI。
-9. Claim-level citation check。
-10. 更强的 research-quality evals。
-11. 可选 multi-agent orchestration。
+4. 图表/表格视觉证据候选提取。
+5. 结构化证据抽取。
+6. AI 辅助评分：相关性、质量和阅读优先级。
+7. 批量候选文献导入和 campaign review queue。
+8. DOI/Crossref/OpenAlex 等 scholarly API 进入 staging。
+9. 本地 review UI。
+10. Claim-level citation check。
+11. 更强的 research-quality evals。
+12. 可选 multi-agent orchestration。
 
 更多 GSD 文档：
 

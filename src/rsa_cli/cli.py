@@ -343,6 +343,43 @@ def build_parser() -> argparse.ArgumentParser:
     )
     asset_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
 
+    visual_group = subcommands.add_parser(
+        "visual",
+        help="提取、校验或查看论文图表/表格视觉证据候选；validate/status 只读。",
+    )
+    visual_subcommands = visual_group.add_subparsers(
+        dest="visual_command", required=True
+    )
+    visual_extract = visual_subcommands.add_parser(
+        "extract",
+        help="从已授权/本地 PDF 生成视觉证据候选、裁图和本地上下文包；不写入正式记录。",
+    )
+    visual_extract.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    visual_extract.add_argument(
+        "--all-detected",
+        action="store_true",
+        help="扩展模式：裁取所有检测到的图表/表格候选，可能产生较多候选。",
+    )
+    visual_extract.add_argument(
+        "--pages",
+        help="只处理指定页码，例如 3 或 3,5-7。",
+    )
+    visual_extract.add_argument(
+        "--asset-suggestions-only",
+        action="store_true",
+        help="只把 reading note 的 asset_suggestions 转成候选，不进行全文页扫描。",
+    )
+    visual_validate = visual_subcommands.add_parser(
+        "validate",
+        help="只读校验 visual_evidence_candidates.yaml 的 schema、状态和回源链接。",
+    )
+    visual_validate.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    visual_status = visual_subcommands.add_parser(
+        "status",
+        help="只读查看视觉证据候选数量、降级状态和候选文件路径。",
+    )
+    visual_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+
     eval_group = subcommands.add_parser(
         "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
     )
@@ -853,6 +890,57 @@ def _run_asset_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_visual_command(args: argparse.Namespace, root: Path) -> int:
+    from .visual import (
+        VisualError,
+        extract_visual_evidence,
+        parse_pages_spec,
+        validate_visual_candidate_file,
+        visual_status,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.visual_command == "extract":
+            pages = parse_pages_spec(args.pages)
+            result = extract_visual_evidence(
+                config,
+                args.paper_id,
+                all_detected=args.all_detected,
+                pages=pages,
+                asset_suggestions_only=args.asset_suggestions_only,
+            )
+            print(
+                "视觉证据候选提取完成: "
+                f"{args.paper_id} -> 新增候选={result.candidates_created}, "
+                f"裁图={result.crops_written}, 上下文包={result.context_packets_written}; "
+                f"候选文件={result.candidate_path}"
+            )
+            return 0
+        if args.visual_command == "validate":
+            errors = validate_visual_candidate_file(config, args.paper_id)
+            if errors:
+                for error in errors:
+                    print(f"视觉证据候选无效: {error}", file=sys.stderr)
+                return 1
+            print(f"视觉证据候选有效: {args.paper_id}")
+            return 0
+        if args.visual_command == "status":
+            status = visual_status(config, args.paper_id)
+            print(
+                f"视觉证据候选状态: {args.paper_id} -> 总数={status.total_count}, "
+                f"cropped={status.cropped_count}, ocr_success={status.ocr_success_count}, "
+                f"ocr_partial={status.ocr_partial_count}, needs_review={status.needs_review_count}, "
+                f"blocked={status.blocked_count}, not_run={status.not_run_count}; "
+                f"候选文件={status.path}"
+            )
+            return 0
+    except VisualError as exc:
+        print(f"视觉证据操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -963,6 +1051,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_source_command(args, root)
         if args.command == "asset":
             return _run_asset_command(args, root)
+        if args.command == "visual":
+            return _run_visual_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":

@@ -75,11 +75,11 @@
 
 ### Phase 8.1: Visual Evidence Extraction
 
-- [ ] **V2-VIS-01:** User can generate visual evidence candidates from Phase 8 `asset_suggestions`, local PDFs, or authorized assets without writing formal records.
-- [ ] **V2-VIS-02:** Cropped figure/table candidates and extracted visual assets remain local-only; auditable manifests/suggestions keep stable English keys with Chinese explanations.
-- [ ] **V2-VIS-03:** Caption extraction and basic OCR outputs are marked as draft/review-needed and include source page, region, confidence, extraction method, and Chinese uncertainty notes.
-- [ ] **V2-VIS-04:** Visual extraction must fail closed on unreadable PDFs/images, low confidence, ambiguous regions, unsupported chart types, or missing trace information; it must not invent numeric data.
-- [ ] **V2-VIS-05:** Phase 8.1 must not perform curve data restoration, advanced table reconstruction, chart-driven formal conclusions, or direct formal writes; those remain deferred advanced figure intelligence.
+- [x] **V2-VIS-01:** User can generate visual evidence candidates from Phase 8 `asset_suggestions`, local PDFs, or authorized assets without writing formal records.
+- [x] **V2-VIS-02:** Cropped figure/table candidates and extracted visual assets remain local-only; auditable manifests/suggestions keep stable English keys with Chinese explanations.
+- [x] **V2-VIS-03:** Caption extraction and basic OCR/region-text outputs are marked as draft/review-needed and include source page, region, confidence, extraction method, and Chinese uncertainty notes.
+- [x] **V2-VIS-04:** Visual extraction must fail closed on unreadable PDFs/images, low confidence, ambiguous regions, unsupported chart types, or missing trace information; it must not invent numeric data.
+- [x] **V2-VIS-05:** Phase 8.1 must not perform curve data restoration, advanced table reconstruction, chart-driven formal conclusions, or direct formal writes; those remain deferred advanced figure intelligence.
 
 ### Phase 9: Evidence Signals & AI Scoring
 
