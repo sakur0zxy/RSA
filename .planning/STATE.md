@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: Phase 8 complete; ready to discuss Phase 8.1
-stopped_at: Phase 8 complete; next recommended step is `$gsd-discuss-phase 8.1`
-last_updated: "2026-05-16T00:00:00+08:00"
+status: Phase 8.1 context gathered; ready to plan Phase 8.1
+stopped_at: Phase 8.1 context gathered; next recommended step is `$gsd-plan-phase 8.1`
+last_updated: "2026-05-19T02:45:56.093Z"
 last_activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
 progress:
   total_phases: 15
@@ -28,7 +28,7 @@ progress:
 
 Phase: 8.1 Visual Evidence Extraction
 Plan: 未开始
-Status: Phase 8 已完成；下一步建议讨论 Phase 8.1
+Status: Phase 8.1 context gathered；下一步建议计划 Phase 8.1
 Last activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
 
 进度: [██████░░░░] 60%
@@ -86,9 +86,9 @@ Last activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
 
 ## 会话连续性
 
-Last session: Phase 8 complete
-Stopped at: Phase 8 Auto Reading Draft complete; ready for `$gsd-discuss-phase 8.1`.
-Resume file: `.planning/phases/08-auto-reading-draft/08-VERIFICATION.md`
+Last session: Phase 8.1 context gathered
+Stopped at: Phase 8.1 context gathered; next recommended step is `$gsd-plan-phase 8.1`
+Resume file: `.planning/phases/08.1-visual-evidence-extraction/08.1-CONTEXT.md`
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
