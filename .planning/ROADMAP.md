@@ -33,7 +33,7 @@
 - [x] Phase 7: Authorized Acquisition - 3/3 plans，完成于 2026-05-14；支持 open access、用户提供和用户授权来源的自动全文获取，不绕过 paywall。
 - [x] Phase 7.1: Browser Session Provider (INSERTED) - 2/2 plans，完成于 2026-05-14；作为 Phase 7 的浏览器会话子能力，支持用户自行登录资料库后，RSA 复用本地授权浏览器会话检索和下载用户有权限访问的论文。
 - [x] Phase 8: Auto Reading Draft - 3/3 plans，完成于 2026-05-16；基于本地或已授权全文生成中文自动 reading note draft、AI 初审分、review packet，并输出候选 `asset_suggestions`。
-- [ ] Phase 8.1: Visual Evidence Extraction (INSERTED) - 基于 Phase 8 候选建议做裁图/裁表候选、caption 提取、基础 OCR 和 page/region/source trace；输出只作为视觉证据候选。
+- [ ] Phase 8.1: Visual Evidence Extraction (INSERTED) - 3/3 plans 已创建，待执行；基于 Phase 8 候选建议做裁图/裁表候选、caption 提取、基础 OCR 和 page/region/source trace；输出只作为视觉证据候选。
 - [ ] Phase 9: Evidence Signals & AI Scoring - 融合正文证据和视觉证据候选，生成 relevance、quality、read priority 辅助评分。
 - [ ] Phase 10: Workflow Orchestrator - 串联 v1/v2 命令，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
 - [ ] Phase 11: Campaign & Batch Review - 支持批量候选导入、去重、review queue、状态流转和排序。
@@ -44,7 +44,7 @@
 
 ## 下一步
 
-当前执行目标：**Phase 8.1: Visual Evidence Extraction**。
+当前执行目标：**执行 Phase 8.1: Visual Evidence Extraction**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -77,7 +77,7 @@ Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-13 core + 7.1 and 8.1 inserted; deferred advanced integrations | 10/10 completed for Phase 6-8 | Phase 8 complete，next Phase 8.1 | 2026-05-16 |
+| v2.0 Scaled Literature Workstation | 6-13 core + 7.1 and 8.1 inserted; deferred advanced integrations | 10/10 completed for Phase 6-8；Phase 8.1 planned 3/3 | Phase 8.1 planned，next execute Phase 8.1 | 2026-05-19 |
 
 ---
 

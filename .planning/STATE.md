@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: Phase 8.1 context gathered; ready to plan Phase 8.1
-stopped_at: Phase 8.1 context gathered; next recommended step is `$gsd-plan-phase 8.1`
-last_updated: "2026-05-19T02:45:56.093Z"
-last_activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
+status: Phase 8.1 planned; ready to execute Phase 8.1
+stopped_at: Phase 8.1 planned; next recommended step is `$gsd-execute-phase 8.1`
+last_updated: "2026-05-19T10:55:00+08:00"
+last_activity: 2026-05-19 -- 完成 Phase 8.1 Visual Evidence Extraction 计划
 progress:
   total_phases: 15
   completed_phases: 9
-  total_plans: 24
+  total_plans: 27
   completed_plans: 24
   percent: 60
 ---
@@ -27,9 +27,9 @@ progress:
 ## 当前位置
 
 Phase: 8.1 Visual Evidence Extraction
-Plan: 未开始
-Status: Phase 8.1 context gathered；下一步建议计划 Phase 8.1
-Last activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
+Plan: 3 plans created
+Status: Phase 8.1 planned；下一步建议执行 Phase 8.1
+Last activity: 2026-05-19 -- 完成 Phase 8.1 Visual Evidence Extraction 计划
 
 进度: [██████░░░░] 60%
 
@@ -54,7 +54,7 @@ Last activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
 | 7 | 3 | complete |
 | 7.1 | 2 | complete |
 | 8 | 3 | complete |
-| 8.1 | not planned | next |
+| 8.1 | 3 | planned |
 
 ## 累积上下文
 
@@ -86,9 +86,9 @@ Last activity: 2026-05-16 -- 完成 Phase 8 Auto Reading Draft
 
 ## 会话连续性
 
-Last session: Phase 8.1 context gathered
-Stopped at: Phase 8.1 context gathered; next recommended step is `$gsd-plan-phase 8.1`
-Resume file: `.planning/phases/08.1-visual-evidence-extraction/08.1-CONTEXT.md`
+Last session: Phase 8.1 planned
+Stopped at: Phase 8.1 planned; next recommended step is `$gsd-execute-phase 8.1`
+Resume file: `.planning/phases/08.1-visual-evidence-extraction/08.1-01-PLAN.md`
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
@@ -107,3 +107,5 @@ Resume file: `.planning/phases/08.1-visual-evidence-extraction/08.1-CONTEXT.md`
 **已完成 Phase:** 07.1 (Browser Session Provider) - 2 plans - 2026-05-14
 **已计划 Phase:** 08 (Auto Reading Draft) - 3 plans - 2026-05-16
 **已完成 Phase:** 08 (Auto Reading Draft) - 3 plans - 2026-05-16
+
+**Planned Phase:** 08.1 (visual-evidence-extraction) — 3 plans — 2026-05-19T02:54:58.164Z
