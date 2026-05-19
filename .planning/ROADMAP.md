@@ -85,3 +85,73 @@ Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成
 ---
 
 *Roadmap updated after Phase 8.2 campaign foundation implementation: 2026-05-19*
+
+## GSD 解析索引
+
+> 这一节是给本地 `gsd-sdk` 使用的 machine-readable phase index。  
+> 原因：当前 SDK 主要识别 `### Phase N:` 形式的标题，并且会忽略 `<details>` 折叠块中的 phase checklist。  
+> 人类阅读仍以上面的 Phase 概览和详细说明为主；后续新增或调整 phase 时，这里也要同步更新。
+
+### Phase 1: Harness Foundation
+
+Status: complete. v1.0 Local Harness phase.
+
+### Phase 2: Literature Records Pipeline
+
+Status: complete. v1.0 Local Harness phase.
+
+### Phase 3: Research Round Integration
+
+Status: complete. v1.0 Local Harness phase.
+
+### Phase 4: Reading Note Workflow
+
+Status: complete. v1.0 Local Harness phase.
+
+### Phase 5: Evaluation and Hardening
+
+Status: complete. v1.0 Local Harness phase.
+
+### Phase 6: Asset & Source Foundation
+
+Status: complete. Establish local assets, source ledger and auditable source/asset records.
+
+### Phase 7: Authorized Acquisition
+
+Status: complete. Discover, review and download authorized full-text sources without bypassing access controls.
+
+### Phase 7.1: Browser Session Provider
+
+Status: complete. Browser-session provider under Phase 7 authorized acquisition.
+
+### Phase 8: Auto Reading Draft
+
+Status: complete. Generate structured Chinese reading drafts, review packets and candidate `asset_suggestions`.
+
+### Phase 8.1: Visual Evidence Extraction
+
+Status: complete. Convert reading draft suggestions and authorized/local PDFs into visual evidence candidates.
+
+### Phase 8.2: Campaign Foundation
+
+Status: complete. Provide dependency-free campaign queue creation, import, dedup, linking and read-only status validation.
+
+### Phase 9: Evidence Signals & AI Scoring
+
+Status: planned. Fuse text evidence, visual candidates and campaign queues into AI-assisted relevance, quality and read-priority scoring.
+
+### Phase 10: Workflow Orchestrator
+
+Status: planned. Chain existing v1/v2 commands and automatically run to review packet while preserving monitoring and formal-write boundaries.
+
+### Phase 11: Campaign & Batch Review
+
+Status: planned. Integrate campaign queues with scoring, workflow runs, ranking, filtering and batch review automation.
+
+### Phase 12: Local Review Workspace
+
+Status: planned. Provide a local supervision workspace for candidates, PDFs, reading drafts, visual evidence, scoring and formal write requests.
+
+### Phase 13: Writing Safety & Hardening
+
+Status: planned. Add claim-level citation checks, regression coverage, prompt/template drift detection and stronger guardrails.

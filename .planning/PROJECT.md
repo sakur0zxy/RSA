@@ -1,10 +1,18 @@
 # RSA 科研 Agent Harness
 
+## What This Is
+
+兼容 GSD health 的英文标题别名；正式中文说明见下方 `## 项目定位`。
+
 ## 项目定位
 
 RSA 是一个面向博士科研工作的本地优先 research agent harness。它不负责自动写论文，也不把 agent 输出当作事实源；它负责把文献检索、候选核验、正式 metadata、阅读笔记、文献映射、研究空白和 eval 回归检查放进可审计、可回滚、可人工确认的工作流。
 
 v1.0 已作为 `Local Harness` 归档。当前项目可以作为 SAR 间断孔径 / 分布式 SAR 文献工作的起点，也可以复用到其他科研主题，只要新增 topic profile。
+
+## Core Value
+
+兼容 GSD health 的英文标题别名；正式中文说明见下方 `## 核心价值`。
 
 ## 核心价值
 
