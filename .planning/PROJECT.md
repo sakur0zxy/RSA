@@ -117,6 +117,7 @@ RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`pytho
 | Phase 7.1 是 Phase 7 的子能力 | 浏览器会话复用只是授权获取的一种 provider，不是独立下载政策 | v2 Phase 7.1 已验证 |
 | Phase 8 `asset_suggestions` 只做候选建议 | 正文阅读可提示可能值得处理的图表，但不能直接断言图表重要性 | v2 Phase 8 设计约束 |
 | 图像能力放入 Phase 8.1 | 让视觉证据在 Phase 9 评分前进入证据链，同时不扩大 Phase 8 正文阅读主流程 | v2 Roadmap 已调整 |
+| 自动化采用分层并行 | 单篇论文内部必须按依赖顺序跑；多篇论文可在 campaign 层受控并行，避免 Phase 10 膨胀成批量调度系统 | v2 Phase 10/11 设计约束 |
 | 基础版覆盖核心 agent 功能 | 普通用户不应为了当前核心闭环手动猜 optional extras；缺外部资源由自检给中文修复路径 | 全局设计已锁定，待 Phase 8/后续实现落地 |
 
 ## 下一里程碑目标
@@ -129,8 +130,8 @@ v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
 4. Visual evidence extraction，把 Phase 8 的候选 `asset_suggestions` 转成可审阅裁图、caption、基础 OCR 和来源追踪。
 5. Evidence extraction / structured reading signals，在评分前抽取正文证据和视觉证据候选。
 6. AI-assisted scoring rubric，区分 relevance、quality 和 read priority，且不直接进入 formal records。
-7. Workflow orchestrator，串联已有命令，自动跑到 review packet，同时允许用户监控关键环节和调整流程。
-8. Batch candidate import 和 campaign review queue。
+7. Workflow orchestrator，串联已有命令，把单篇论文按依赖顺序自动跑到 review packet，同时允许用户监控关键环节和调整流程。
+8. Campaign controlled parallelism 和 batch review queue：多篇论文之间允许小规模流水线并行，但每篇论文内部仍复用 Phase 10 的顺序 workflow primitive。
 9. Local review workspace，用于监管候选、PDF、阅读草稿、视觉证据、评分和 formal approval。
 10. 面向后续写作的 claim-level citation check。
 

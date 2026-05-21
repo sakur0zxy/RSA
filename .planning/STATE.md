@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: ready_to_plan
-stopped_at: Phase 09 complete (3/3) — ready to discuss Phase 10
-last_updated: 2026-05-21T11:10:04+08:00
+status: planning
+stopped_at: Phase 9 complete; next recommended step is `$gsd-discuss-phase 10`
+last_updated: "2026-05-21T14:03:56.536Z"
 last_activity: 2026-05-21
 progress:
   total_phases: 16
@@ -121,3 +121,9 @@ Resume file: `.planning/phases/09-evidence-signals-ai-scoring/09-VERIFICATION.md
 **Completed Phase:** 08.2 (campaign-foundation) — 1 plan — 2026-05-19
 **Planned Phase:** 09 (evidence-signals-ai-scoring) — 3 plans — 2026-05-21
 **Completed Phase:** 09 (evidence-signals-ai-scoring) — 3 plans — 2026-05-21
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 10 edited: Phase 10/11 automation split: single-paper sequential workflow primitive in Phase 10; campaign controlled pipeline parallelism in Phase 11

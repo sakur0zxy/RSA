@@ -12,6 +12,7 @@
 - 所有自动产物必须标记 `evidence_level`；失败必须记录 `blocked` 或 `partial` 状态和中文原因。
 - 视觉证据只作为候选证据，不直接形成正式学术结论。
 - `formal write gate` 不得被 orchestrator、batch、UI 或后续 agent 编排绕过。
+- 自动化调度采用分层并行：Phase 10 提供单篇顺序 workflow primitive；Phase 11 在其上做 campaign 级受控并行、队列限流和批量异常聚合。
 
 ## Phase 概览
 
@@ -36,8 +37,8 @@
 - [x] Phase 8.1: Visual Evidence Extraction (INSERTED) - 3/3 plans，完成于 2026-05-19；基于 Phase 8 候选建议和授权/本地 PDF 生成图表/表格视觉证据候选、裁图、本地 context packet 和 page/region/source trace；输出只作为 staging/review 候选。
 - [x] Phase 8.2: Campaign Foundation (INSERTED) - 1/1 plan，完成于 2026-05-19；提前实现不依赖 Phase 9/10 的批量候选队列、CSV/TSV/YAML 导入、轻量去重、正式 metadata 链接和只读状态校验。
 - [x] Phase 9: Evidence Signals & AI Scoring - 3/3 plans，完成于 2026-05-21；融合正文证据、视觉证据候选和 campaign 队列，生成 relevance、quality、read priority 辅助评分、review packet 和 campaign scoring summary。
-- [ ] Phase 10: Workflow Orchestrator - 串联 v1/v2 命令，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
-- [ ] Phase 11: Campaign & Batch Review - 支持批量候选导入、去重、review queue、状态流转和排序。
+- [ ] Phase 10: Workflow Orchestrator - 串联 v1/v2 命令，为单篇论文提供顺序、可恢复、可监控的 workflow primitive，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
+- [ ] Phase 11: Campaign & Batch Review - 在 Phase 10 workflow primitive 之上支持批量候选、受控流水线并行、review queue、状态流转、排序和批量异常聚合。
 - [ ] Phase 12: Local Review Workspace - 提供本地监管台审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
 - [ ] Phase 13: Writing Safety & Hardening - 做 claim-level citation check，并增强 eval、回归测试、prompt/template drift 检测和 guardrails。
 
@@ -74,6 +75,8 @@ Phase 8.1 已完成 Phase 8 之后的插入增强：在评分前处理最小必�
 Phase 8.2 已完成提前拆出的 Campaign Foundation：它只负责批量候选队列、导入、轻量去重、状态汇总和 formal metadata 轻量链接；不做 AI scoring、不调用 workflow orchestrator、不做 UI，也不执行 formal write。完整 Campaign & Batch Review 仍留在 Phase 11，并在 Phase 9/10 完成后接入评分和自动运行状态。
 
 Phase 9 已完成 Evidence Signals & AI Scoring：它从正式 metadata、Phase 8 reading draft、Phase 8.1 视觉证据候选和 Phase 8.2 campaign 队列中生成结构化 evidence signals，并输出 `01_literature/scores/P###_scoring.yaml`、`P###_review_packet.md` 和 `campaigns/C###_scoring_summary.yaml`。AI 评分只作为 staging/review guidance，支持人工 review/override，不直接写入 formal records。
+
+Phase 10/11 的自动化分工已经锁定为“单篇顺序链 + campaign 级受控并行”。Phase 10 只负责把单篇论文按 acquisition -> reading draft -> visual extraction -> scoring -> review packet 顺序跑成可靠 workflow primitive，并保留 `campaign_id`、`run_id`、`step_status`、`retry_policy`、`artifacts` 等字段供后续复用。Phase 11 才负责多篇论文之间的小规模流水线并行、阶段队列限流、campaign 排序和批量异常聚合。
 
 Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成、高级图表智能、复杂多 agent 编排。轻量 DOI/BibTeX 补全、title/author/year 标准化和 dedup 辅助可在 Phase 9 内按主闭环需要处理。
 
@@ -144,11 +147,11 @@ Status: complete. Fuse text evidence, visual candidates and campaign queues into
 
 ### Phase 10: Workflow Orchestrator
 
-Status: planned. Chain existing v1/v2 commands and automatically run to review packet while preserving monitoring and formal-write boundaries.
+Status: planned. Chain existing v1/v2 commands into a single-paper sequential, resumable and monitorable workflow primitive that automatically runs to review packet while preserving formal-write boundaries.
 
 ### Phase 11: Campaign & Batch Review
 
-Status: planned. Integrate campaign queues with scoring, workflow runs, ranking, filtering and batch review automation.
+Status: planned. Integrate campaign queues with Phase 10 workflow runs, controlled pipeline parallelism, ranking, filtering, review queue automation and batch exception aggregation.
 
 ### Phase 12: Local Review Workspace
 

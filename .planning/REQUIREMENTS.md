@@ -103,10 +103,15 @@
 - [ ] **V2-WORKFLOW-02:** Workflow runs must be resumable: interrupted runs record current step, completed outputs, pending review items and next action.
 - [ ] **V2-WORKFLOW-03:** Workflow automation must stop before formal writes and produce a review packet for metadata, map, reading note or research-note approvals.
 - [ ] **V2-WORKFLOW-04:** User can monitor and adjust workflow execution through status commands, local config, step-level toggles and explicit rerun/resume commands.
+- [ ] **V2-WORKFLOW-05:** Phase 10 orchestrates a single-paper sequential chain: acquisition -> reading draft -> visual extraction -> scoring -> review packet.
+- [ ] **V2-WORKFLOW-06:** Phase 10 run state must preserve batch-ready fields such as `run_id`, `paper_id`, `campaign_id`, `step_id`, `step_status`, `artifacts`, `retry_policy` and Chinese blocked/partial reasons, but must not implement campaign worker queues or uncontrolled parallelism.
 
 ### Phase 11-13
 
 - [ ] **V2-CAMPAIGN-01:** Campaigns integrate Phase 8.2 queues with Phase 9 scoring, Phase 10 workflow runs, ranking/filtering and batch review automation.
+- [ ] **V2-CAMPAIGN-02:** Campaign processing uses controlled pipeline parallelism across papers while preserving sequential dependencies inside each paper workflow.
+- [ ] **V2-CAMPAIGN-03:** Campaign-level concurrency must be configurable and conservative by default, with separate limits for acquisition, reading draft, visual extraction and scoring.
+- [ ] **V2-CAMPAIGN-04:** Batch failures must support `continue_on_error`, `pause_on_auth_error` and `pause_on_formal_request` semantics, with Chinese status reports and no automatic formal writes.
 - [ ] **V2-WORKSPACE-01:** Local review workspace supports verification, approval, reading draft review, visual evidence review and scoring review.
 - [ ] **V2-WRITE-01:** Claim-level citation checks produce review guidance, not final academic conclusions.
 
