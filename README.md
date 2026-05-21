@@ -29,6 +29,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记；`rsa note draft` 可生成中文自动阅读草稿和监管包。 |
 | Visual evidence candidates | `rsa visual extract` 从已授权/本地 PDF 提取图表/表格候选、裁图和本地上下文包；候选 YAML 进入 staging/review，不是正式科研记录。 |
 | Campaign foundation | `rsa campaign create/import/validate/status` 管理批量候选队列、轻量去重和正式 metadata 链接；不依赖 AI 评分或 workflow orchestrator。 |
+| AI scoring | `rsa score` 融合 reading note、视觉候选和 campaign 队列，生成 relevance、quality、read priority 三类 0-10 辅助评分；只用于排序、初审和监管。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
@@ -54,8 +55,9 @@ flowchart TD
   F --> F2["Browser session provider<br/>用户授权浏览器会话"]
   F2 --> G["Reading note<br/>阅读笔记"]
   G --> V["Visual evidence candidates<br/>图表/表格候选证据"]
+  V --> S["AI scoring<br/>辅助评分与监管"]
   E --> H["Literature map<br/>文献映射"]
-  V --> I["Formal write gate<br/>正式写入门禁"]
+  S --> I["Formal write gate<br/>正式写入门禁"]
   H --> J["Gap report<br/>研究空白报告"]
   I --> H
 ```
@@ -154,6 +156,10 @@ rsa --root . eval compare
 | `rsa campaign create` | 创建批量候选队列，写入 `01_literature/campaigns/C###.yaml`。 |
 | `rsa campaign import C001 --file candidates.csv` | 导入 CSV/TSV/YAML 候选，做 DOI/URL/title-year-author 轻量去重和正式 metadata 链接。 |
 | `rsa campaign validate C001` / `status C001` | 只读校验或查看批量队列状态、重复项、阻塞项和已链接项。 |
+| `rsa score P001` | 生成单篇论文 Phase 9 AI 辅助评分和中文监管包。 |
+| `rsa score validate P001` / `status P001` | 只读校验或查看 scoring YAML，不修改正式记录。 |
+| `rsa score campaign C001` | 对已链接正式 metadata 的 campaign 条目批量生成 scoring summary。 |
+| `rsa score review P001` | 记录人工监管或纠正结果，追加 `review_history`，不写 formal records。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
@@ -206,6 +212,41 @@ rsa --root . campaign status C001
 | `candidate_key` | 外部来源中的候选编号。 |
 | `source_candidate_id` | Phase 7 source candidate 编号。 |
 | `note_zh` | 中文备注或导入原因。 |
+
+## AI Scoring Workflow
+
+Phase 9 把 Phase 8 reading note、Phase 8.1 visual evidence candidates 和 Phase 8.2 campaign queue 接到同一个评分层。它会生成三个分数：
+
+- `ai_relevance_score_10`：与 topic profile、priority question 和当前研究场景的相关性。
+- `ai_quality_score_10`：基于 rubric 的质量辅助判断，包含 method clarity、experiment strength、comparison fairness、reproducibility signals 和 limitation awareness。
+- `ai_read_priority_score_10`：面向阅读队列排序的优先级。
+
+```powershell
+rsa --root . score P001
+rsa --root . score validate P001
+rsa --root . score status P001
+
+rsa --root . score review P001 `
+  --final-decision approved `
+  --reviewer zxy `
+  --reason "人工复核后认为该评分可作为排序参考。"
+
+rsa --root . score campaign C001
+```
+
+输出文件：
+
+- `01_literature/scores/P###_scoring.yaml`：机器可读评分记录。
+- `01_literature/scores/P###_review_packet.md`：中文监管包，包含链接、证据范围和人工复核重点。
+- `01_literature/campaigns/C###_scoring_summary.yaml`：批量评分摘要。
+
+评分语义：
+
+- `8-10`：建议优先阅读或重点复核。
+- `6-7`：AI 初审建议进入用户监管队列。
+- `0-5`：建议暂缓或低优先级。
+
+`recommend_pass` 只是 staging/review 层建议，不是 `approved`，也不是 formal approval。Phase 9 不会写入 `metadata/`、`paper_index.md`、`literature_map.md`、`agent_research_notes.md` 或论文正文；后续正式写入仍必须通过 formal write gate 和人工确认。
 
 ## Browser Session Provider 示例
 

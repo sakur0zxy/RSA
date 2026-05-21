@@ -1,4 +1,5 @@
 import pytest
+import yaml
 
 from rsa_cli.cli import main
 from rsa_cli.config import load_project_config
@@ -69,6 +70,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "asset" in captured.out
     assert "visual" in captured.out
     assert "campaign" in captured.out
+    assert "score" in captured.out
     assert "eval" in captured.out
     assert "formal" in captured.out
 
@@ -730,6 +732,155 @@ def test_cli_campaign_create_import_validate_status(tmp_path, capsys):
     assert "批量队列状态" in status_out.out
     assert "duplicate=1" in status_out.out
     assert candidate_path.read_text(encoding="utf-8") == before
+
+
+def write_cli_scoring_note(root):
+    source = root / "01_literature" / "pdfs" / "P001" / "source.pdf"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("authorized source", encoding="utf-8")
+    note = root / "01_literature" / "notes" / "P001_reading_note.md"
+    frontmatter = {
+        "paper_id": "P001",
+        "metadata": "01_literature/metadata/P001.yaml",
+        "note_status": "ready_for_review",
+        "source_file": "01_literature/pdfs/P001/source.pdf",
+        "authorization": "local",
+        "source_grounded_claims": [
+            {
+                "claim_zh": "论文提出 method 并包含 experiment result。",
+                "evidence_page": 1,
+                "evidence_section": "Method",
+                "source_chunk_id": "CH001",
+                "evidence_snippet": "method experiment result",
+                "needs_human_check": True,
+            }
+        ],
+        "short_quotes": [
+            {
+                "quote": "method experiment result",
+                "page": 1,
+                "section": "Method",
+                "reason_zh": "用于定位。",
+            }
+        ],
+        "uncertain_points_zh": [],
+        "asset_suggestions": [],
+        "note_integration_requests": [],
+        "human_confirmed": False,
+    }
+    note.write_text(
+        "---\n"
+        + yaml.safe_dump(frontmatter, allow_unicode=True, sort_keys=False)
+        + "---\n\n"
+        + "## Agent 摘要\n\n用于 CLI scoring 测试。\n",
+        encoding="utf-8",
+    )
+
+
+def test_cli_score_single_validate_status_review_and_campaign(tmp_path, capsys):
+    prepare_project(tmp_path)
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Score CLI Paper"),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+    write_cli_scoring_note(tmp_path)
+
+    scored = main(["--root", str(tmp_path), "score", "P001"])
+    scored_out = capsys.readouterr()
+    valid = main(["--root", str(tmp_path), "score", "validate", "P001"])
+    valid_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "score", "status", "P001"])
+    status_out = capsys.readouterr()
+    review_missing = main(
+        [
+            "--root",
+            str(tmp_path),
+            "score",
+            "review",
+            "P001",
+            "--final-decision",
+            "approved",
+            "--reviewer",
+            "zxy",
+        ]
+    )
+    review_missing_out = capsys.readouterr()
+    reviewed = main(
+        [
+            "--root",
+            str(tmp_path),
+            "score",
+            "review",
+            "P001",
+            "--final-decision",
+            "approved",
+            "--reviewer",
+            "zxy",
+            "--reason",
+            "人工复核后认为该评分可作为排序参考。",
+        ]
+    )
+    reviewed_out = capsys.readouterr()
+
+    assert scored == 0
+    assert "评分完成" in scored_out.out
+    assert "relevance=" in scored_out.out
+    assert valid == 0
+    assert "评分记录有效" in valid_out.out
+    assert status == 0
+    assert "评分状态" in status_out.out
+    assert review_missing == 1
+    assert "评分操作失败" in review_missing_out.err
+    assert "Traceback" not in review_missing_out.err
+    assert reviewed == 0
+    assert "评分人工监管已记录" in reviewed_out.out
+
+    csv_path = tmp_path / "score_campaign.csv"
+    csv_path.write_text(
+        "title,doi,year,first_author\n"
+        "Score CLI Paper,10.1234/cli,2024,Ada\n",
+        encoding="utf-8",
+    )
+    created = main(
+        [
+            "--root",
+            str(tmp_path),
+            "campaign",
+            "create",
+            "--name-zh",
+            "评分队列",
+            "--objective-zh",
+            "测试 Phase 9 campaign scoring。",
+        ]
+    )
+    capsys.readouterr()
+    imported = main(
+        [
+            "--root",
+            str(tmp_path),
+            "campaign",
+            "import",
+            "C001",
+            "--file",
+            str(csv_path),
+        ]
+    )
+    capsys.readouterr()
+    campaign_scored = main(["--root", str(tmp_path), "score", "campaign", "C001"])
+    campaign_out = capsys.readouterr()
+
+    assert created == 0
+    assert imported == 0
+    assert campaign_scored == 0
+    assert "批量评分完成" in campaign_out.out
+    assert (tmp_path / "01_literature" / "campaigns" / "C001_scoring_summary.yaml").exists()
 
 
 def test_cli_source_phase7_help_lists_monitored_acquisition_commands(capsys):

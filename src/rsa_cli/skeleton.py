@@ -17,6 +17,7 @@ LITERATURE_DIRECTORIES = [
     "sources",
     "source_candidates",
     "campaigns",
+    "scores",
     "pdfs",
     "assets",
     "extracted",

@@ -417,6 +417,39 @@ def build_parser() -> argparse.ArgumentParser:
     )
     campaign_status.add_argument("campaign_id", help="campaign 编号，例如 C001。")
 
+    score_group = subcommands.add_parser(
+        "score",
+        help="生成、校验或监管 Phase 9 AI 辅助评分；评分只进入 staging/review，不写正式记录。",
+    )
+    score_group.add_argument(
+        "score_command",
+        nargs="?",
+        help="paper_id，或 validate/status/campaign/review。",
+    )
+    score_group.add_argument(
+        "score_target",
+        nargs="?",
+        help="paper_id 或 campaign_id；例如 P001 或 C001。",
+    )
+    score_group.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="重新生成 scoring YAML 和 review packet；不会覆盖 review_history。",
+    )
+    score_group.add_argument(
+        "--final-decision",
+        choices=["approved", "rejected", "deferred"],
+        help="人工监管最终决定；仅用于 rsa score review，不是正式写入批准。",
+    )
+    score_group.add_argument(
+        "--reviewer",
+        help="人工监管人；用于 rsa score review。",
+    )
+    score_group.add_argument(
+        "--reason",
+        help="中文人工监管原因；用于 rsa score review。",
+    )
+
     eval_group = subcommands.add_parser(
         "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
     )
@@ -1036,6 +1069,105 @@ def _run_campaign_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_score_command(args: argparse.Namespace, root: Path) -> int:
+    from .scoring import (
+        ScoringError,
+        review_score,
+        score_campaign,
+        score_paper,
+        score_status,
+        validate_scoring_record,
+    )
+
+    config = load_project_config(root)
+    command = args.score_command
+    target = args.score_target
+    if not command:
+        print(
+            "评分命令缺少参数：请使用 rsa score P001，或 rsa score validate/status/review P001。",
+            file=sys.stderr,
+        )
+        return 2
+
+    try:
+        if command == "validate":
+            if not target:
+                print("rsa score validate 需要 paper_id，例如 P001。", file=sys.stderr)
+                return 2
+            errors = validate_scoring_record(config, target)
+            if errors:
+                for error in errors:
+                    print(f"评分记录无效: {error}", file=sys.stderr)
+                return 1
+            print(f"评分记录有效: {target}")
+            return 0
+        if command == "status":
+            if not target:
+                print("rsa score status 需要 paper_id，例如 P001。", file=sys.stderr)
+                return 2
+            status = score_status(config, target)
+            if not status.exists:
+                print(f"评分状态: {target} -> 未生成；文件={status.path}")
+                return 0
+            print(
+                f"评分状态: {target} -> status={status.scoring_status}, "
+                f"ai_review_decision={status.ai_review_decision}, "
+                f"relevance={status.ai_relevance_score_10}/10, "
+                f"quality={status.ai_quality_score_10}/10, "
+                f"priority={status.ai_read_priority_score_10}/10, "
+                f"confidence={status.score_confidence}, "
+                f"human_final_decision={status.human_final_decision}; "
+                f"文件={status.path}; review_packet={status.review_packet_path}"
+            )
+            return 0
+        if command == "campaign":
+            if not target:
+                print("rsa score campaign 需要 campaign_id，例如 C001。", file=sys.stderr)
+                return 2
+            result = score_campaign(config, target)
+            print(
+                f"批量评分完成: {target} -> scored={result.scored_count}, "
+                f"skipped={result.skipped_count}, blocked={result.blocked_count}, "
+                f"needs_review={result.needs_review_count}, "
+                f"recommend_pass={result.recommend_pass_count}, "
+                f"recommend_defer={result.recommend_defer_count}; summary={result.path}"
+            )
+            return 0
+        if command == "review":
+            if not target:
+                print("rsa score review 需要 paper_id，例如 P001。", file=sys.stderr)
+                return 2
+            result = review_score(
+                config,
+                target,
+                final_decision=args.final_decision,
+                reviewer=args.reviewer,
+                reason=args.reason,
+            )
+            print(
+                "评分人工监管已记录: "
+                f"{target} -> final_decision={result.final_decision}, "
+                f"history={result.history_count}; 文件={result.scoring_path}; "
+                f"review_packet={result.review_packet_path}"
+            )
+            return 0
+
+        result = score_paper(config, command, overwrite=args.overwrite)
+        print(
+            f"评分完成: {command} -> "
+            f"relevance={result.ai_relevance_score_10}/10, "
+            f"quality={result.ai_quality_score_10}/10, "
+            f"priority={result.ai_read_priority_score_10}/10, "
+            f"ai_review_decision={result.ai_review_decision}, "
+            f"confidence={result.score_confidence}; "
+            f"文件={result.scoring_path}; review_packet={result.review_packet_path}"
+        )
+        return 0
+    except ScoringError as exc:
+        print(f"评分操作失败: {exc}", file=sys.stderr)
+        return 1
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -1150,6 +1282,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_visual_command(args, root)
         if args.command == "campaign":
             return _run_campaign_command(args, root)
+        if args.command == "score":
+            return _run_score_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":

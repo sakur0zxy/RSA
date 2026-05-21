@@ -121,6 +121,10 @@ class ProjectConfig:
         return self.literature_root / "campaigns"
 
     @property
+    def scores_root(self) -> Path:
+        return self.literature_root / "scores"
+
+    @property
     def pdfs_root(self) -> Path:
         return self.literature_root / "pdfs"
 

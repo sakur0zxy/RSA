@@ -238,6 +238,21 @@ def test_readme_documents_visual_evidence_workflow():
     assert "PyMuPDF" in text
 
 
+def test_readme_documents_phase9_scoring_workflow():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for needle in [
+        "rsa --root . score P001",
+        "rsa --root . score campaign C001",
+        "ai_relevance_score_10",
+        "ai_quality_score_10",
+        "ai_read_priority_score_10",
+        "`recommend_pass` 只是 staging/review 层建议",
+        "不是 formal approval",
+    ]:
+        assert needle in text
+
+
 def test_init_writes_localized_templates_and_formal_records(tmp_path):
     config = load_project_config(tmp_path)
 
