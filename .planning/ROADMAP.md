@@ -35,7 +35,7 @@
 - [x] Phase 8: Auto Reading Draft - 3/3 plans，完成于 2026-05-16；基于本地或已授权全文生成中文自动 reading note draft、AI 初审分、review packet，并输出候选 `asset_suggestions`。
 - [x] Phase 8.1: Visual Evidence Extraction (INSERTED) - 3/3 plans，完成于 2026-05-19；基于 Phase 8 候选建议和授权/本地 PDF 生成图表/表格视觉证据候选、裁图、本地 context packet 和 page/region/source trace；输出只作为 staging/review 候选。
 - [x] Phase 8.2: Campaign Foundation (INSERTED) - 1/1 plan，完成于 2026-05-19；提前实现不依赖 Phase 9/10 的批量候选队列、CSV/TSV/YAML 导入、轻量去重、正式 metadata 链接和只读状态校验。
-- [ ] Phase 9: Evidence Signals & AI Scoring - 3/3 plans，准备执行；融合正文证据和视觉证据候选，生成 relevance、quality、read priority 辅助评分。
+- [x] Phase 9: Evidence Signals & AI Scoring - 3/3 plans，完成于 2026-05-21；融合正文证据、视觉证据候选和 campaign 队列，生成 relevance、quality、read priority 辅助评分、review packet 和 campaign scoring summary。
 - [ ] Phase 10: Workflow Orchestrator - 串联 v1/v2 命令，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
 - [ ] Phase 11: Campaign & Batch Review - 支持批量候选导入、去重、review queue、状态流转和排序。
 - [ ] Phase 12: Local Review Workspace - 提供本地监管台审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
@@ -45,7 +45,7 @@
 
 ## 下一步
 
-当前执行目标：**执行 Phase 9: Evidence Signals & AI Scoring**。
+当前执行目标：**进入 Phase 10: Workflow Orchestrator 讨论/规划**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -73,6 +73,8 @@ Phase 8.1 已完成 Phase 8 之后的插入增强：在评分前处理最小必�
 
 Phase 8.2 已完成提前拆出的 Campaign Foundation：它只负责批量候选队列、导入、轻量去重、状态汇总和 formal metadata 轻量链接；不做 AI scoring、不调用 workflow orchestrator、不做 UI，也不执行 formal write。完整 Campaign & Batch Review 仍留在 Phase 11，并在 Phase 9/10 完成后接入评分和自动运行状态。
 
+Phase 9 已完成 Evidence Signals & AI Scoring：它从正式 metadata、Phase 8 reading draft、Phase 8.1 视觉证据候选和 Phase 8.2 campaign 队列中生成结构化 evidence signals，并输出 `01_literature/scores/P###_scoring.yaml`、`P###_review_packet.md` 和 `campaigns/C###_scoring_summary.yaml`。AI 评分只作为 staging/review guidance，支持人工 review/override，不直接写入 formal records。
+
 Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成、高级图表智能、复杂多 agent 编排。轻量 DOI/BibTeX 补全、title/author/year 标准化和 dedup 辅助可在 Phase 9 内按主闭环需要处理。
 
 ## 进度
@@ -80,11 +82,11 @@ Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-13 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 14/17 completed for Phase 6-9 planned | Phase 9 planned，next execute Phase 9 | 2026-05-21 |
+| v2.0 Scaled Literature Workstation | 6-13 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 17/17 completed for Phase 6-9 planned | Phase 9 complete，next discuss Phase 10 | 2026-05-21 |
 
 ---
 
-*Roadmap updated after Phase 8.2 campaign foundation implementation: 2026-05-19*
+*Roadmap updated after Phase 9 evidence scoring implementation: 2026-05-21*
 
 ## GSD 解析索引
 
@@ -138,7 +140,7 @@ Status: complete. Provide dependency-free campaign queue creation, import, dedup
 
 ### Phase 9: Evidence Signals & AI Scoring
 
-Status: planned. Fuse text evidence, visual candidates and campaign queues into AI-assisted relevance, quality and read-priority scoring.
+Status: complete. Fuse text evidence, visual candidates and campaign queues into AI-assisted relevance, quality and read-priority scoring.
 
 ### Phase 10: Workflow Orchestrator
 

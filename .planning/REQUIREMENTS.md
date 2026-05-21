@@ -91,11 +91,11 @@
 
 ### Phase 9: Evidence Signals & AI Scoring
 
-- [ ] **V2-SCORE-01:** AI scoring separates relevance, quality and read priority.
-- [ ] **V2-SCORE-02:** Scoring must record evidence level, confidence, structured basis, rubric details and human review override.
-- [ ] **V2-SCORE-03:** AI scoring is queue/review guidance only and cannot directly write formal records.
-- [ ] **V2-SCORE-04:** Scoring may consume text evidence and Phase 8.1 visual evidence candidates, but must degrade gracefully when visual evidence is missing or low confidence.
-- [ ] **V2-SCORE-05:** Any metadata enrichment in Phase 9 must stay lightweight and serve the scoring/review loop only: DOI/BibTeX basics, title/author/year normalization, and dedup assistance.
+- [x] **V2-SCORE-01:** AI scoring separates relevance, quality and read priority.
+- [x] **V2-SCORE-02:** Scoring must record evidence level, confidence, structured basis, rubric details and human review override.
+- [x] **V2-SCORE-03:** AI scoring is queue/review guidance only and cannot directly write formal records.
+- [x] **V2-SCORE-04:** Scoring may consume text evidence and Phase 8.1 visual evidence candidates, but must degrade gracefully when visual evidence is missing or low confidence.
+- [x] **V2-SCORE-05:** Any metadata enrichment in Phase 9 must stay lightweight and serve the scoring/review loop only: DOI/BibTeX basics, title/author/year normalization, and dedup assistance.
 
 ### Phase 10: Workflow Orchestrator
 
