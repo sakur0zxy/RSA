@@ -44,6 +44,20 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "ready_score_threshold": 6,
         },
     },
+    "workflow": {
+        "enabled_steps": [
+            "acquisition",
+            "reading_draft",
+            "visual_extraction",
+            "scoring",
+            "review_packet",
+        ],
+        "skip_steps": [],
+        "retry_policy": {
+            "max_attempts": 1,
+            "retryable_statuses": ["failed"],
+        },
+    },
 }
 
 
@@ -125,6 +139,10 @@ class ProjectConfig:
         return self.literature_root / "scores"
 
     @property
+    def workflows_root(self) -> Path:
+        return self.literature_root / "workflows"
+
+    @property
     def pdfs_root(self) -> Path:
         return self.literature_root / "pdfs"
 
@@ -164,6 +182,22 @@ class ProjectConfig:
     @property
     def reading_draft_review(self) -> dict[str, Any]:
         return dict(self.reading_draft.get("review", {}))
+
+    @property
+    def workflow(self) -> dict[str, Any]:
+        return dict(self.data.get("workflow", {}))
+
+    @property
+    def workflow_enabled_steps(self) -> list[str]:
+        return list(self.workflow.get("enabled_steps", []) or [])
+
+    @property
+    def workflow_skip_steps(self) -> list[str]:
+        return list(self.workflow.get("skip_steps", []) or [])
+
+    @property
+    def workflow_retry_policy(self) -> dict[str, Any]:
+        return dict(self.workflow.get("retry_policy", {}) or {})
 
     @property
     def reading_draft_ready_score_threshold(self) -> int:
@@ -247,6 +281,14 @@ def validate_config(config: ProjectConfig) -> None:
         raise ConfigError("reading_draft.llm 必须是 mapping")
     if not isinstance(config.reading_draft.get("review", {}), dict):
         raise ConfigError("reading_draft.review 必须是 mapping")
+    if not isinstance(config.workflow, dict):
+        raise ConfigError("workflow 必须是 mapping")
+    if not isinstance(config.workflow_enabled_steps, list):
+        raise ConfigError("workflow.enabled_steps 必须是 list")
+    if not isinstance(config.workflow_skip_steps, list):
+        raise ConfigError("workflow.skip_steps 必须是 list")
+    if not isinstance(config.workflow_retry_policy, dict):
+        raise ConfigError("workflow.retry_policy 必须是 mapping")
     if not config.output_policy:
         raise ConfigError("rounds.output_policy 不能为空")
     if not config.approval_mode:
