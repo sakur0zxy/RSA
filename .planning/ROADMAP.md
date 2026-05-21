@@ -3,7 +3,7 @@
 ## 里程碑
 
 - **v1.0 Local Harness** - Phase 1-5，已于 2026-05-13 发布。详见 `.planning/milestones/v1.0-ROADMAP.md`。
-- **v2.0 Scaled Literature Workstation** - Phase 6-13 与插入 Phase 7.1、Phase 8.1 为核心范围；重型 metadata 集成、高级图表智能和 multi-agent 编排为延后范围。
+- **v2.0 Scaled Literature Workstation** - Phase 6-13 与插入 Phase 7.1、Phase 8.1、Phase 8.2 为核心范围；重型 metadata 集成、高级图表智能和 multi-agent 编排为延后范围。
 
 ## v2 全局原则
 
@@ -37,7 +37,7 @@
 - [x] Phase 8.1: Visual Evidence Extraction (INSERTED) - 3/3 plans，完成于 2026-05-19；基于 Phase 8 候选建议和授权/本地 PDF 生成图表/表格视觉证据候选、裁图、本地 context packet 和 page/region/source trace；输出只作为 staging/review 候选。
 - [x] Phase 8.2: Campaign Foundation (INSERTED) - 1/1 plan，完成于 2026-05-19；提前实现不依赖 Phase 9/10 的批量候选队列、CSV/TSV/YAML 导入、轻量去重、正式 metadata 链接和只读状态校验。
 - [x] Phase 9: Evidence Signals & AI Scoring - 3/3 plans，完成于 2026-05-21；融合正文证据、视觉证据候选和 campaign 队列，生成 relevance、quality、read priority 辅助评分、review packet 和 campaign scoring summary。
-- [ ] Phase 10: Workflow Orchestrator - 串联 v1/v2 命令，为单篇论文提供顺序、可恢复、可监控的 workflow primitive，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
+- [x] Phase 10: Workflow Orchestrator - 3/3 plans，完成于 2026-05-21；串联 v1/v2 命令，为单篇论文提供顺序、可恢复、可监控的 workflow primitive，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
 - [ ] Phase 11: Campaign & Batch Review - 在 Phase 10 workflow primitive 之上支持批量候选、受控流水线并行、review queue、状态流转、排序和批量异常聚合。
 - [ ] Phase 12: Local Review Workspace - 提供本地监管台审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
 - [ ] Phase 13: Writing Safety & Hardening - 做 claim-level citation check，并增强 eval、回归测试、prompt/template drift 检测和 guardrails。
@@ -46,7 +46,7 @@
 
 ## 下一步
 
-当前执行目标：**进入 Phase 10: Workflow Orchestrator 讨论/规划**。
+当前执行目标：**进入 Phase 11: Campaign & Batch Review 讨论/规划**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -78,6 +78,8 @@ Phase 9 已完成 Evidence Signals & AI Scoring：它从正式 metadata、Phase 
 
 Phase 10/11 的自动化分工已经锁定为“单篇顺序链 + campaign 级受控并行”。Phase 10 只负责把单篇论文按 acquisition -> reading draft -> visual extraction -> scoring -> review packet 顺序跑成可靠 workflow primitive，并保留 `campaign_id`、`run_id`、`step_status`、`retry_policy`、`artifacts` 等字段供后续复用。Phase 11 才负责多篇论文之间的小规模流水线并行、阶段队列限流、campaign 排序和批量异常聚合。
 
+Phase 10 已完成 Workflow Orchestrator：它新增 `rsa workflow run|resume|status|report|stop|rerun`，把单篇正式文献自动推进到中文 review packet；run state 写入 `01_literature/workflows/P###/RUN-###.yaml`，并保留 future interfaces 给后续 LLM visual analysis 和高级图表智能。Phase 10 不执行 campaign worker queue、不并行处理多篇论文、不绕过 formal write gate。
+
 Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成、高级图表智能、复杂多 agent 编排。轻量 DOI/BibTeX 补全、title/author/year 标准化和 dedup 辅助可在 Phase 9 内按主闭环需要处理。
 
 ## 进度
@@ -85,7 +87,7 @@ Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-13 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 17/17 completed for Phase 6-9 planned | Phase 9 complete，next discuss Phase 10 | 2026-05-21 |
+| v2.0 Scaled Literature Workstation | 6-13 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 20/20 completed for Phase 6-10 planned | Phase 10 complete，next discuss Phase 11 | 2026-05-21 |
 
 ---
 
@@ -147,7 +149,7 @@ Status: complete. Fuse text evidence, visual candidates and campaign queues into
 
 ### Phase 10: Workflow Orchestrator
 
-Status: planned. Chain existing v1/v2 commands into a single-paper sequential, resumable and monitorable workflow primitive that automatically runs to review packet while preserving formal-write boundaries.
+Status: complete. Chain existing v1/v2 commands into a single-paper sequential, resumable and monitorable workflow primitive that automatically runs to review packet while preserving formal-write boundaries.
 
 ### Phase 11: Campaign & Batch Review
 

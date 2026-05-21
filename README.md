@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-156%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-168%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -30,6 +30,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Visual evidence candidates | `rsa visual extract` 从已授权/本地 PDF 提取图表/表格候选、裁图和本地上下文包；候选 YAML 进入 staging/review，不是正式科研记录。 |
 | Campaign foundation | `rsa campaign create/import/validate/status` 管理批量候选队列、轻量去重和正式 metadata 链接；不依赖 AI 评分或 workflow orchestrator。 |
 | AI scoring | `rsa score` 融合 reading note、视觉候选和 campaign 队列，生成 relevance、quality、read priority 三类 0-10 辅助评分；只用于排序、初审和监管。 |
+| Workflow orchestrator | `rsa workflow run/resume/status/report/stop/rerun` 把单篇论文顺序跑到 review packet，保留中文状态、可恢复 run state 和 Phase 11 可复用的 campaign 字段。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
@@ -160,6 +161,9 @@ rsa --root . eval compare
 | `rsa score validate P001` / `status P001` | 只读校验或查看 scoring YAML，不修改正式记录。 |
 | `rsa score campaign C001` | 对已链接正式 metadata 的 campaign 条目批量生成 scoring summary。 |
 | `rsa score review P001` | 记录人工监管或纠正结果，追加 `review_history`，不写 formal records。 |
+| `rsa workflow run P001` | 串联 acquisition、reading draft、visual extraction、scoring 和 review packet，自动跑到需要监管的位置。 |
+| `rsa workflow status P001` / `report P001` | 只读查看最近一次 workflow run 的状态、步骤、下一步建议和中文监管包。 |
+| `rsa workflow resume P001` / `rerun P001` / `stop P001` | 显式恢复、重跑指定步骤或暂停单篇 workflow；campaign 批量调度属于 Phase 11。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
@@ -248,6 +252,44 @@ rsa --root . score campaign C001
 
 `recommend_pass` 只是 staging/review 层建议，不是 `approved`，也不是 formal approval。Phase 9 不会写入 `metadata/`、`paper_index.md`、`literature_map.md`、`agent_research_notes.md` 或论文正文；后续正式写入仍必须通过 formal write gate 和人工确认。
 
+## Workflow Orchestrator
+
+Phase 10 提供单篇论文的顺序 workflow primitive。它把已有命令串成一条可恢复、可监控的链路，默认自动运行到 `review_packet`，但不会绕过 formal write gate。
+
+```powershell
+rsa --root . workflow run P001 --skip-visual
+rsa --root . workflow status P001
+rsa --root . workflow report P001
+rsa --root . workflow resume P001 --from-step scoring
+rsa --root . workflow rerun P001 --from-step visual_extraction
+rsa --root . workflow stop P001 --reason "等待人工检查来源"
+```
+
+执行顺序：
+
+1. `acquisition`：查找、审查并登记授权来源。
+2. `reading_draft`：基于正式 metadata 和授权全文生成阅读草稿。
+3. `visual_extraction`：生成视觉证据候选；失败会降级为 `partial`，不阻塞正文评分。
+4. `scoring`：生成 AI 初审评分和中文监管包。
+5. `review_packet`：汇总链接、状态和下一步建议，供用户监管。
+
+状态语义：
+
+| status | 中文含义 |
+|--------|----------|
+| `completed` | 当前步骤完成，产物已记录。 |
+| `partial` | 当前步骤部分完成，可继续后续步骤，但需要用户后续查看原因。 |
+| `needs_review` | 已进入监管点，用户需要检查 review packet 或相关候选产物。 |
+| `blocked` | 缺少必要输入、授权或依赖，workflow fail closed，不生成伪结果。 |
+| `stopped` | 用户显式暂停；必须指定 `--from-step` 才能恢复。 |
+| `skipped` | 用户或本地配置显式跳过该步骤。 |
+
+运行状态写入 `01_literature/workflows/P###/RUN-###.yaml`，监管包写入 `01_literature/workflows/P###/RUN-###_report.md`。字段名保持英文稳定，例如 `run_id`、`paper_id`、`campaign_id`、`step_id`、`step_status`、`artifacts`、`retry_policy`，用户可读解释和错误原因使用中文。
+
+Phase 10 只处理单篇顺序链；`campaign_id` 和 `campaign_item_id` 只是为 Phase 11 复用而保留的上下文字段。`rsa workflow run C001` 会被拒绝，因为 campaign 批量调度属于 Phase 11。
+
+预留接口：run state 中保留 `llm_visual_analysis`、`advanced_analysis.curve_extraction`、`advanced_analysis.table_structure` 和 `advanced_analysis.multimodal_interpretation`，当前默认 `not_run`。这些接口用于后续高级图表智能，不代表 Phase 10 已经生成图像学术结论。
+
 ## Browser Session Provider 示例
 
 把下面配置放入 `.rsa/local.yaml`，用于本地自定义资料库。字段名保持英文稳定，中文说明用于提醒授权边界。
@@ -297,6 +339,7 @@ rsa --root . source find P001 --provider university_library_browser
   sources/                  # P###.yaml 来源 ledger
   source_candidates/        # P###.yaml 候选来源、匹配证据和下载状态
   campaigns/                # C###.yaml 批量候选队列、轻量去重和状态汇总
+  workflows/                # P###/RUN-###.yaml 单篇 workflow 状态和中文监管包
   pdfs/                     # 本地-only PDF，git 忽略
   assets/                   # 本地-only 截图/结果图；manifest.yaml 与 visual_evidence_candidates.yaml 可审计
     P###/crops/             # 本地-only 视觉候选裁图
@@ -331,6 +374,7 @@ tests/                      # 回归测试
 - Phase 8.1 不还原曲线数值、不做高级表格结构理解、不让 LLM 直接给图像学术结论；这些能力必须在后续阶段继续保留证据链、置信度和人工监管。
 - `rsa campaign ...` 只管理批量候选队列和去重状态，不执行 AI scoring、workflow orchestration、review UI 或 formal write。
 - Campaign 中的 `linked` 只表示候选匹配到现有 `metadata/P###.yaml`，不代表论文已经完成阅读、评分或正式结论。
+- `rsa workflow ...` 只自动推进单篇 staging/review 链路，不会并行处理多篇论文，也不会执行 formal write。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。

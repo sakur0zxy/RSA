@@ -99,12 +99,12 @@
 
 ### Phase 10: Workflow Orchestrator
 
-- [ ] **V2-WORKFLOW-01:** User can run one monitored workflow command that chains existing v1/v2 steps and advances automatically until review is needed.
-- [ ] **V2-WORKFLOW-02:** Workflow runs must be resumable: interrupted runs record current step, completed outputs, pending review items and next action.
-- [ ] **V2-WORKFLOW-03:** Workflow automation must stop before formal writes and produce a review packet for metadata, map, reading note or research-note approvals.
-- [ ] **V2-WORKFLOW-04:** User can monitor and adjust workflow execution through status commands, local config, step-level toggles and explicit rerun/resume commands.
-- [ ] **V2-WORKFLOW-05:** Phase 10 orchestrates a single-paper sequential chain: acquisition -> reading draft -> visual extraction -> scoring -> review packet.
-- [ ] **V2-WORKFLOW-06:** Phase 10 run state must preserve batch-ready fields such as `run_id`, `paper_id`, `campaign_id`, `step_id`, `step_status`, `artifacts`, `retry_policy` and Chinese blocked/partial reasons, but must not implement campaign worker queues or uncontrolled parallelism.
+- [x] **V2-WORKFLOW-01:** User can run one monitored workflow command that chains existing v1/v2 steps and advances automatically until review is needed.
+- [x] **V2-WORKFLOW-02:** Workflow runs must be resumable: interrupted runs record current step, completed outputs, pending review items and next action.
+- [x] **V2-WORKFLOW-03:** Workflow automation must stop before formal writes and produce a review packet for metadata, map, reading note or research-note approvals.
+- [x] **V2-WORKFLOW-04:** User can monitor and adjust workflow execution through status commands, local config, step-level toggles and explicit rerun/resume commands.
+- [x] **V2-WORKFLOW-05:** Phase 10 orchestrates a single-paper sequential chain: acquisition -> reading draft -> visual extraction -> scoring -> review packet.
+- [x] **V2-WORKFLOW-06:** Phase 10 run state must preserve batch-ready fields such as `run_id`, `paper_id`, `campaign_id`, `step_id`, `step_status`, `artifacts`, `retry_policy` and Chinese blocked/partial reasons, but must not implement campaign worker queues or uncontrolled parallelism.
 
 ### Phase 11-13
 

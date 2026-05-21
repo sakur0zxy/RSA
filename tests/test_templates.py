@@ -253,6 +253,22 @@ def test_readme_documents_phase9_scoring_workflow():
         assert needle in text
 
 
+def test_readme_documents_phase10_workflow_orchestrator():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for needle in [
+        "rsa --root . workflow run P001",
+        "rsa --root . workflow status P001",
+        "rsa --root . workflow report P001",
+        "01_literature/workflows/P###/RUN-###.yaml",
+        "campaign 批量调度属于 Phase 11",
+        "llm_visual_analysis",
+        "formal write gate",
+        "fail closed",
+    ]:
+        assert needle in text
+
+
 def test_init_writes_localized_templates_and_formal_records(tmp_path):
     config = load_project_config(tmp_path)
 

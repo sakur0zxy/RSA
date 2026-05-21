@@ -71,6 +71,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "visual" in captured.out
     assert "campaign" in captured.out
     assert "score" in captured.out
+    assert "workflow" in captured.out
     assert "eval" in captured.out
     assert "formal" in captured.out
 
@@ -777,6 +778,68 @@ def write_cli_scoring_note(root):
     )
 
 
+def prepare_cli_workflow_project(root):
+    from rsa_cli.assets import add_source_record
+    from rsa_cli.metadata import write_metadata_record
+
+    prepare_project(root)
+    local_yaml = root / ".rsa" / "local.yaml"
+    local_yaml.parent.mkdir(parents=True, exist_ok=True)
+    local_yaml.write_text(
+        """
+reading_draft:
+  llm:
+    provider: mock
+    model: mock-reading-draft
+""",
+        encoding="utf-8",
+    )
+    config = load_project_config(root)
+    source = root / "workflow-source.pdf"
+    source.write_text(
+        (
+            "This paper studies gapped aperture SAR reconstruction. "
+            "The method compares experiment results and reports metrics. "
+        )
+        * 8,
+        encoding="utf-8",
+    )
+    write_metadata_record(
+        config,
+        {
+            "title": "Workflow CLI Paper",
+            "authors": ["Ada Lovelace"],
+            "year": "2024",
+            "venue": "Journal of Tests",
+            "doi": "10.1234/workflow-cli",
+            "official_url": None,
+            "source_reliability": "publisher",
+            "decision": "include",
+            "decision_reason": "用于测试 workflow CLI。",
+            "last_checked": "2026-05-21",
+            "pdf_status": "authorized",
+            "local_pdf": str(source),
+            "assets": [],
+            "topic_profile": "demo_topic",
+            "priority_questions": ["Q1"],
+            "used_for": ["workflow"],
+            "research_roles": ["method"],
+            "notes": "人工备注",
+        },
+        human_confirmed=True,
+        confirmed_by="zxy",
+    )
+    add_source_record(
+        config,
+        "P001",
+        source_file=str(source),
+        authorization="authorized",
+        source_type="pdf",
+        license_note="用户已授权本地科研阅读。",
+        added_by="zxy",
+    )
+
+
 def test_cli_score_single_validate_status_review_and_campaign(tmp_path, capsys):
     prepare_project(tmp_path)
     main(
@@ -881,6 +944,77 @@ def test_cli_score_single_validate_status_review_and_campaign(tmp_path, capsys):
     assert campaign_scored == 0
     assert "批量评分完成" in campaign_out.out
     assert (tmp_path / "01_literature" / "campaigns" / "C001_scoring_summary.yaml").exists()
+
+
+def test_cli_workflow_run_status_report_stop_and_resume_boundary(tmp_path, capsys):
+    prepare_cli_workflow_project(tmp_path)
+
+    with pytest.raises(SystemExit) as help_exc:
+        main(["workflow", "run", "--help"])
+    help_out = capsys.readouterr()
+    run = main(
+        [
+            "--root",
+            str(tmp_path),
+            "workflow",
+            "run",
+            "P001",
+            "--campaign-id",
+            "C001",
+            "--campaign-item-id",
+            "CI001",
+            "--skip-acquisition",
+            "--skip-visual",
+        ]
+    )
+    run_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "workflow", "status", "P001"])
+    status_out = capsys.readouterr()
+    report = main(["--root", str(tmp_path), "workflow", "report", "P001"])
+    report_out = capsys.readouterr()
+    stopped = main(
+        [
+            "--root",
+            str(tmp_path),
+            "workflow",
+            "stop",
+            "P001",
+            "--reason",
+            "用户检查中，暂停自动推进。",
+        ]
+    )
+    stopped_out = capsys.readouterr()
+    resume = main(["--root", str(tmp_path), "workflow", "resume", "P001"])
+    resume_out = capsys.readouterr()
+
+    assert help_exc.value.code == 0
+    assert "--skip-acquisition" in help_out.out
+    assert "--campaign-id" in help_out.out
+    assert run == 0
+    assert "workflow 运行完成" in run_out.out
+    assert "needs_review" in run_out.out
+    assert "next_action=" in run_out.out
+    assert status == 0
+    assert "workflow 状态" in status_out.out
+    assert "next_action=" in status_out.out
+    assert "C001" not in status_out.err
+    assert report == 0
+    assert "Workflow Review Packet" in report_out.out
+    assert stopped == 0
+    assert "workflow 已暂停" in stopped_out.out
+    assert resume == 1
+    assert "workflow 操作失败" in resume_out.err
+    assert "stop" in resume_out.err
+
+
+def test_cli_workflow_rejects_campaign_as_main_target(tmp_path, capsys):
+    prepare_project(tmp_path)
+
+    exit_code = main(["--root", str(tmp_path), "workflow", "run", "C001"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "campaign 批量调度属于 Phase 11" in captured.err
 
 
 def test_cli_source_phase7_help_lists_monitored_acquisition_commands(capsys):

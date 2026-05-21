@@ -450,6 +450,59 @@ def build_parser() -> argparse.ArgumentParser:
         help="中文人工监管原因；用于 rsa score review。",
     )
 
+    workflow_group = subcommands.add_parser(
+        "workflow",
+        help="运行、恢复、停止或查看单篇论文自动工作流；Phase 10 只处理 P###，不做 campaign 批量调度。",
+    )
+    workflow_subcommands = workflow_group.add_subparsers(
+        dest="workflow_command", required=True
+    )
+    workflow_run = workflow_subcommands.add_parser(
+        "run",
+        help="按 acquisition -> reading_draft -> visual_extraction -> scoring -> review_packet 顺序自动处理单篇论文。",
+    )
+    workflow_run.add_argument("paper_id", help="正式文献编号，例如 P001；不能传入 C### campaign。")
+    workflow_run.add_argument("--campaign-id", help="可选 campaign 上下文，例如 C001；不启动批量调度。")
+    workflow_run.add_argument("--campaign-item-id", help="可选 campaign item 上下文，例如 CI001。")
+    workflow_run.add_argument("--from-step", help="从指定 step 开始本次 run，并跳过之前步骤。")
+    workflow_run.add_argument("--skip-acquisition", action="store_true", help="跳过授权获取步骤并记录 skipped。")
+    workflow_run.add_argument("--skip-reading-draft", action="store_true", help="跳过阅读草稿步骤并记录 skipped。")
+    workflow_run.add_argument("--skip-visual", action="store_true", help="跳过视觉证据候选提取步骤并记录 skipped。")
+    workflow_run.add_argument("--skip-scoring", action="store_true", help="跳过 AI 辅助评分步骤并记录 skipped。")
+
+    workflow_resume = workflow_subcommands.add_parser(
+        "resume",
+        help="从最近一次未完成、失败或可重试步骤恢复单篇 workflow。",
+    )
+    workflow_resume.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    workflow_resume.add_argument("--from-step", help="显式指定恢复位置，例如 scoring。")
+
+    workflow_status = workflow_subcommands.add_parser(
+        "status",
+        help="只读查看最近一次 workflow run 的状态、当前位置和报告路径。",
+    )
+    workflow_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+
+    workflow_report = workflow_subcommands.add_parser(
+        "report",
+        help="只读显示最近一次 workflow review packet 的路径和摘要。",
+    )
+    workflow_report.add_argument("paper_id", help="正式文献编号，例如 P001。")
+
+    workflow_stop = workflow_subcommands.add_parser(
+        "stop",
+        help="把最近一次 workflow 标记为用户暂停；后续不会自动 resume。",
+    )
+    workflow_stop.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    workflow_stop.add_argument("--reason", help="中文暂停原因。")
+
+    workflow_rerun = workflow_subcommands.add_parser(
+        "rerun",
+        help="从指定 step 重新计算该步骤及后续步骤。",
+    )
+    workflow_rerun.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    workflow_rerun.add_argument("--from-step", required=True, help="重新执行起点，例如 visual_extraction。")
+
     eval_group = subcommands.add_parser(
         "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
     )
@@ -1168,6 +1221,125 @@ def _run_score_command(args: argparse.Namespace, root: Path) -> int:
         return 1
 
 
+def _run_workflow_command(args: argparse.Namespace, root: Path) -> int:
+    from .workflow import (
+        STEP_IDS,
+        WorkflowError,
+        rerun_workflow,
+        resume_workflow,
+        run_workflow,
+        stop_workflow,
+        workflow_status,
+    )
+
+    config = load_project_config(root)
+    paper_id = args.paper_id
+    if paper_id.startswith("C"):
+        print(
+            "workflow 的主目标必须是单篇正式文献 P###；campaign 批量调度属于 Phase 11。",
+            file=sys.stderr,
+        )
+        return 1
+    try:
+        if args.workflow_command == "run":
+            skip_steps = _workflow_skip_steps(args)
+            result = run_workflow(
+                config,
+                paper_id,
+                campaign_id=args.campaign_id,
+                campaign_item_id=args.campaign_item_id,
+                skip_steps=skip_steps,
+                from_step=args.from_step,
+            )
+            print(
+                f"workflow 运行完成: {paper_id} run_id={result.run_id}, "
+                f"status={result.workflow_status}, current_step={result.current_step}; "
+                f"run={result.run_path}; report={result.report_path}; "
+                f"next_action={_workflow_next_action_text(result.workflow_status)}"
+            )
+            return 0 if result.workflow_status in {"completed", "partial", "needs_review"} else 1
+        if args.workflow_command == "resume":
+            result = resume_workflow(config, paper_id, from_step=args.from_step)
+            print(
+                f"workflow 恢复完成: {paper_id} run_id={result.run_id}, "
+                f"status={result.workflow_status}; report={result.report_path}; "
+                f"next_action={_workflow_next_action_text(result.workflow_status)}"
+            )
+            return 0 if result.workflow_status in {"completed", "partial", "needs_review"} else 1
+        if args.workflow_command == "status":
+            status = workflow_status(config, paper_id)
+            if not status.exists:
+                print(f"workflow 状态: {paper_id} -> 尚未运行；目录={status.path}")
+                return 0
+            print(
+                f"workflow 状态: {paper_id} run_id={status.run_id}, "
+                f"status={status.workflow_status}, current_step={status.current_step}; "
+                f"run={status.path}; report={status.report_path}; "
+                f"next_action={_workflow_next_action_text(status.workflow_status)}"
+            )
+            return 0
+        if args.workflow_command == "report":
+            status = workflow_status(config, paper_id)
+            if not status.exists or status.report_path is None or not status.report_path.exists():
+                print(f"workflow report 不存在: {paper_id}", file=sys.stderr)
+                return 1
+            text = status.report_path.read_text(encoding="utf-8")
+            first_lines = "\n".join(text.splitlines()[:12])
+            print(f"workflow report: {status.report_path}\n{first_lines}")
+            return 0
+        if args.workflow_command == "stop":
+            result = stop_workflow(config, paper_id, reason_zh=args.reason)
+            print(
+                f"workflow 已暂停: {paper_id} run_id={result.run_id}, "
+                f"status={result.workflow_status}; report={result.report_path}; "
+                f"next_action={_workflow_next_action_text(result.workflow_status)}"
+            )
+            return 0
+        if args.workflow_command == "rerun":
+            if args.from_step not in STEP_IDS:
+                print(f"--from-step 必须是: {', '.join(STEP_IDS)}", file=sys.stderr)
+                return 2
+            result = rerun_workflow(config, paper_id, from_step=args.from_step)
+            print(
+                f"workflow 重新执行完成: {paper_id} run_id={result.run_id}, "
+                f"from_step={args.from_step}, status={result.workflow_status}; "
+                f"report={result.report_path}; "
+                f"next_action={_workflow_next_action_text(result.workflow_status)}"
+            )
+            return 0 if result.workflow_status in {"completed", "partial", "needs_review"} else 1
+    except WorkflowError as exc:
+        print(f"workflow 操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
+def _workflow_skip_steps(args: argparse.Namespace) -> list[str]:
+    skip_steps: list[str] = []
+    if getattr(args, "skip_acquisition", False):
+        skip_steps.append("acquisition")
+    if getattr(args, "skip_reading_draft", False):
+        skip_steps.append("reading_draft")
+    if getattr(args, "skip_visual", False):
+        skip_steps.append("visual_extraction")
+    if getattr(args, "skip_scoring", False):
+        skip_steps.append("scoring")
+    return skip_steps
+
+
+def _workflow_next_action_text(status: str | None) -> str:
+    if status == "completed":
+        return "查看 review packet；如需正式写入，继续走 rsa formal 和人工确认。"
+    if status == "needs_review":
+        return "查看中文监管包，处理 needs_review 项。"
+    if status == "partial":
+        return "先查看 partial 原因，必要时用 workflow rerun 重跑对应步骤。"
+    if status == "blocked":
+        return "按修复提示补齐输入、授权或依赖后再 resume。"
+    if status == "stopped":
+        return "已暂停；后续必须显式指定 --from-step 才能恢复。"
+    return "查看 workflow status 和 report。"
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -1284,6 +1456,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_campaign_command(args, root)
         if args.command == "score":
             return _run_score_command(args, root)
+        if args.command == "workflow":
+            return _run_workflow_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":
