@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: executing
-stopped_at: Phase 10 context gathered
-last_updated: "2026-05-21T14:59:35.460Z"
+status: ready_to_plan
+stopped_at: Phase 10 complete (3/3) - ready to discuss Phase 11
+last_updated: 2026-05-21T15:15:36.359Z
 last_activity: 2026-05-21
 progress:
   total_phases: 16
   completed_phases: 12
-  total_plans: 34
-  completed_plans: 32
+  total_plans: 14
+  completed_plans: 34
   percent: 75
 ---
 
@@ -22,13 +22,13 @@ progress:
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** Phase 10 Workflow Orchestrator
+**当前重点:** Phase 11 Campaign & Batch Review
 
 ## 当前位置
 
-Phase: 10
+Phase: 11
 Plan: Not started
-Status: Executing Phase 10
+Status: Ready to plan
 Last activity: 2026-05-21
 
 进度: [████████░░] 75%
@@ -37,7 +37,7 @@ Last activity: 2026-05-21
 
 **速度:**
 
-- 已完成 plans: 31
+- 已完成 plans: 34
 - 平均耗时: N/A
 - 总执行时间: 0 hours
 
@@ -57,7 +57,7 @@ Last activity: 2026-05-21
 | 8.1 | 3 | complete |
 | 8.2 | 1 | complete |
 | 9 | 3 | complete |
-| 10 | 0 | ready_to_plan |
+| 10 | 3 | complete |
 
 ## 累积上下文
 
@@ -88,14 +88,14 @@ Last activity: 2026-05-21
 - Phase 8.1 已完成视觉候选提取闭环：`rsa visual extract|validate|status`、`visual_evidence_candidates.yaml`、local-only crops/context packets 和 PyMuPDF fail-closed 边界。
 - Phase 8.2 已完成不依赖 Phase 9/10 的 campaign foundation：`rsa campaign create|import|validate|status`、`01_literature/campaigns/C###.yaml`、CSV/TSV/YAML 导入、轻量去重和 formal metadata 链接。
 - Phase 9 已完成正文证据、Phase 8.1 视觉候选和 campaign 队列的评分闭环，但仍不能把未人工确认的 AI 评分或图像解释写入 formal records。
-- Phase 10 需要把现有 v1/v2 命令串联为可暂停、可恢复、可监控的自动工作流，并保持 formal write gate 不可绕过。
+- Phase 10 已完成单篇 workflow primitive：`rsa workflow run|resume|status|report|stop|rerun` 串联 acquisition、reading draft、visual extraction、scoring 和 review packet，并保持 formal write gate 不可绕过。
 - Browser session 下载得到的 PDF 只是本地授权阅读材料，不能自动写入 metadata、literature_map、agent_research_notes 或论文正文。
 
 ## 会话连续性
 
 Last session: 2026-05-21T14:43:21.489Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-workflow-orchestrator/10-CONTEXT.md
+Stopped at: Phase 10 complete (3/3) - ready to discuss Phase 11
+Resume file: .planning/phases/10-workflow-orchestrator/10-VERIFICATION.md
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
@@ -121,6 +121,8 @@ Resume file: .planning/phases/10-workflow-orchestrator/10-CONTEXT.md
 **Completed Phase:** 08.2 (campaign-foundation) — 1 plan — 2026-05-19
 **Planned Phase:** 09 (evidence-signals-ai-scoring) — 3 plans — 2026-05-21
 **Completed Phase:** 09 (evidence-signals-ai-scoring) — 3 plans — 2026-05-21
+**Planned Phase:** 10 (workflow-orchestrator) — 3 plans — 2026-05-21
+**Completed Phase:** 10 (workflow-orchestrator) — 3 plans — 2026-05-21
 
 ## Accumulated Context
 
