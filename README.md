@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-168%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-174%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -28,7 +28,8 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Literature map | 将已验证文献映射到 topic、priority question、章节和计划产出。 |
 | Reading note | 只基于本地、用户提供或已授权全文创建单篇阅读笔记；`rsa note draft` 可生成中文自动阅读草稿和监管包。 |
 | Visual evidence candidates | `rsa visual extract` 从已授权/本地 PDF 提取图表/表格候选、裁图和本地上下文包；候选 YAML 进入 staging/review，不是正式科研记录。 |
-| Campaign foundation | `rsa campaign create/import/validate/status` 管理批量候选队列、轻量去重和正式 metadata 链接；不依赖 AI 评分或 workflow orchestrator。 |
+| Campaign foundation | `rsa campaign create/import/validate/status` 管理批量候选队列、轻量去重和正式 metadata 链接；作为 Phase 11 的批量入口。 |
+| Campaign batch review | `rsa campaign run/resume/pause/queue/report` 把 campaign 队列接入单篇 workflow、metadata intake、review queue 和中文批量报告；自动运行到监管队列，正式写入仍需人工确认。 |
 | AI scoring | `rsa score` 融合 reading note、视觉候选和 campaign 队列，生成 relevance、quality、read priority 三类 0-10 辅助评分；只用于排序、初审和监管。 |
 | Workflow orchestrator | `rsa workflow run/resume/status/report/stop/rerun` 把单篇论文顺序跑到 review packet，保留中文状态、可恢复 run state 和 Phase 11 可复用的 campaign 字段。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
@@ -157,6 +158,12 @@ rsa --root . eval compare
 | `rsa campaign create` | 创建批量候选队列，写入 `01_literature/campaigns/C###.yaml`。 |
 | `rsa campaign import C001 --file candidates.csv` | 导入 CSV/TSV/YAML 候选，做 DOI/URL/title-year-author 轻量去重和正式 metadata 链接。 |
 | `rsa campaign validate C001` / `status C001` | 只读校验或查看批量队列状态、重复项、阻塞项和已链接项。 |
+| `rsa campaign run C001` | 运行 campaign 批量流水线；`linked` 项进入单篇 workflow，`queued` 项生成 metadata intake request。 |
+| `rsa campaign run C001 --dry-run` | 只生成 run ledger、review queue 和 batch report，不实际运行 workflow。 |
+| `rsa campaign resume C001` / `pause C001` | 恢复未完成项或暂停 campaign run；已完成 staging 项不会重复运行。 |
+| `rsa campaign queue C001` | 生成监管队列，按 blocked、partial、needs_review、auto_triaged、high_priority、low_confidence 等分组。 |
+| `rsa campaign queue review C001 --item QI001 --decision accepted --reviewer zxy` | 记录监管队列决策；`accepted` 不是 formal approval。 |
+| `rsa campaign report C001` | 生成中文批量报告，汇总自动化状态、异常、监管队列和正式写入边界。 |
 | `rsa score P001` | 生成单篇论文 Phase 9 AI 辅助评分和中文监管包。 |
 | `rsa score validate P001` / `status P001` | 只读校验或查看 scoring YAML，不修改正式记录。 |
 | `rsa score campaign C001` | 对已链接正式 metadata 的 campaign 条目批量生成 scoring summary。 |
@@ -216,6 +223,33 @@ rsa --root . campaign status C001
 | `candidate_key` | 外部来源中的候选编号。 |
 | `source_candidate_id` | Phase 7 source candidate 编号。 |
 | `note_zh` | 中文备注或导入原因。 |
+
+## Campaign Batch Review Workflow
+
+Phase 11 在 Phase 8.2 campaign 队列和 Phase 10 单篇 workflow 之间建立批量监管层。默认策略是“多篇之间受控流水线推进，单篇内部仍按 acquisition -> reading draft -> visual extraction -> scoring -> review packet 顺序执行”。
+
+```powershell
+rsa --root . campaign run C001 --dry-run
+rsa --root . campaign run C001 --max-acquisition 2 --max-reading-draft 2 --max-visual 1 --max-scoring 2
+rsa --root . campaign queue C001
+rsa --root . campaign report C001
+
+rsa --root . campaign queue review C001 `
+  --item QI001 `
+  --decision accepted `
+  --reviewer zxy `
+  --reason "进入后续人工确认流程"
+```
+
+自动化部分：
+- `linked` 条目会调用单篇 workflow，把已正式入库的论文自动推进到 review packet。
+- `queued` 条目会生成 `C###_metadata_requests.yaml`，默认状态为 `auto_triaged`，只表示机器完成初步分诊。
+- run ledger、review queue 和 batch report 会写在 `01_literature/campaigns/` 旁边，方便追溯。
+
+人工审批边界：
+- `review_decision` 只支持 `accepted | deferred | rejected | needs_followup`，表示用户对监管队列项的处理意见。
+- `accepted` 不等于 formal approval，也不会自动创建 `metadata/P###.yaml`。
+- metadata intake 被接受后只会形成 `formal_write_request`；真正正式写入仍必须走 formal write gate 和显式人工确认。
 
 ## AI Scoring Workflow
 
@@ -405,8 +439,8 @@ rsa --root . eval compare
 ## 项目状态
 
 - 当前里程碑：`v1.0 Local Harness`
-- 当前版本：`v2.0` Phase 8.1 完成
-- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿和视觉证据候选提取
+- 当前版本：`v2.0` Phase 11 完成
+- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、AI 辅助评分、单篇 workflow 和 campaign batch review
 - 主要用户语言：中文优先
 - 语言策略：见 `.planning/LANGUAGE-POLICY.md`
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释

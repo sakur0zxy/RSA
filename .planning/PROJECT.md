@@ -28,7 +28,7 @@ RSA 当前主要面向中文用户。所有用户可见内容必须中文优先�
 
 RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`python -m pip install -e .` 应安装当前核心功能所需的 Python 依赖；optional extras 只用于非核心增强、未来扩展或开发测试。
 
-当前核心能力包括本地 Markdown/YAML harness、metadata/round/map/gap、source ledger、授权来源获取、browser session provider、PDF 文本提取和自动阅读草稿。不能把这些核心能力拆成用户必须手动猜测的 optional extras。
+当前核心能力包括本地 Markdown/YAML harness、metadata/round/map/gap、source ledger、授权来源获取、browser session provider、PDF 文本提取、自动阅读草稿、视觉证据候选、AI 辅助评分、单篇 workflow 和 campaign batch review。不能把这些核心能力拆成用户必须手动猜测的 optional extras。
 
 无法由 pip 可靠安装的外部资源，例如 Playwright Chromium、本地浏览器运行资源或未来模型/工具资源，应通过 `rsa doctor` 或命令级 preflight check 自动检查。缺失时必须用中文说明缺什么、影响哪个功能、如何修复，并且不得生成伪结果。
 
@@ -42,7 +42,7 @@ RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`pytho
 - Roadmap 归档：`.planning/milestones/v1.0-ROADMAP.md`
 - Requirements 归档：`.planning/milestones/v1.0-REQUIREMENTS.md`
 - 运行形态：Python CLI、Markdown/YAML 文件、pytest 回归测试
-- 当前验证：117 个测试通过，`rsa eval compare` 报告回归数 0
+- 当前验证：174 个测试通过，`rsa eval compare` 报告回归数 0
 
 ## Requirements
 
@@ -61,12 +61,18 @@ RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`pytho
 - Source ledger 和 asset manifest foundation - v2 Phase 6
 - Authorized acquisition workflow - v2 Phase 7
 - Browser session provider 作为授权获取子能力 - v2 Phase 7.1
+- Auto reading draft - v2 Phase 8
+- Visual evidence candidates - v2 Phase 8.1
+- Campaign foundation - v2 Phase 8.2
+- AI-assisted scoring - v2 Phase 9
+- Single-paper workflow orchestrator - v2 Phase 10
+- Campaign batch review queue and reports - v2 Phase 11
 
 ### 下一阶段
 
-- Phase 7/7.1 已完成授权全文获取和浏览器会话复用能力，下一步推进 Phase 8 Auto Reading Draft。
-- Phase 8 只生成阅读草稿和候选 `asset_suggestions`；Phase 8.1 再处理最小必要视觉证据候选。
-- 增加自动阅读、视觉证据、评分、批量 campaign 或 review workspace 能力时，必须保留 v1 formal write guardrails 和 Phase 7 授权边界。
+- Phase 11 已完成 campaign batch review 的同步 CLI 主链，下一步推进 Phase 12 Local Review Workspace。
+- Phase 12 只提供本地监管台，不应绕过 formal write gate，也不应把 review decision 当作正式批准。
+- 增加 review workspace、writing safety 或 background worker 能力时，必须保留 v1 formal write guardrails、Phase 7 授权边界和 Phase 11 review queue 语义。
 
 ### 除非重新打开，否则不做
 
@@ -117,7 +123,8 @@ RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`pytho
 | Phase 7.1 是 Phase 7 的子能力 | 浏览器会话复用只是授权获取的一种 provider，不是独立下载政策 | v2 Phase 7.1 已验证 |
 | Phase 8 `asset_suggestions` 只做候选建议 | 正文阅读可提示可能值得处理的图表，但不能直接断言图表重要性 | v2 Phase 8 设计约束 |
 | 图像能力放入 Phase 8.1 | 让视觉证据在 Phase 9 评分前进入证据链，同时不扩大 Phase 8 正文阅读主流程 | v2 Roadmap 已调整 |
-| 自动化采用分层并行 | 单篇论文内部必须按依赖顺序跑；多篇论文可在 campaign 层受控并行，避免 Phase 10 膨胀成批量调度系统 | v2 Phase 10/11 设计约束 |
+| 自动化采用分层并行 | 单篇论文内部必须按依赖顺序跑；多篇论文可在 campaign 层受控并行，避免 Phase 10 膨胀成批量调度系统 | v2 Phase 10/11 已验证 |
+| Campaign review queue 不等于 formal approval | `accepted | deferred | rejected | needs_followup` 只表示监管队列项处理状态；正式写入仍必须走 formal gate | v2 Phase 11 已验证 |
 | 基础版覆盖核心 agent 功能 | 普通用户不应为了当前核心闭环手动猜 optional extras；缺外部资源由自检给中文修复路径 | 全局设计已锁定，待 Phase 8/后续实现落地 |
 
 ## 下一里程碑目标
@@ -141,4 +148,4 @@ v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
 
 ---
 
-*Last updated: 2026-05-16 after Phase 8/8.1 roadmap alignment*
+*Last updated: 2026-05-26 after Phase 11 campaign batch review implementation*

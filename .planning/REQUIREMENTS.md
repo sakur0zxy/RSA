@@ -108,15 +108,15 @@
 
 ### Phase 11-14
 
-- [ ] **V2-CAMPAIGN-01:** Campaigns integrate Phase 8.2 queues with Phase 9 scoring, Phase 10 workflow runs, ranking/filtering and batch review automation.
-- [ ] **V2-CAMPAIGN-02:** Campaign processing uses controlled pipeline parallelism across papers while preserving sequential dependencies inside each paper workflow.
-- [ ] **V2-CAMPAIGN-03:** Campaign-level concurrency must be configurable and conservative by default, with separate limits for acquisition, reading draft, visual extraction and scoring.
-- [ ] **V2-CAMPAIGN-04:** Batch failures must support `continue_on_error`, `pause_on_auth_error` and `pause_on_formal_request` semantics, with Chinese status reports and no automatic formal writes.
-- [ ] **V2-CAMPAIGN-05:** `queued` campaign items generate metadata intake requests with `auto_triaged` machine triage by default, but must not create formal `paper_id` records or write `metadata/P###.yaml` directly.
-- [ ] **V2-CAMPAIGN-06:** Metadata intake requests and formal write requests must be designed as migratable independent objects with stable ids, source campaign/item links, status, candidate data and Chinese rationale.
-- [ ] **V2-CAMPAIGN-07:** Campaign review queues must group items by status, sort within groups by read priority/risk/confidence, preserve artifact links, and support `accepted | deferred | rejected | needs_followup` review decisions without treating them as formal approvals.
-- [ ] **V2-CAMPAIGN-08:** Campaign run state and batch reports must be stored beside the campaign in local YAML/Markdown, use Chinese-first supervision text, avoid sensitive/full-log content, and keep `C###.yaml` as a lightweight queue index.
-- [ ] **V2-CAMPAIGN-09:** Campaign CLI must extend `rsa campaign` with `run`, `resume`, `pause`, `queue` and `report`; normal run must not rerun completed staging items, and `--dry-run`, `--items` and `--status` filters must be supported.
+- [x] **V2-CAMPAIGN-01:** Campaigns integrate Phase 8.2 queues with Phase 9 scoring, Phase 10 workflow runs, ranking/filtering and batch review automation.
+- [x] **V2-CAMPAIGN-02:** Campaign processing uses controlled pipeline parallelism across papers while preserving sequential dependencies inside each paper workflow.
+- [x] **V2-CAMPAIGN-03:** Campaign-level concurrency must be configurable and conservative by default, with separate limits for acquisition, reading draft, visual extraction and scoring.
+- [x] **V2-CAMPAIGN-04:** Batch failures must support `continue_on_error`, `pause_on_auth_error` and `pause_on_formal_request` semantics, with Chinese status reports and no automatic formal writes.
+- [x] **V2-CAMPAIGN-05:** `queued` campaign items generate metadata intake requests with `auto_triaged` machine triage by default, but must not create formal `paper_id` records or write `metadata/P###.yaml` directly.
+- [x] **V2-CAMPAIGN-06:** Metadata intake requests and formal write requests must be designed as migratable independent objects with stable ids, source campaign/item links, status, candidate data and Chinese rationale.
+- [x] **V2-CAMPAIGN-07:** Campaign review queues must group items by status, sort within groups by read priority/risk/confidence, preserve artifact links, and support `accepted | deferred | rejected | needs_followup` review decisions without treating them as formal approvals.
+- [x] **V2-CAMPAIGN-08:** Campaign run state and batch reports must be stored beside the campaign in local YAML/Markdown, use Chinese-first supervision text, avoid sensitive/full-log content, and keep `C###.yaml` as a lightweight queue index.
+- [x] **V2-CAMPAIGN-09:** Campaign CLI must extend `rsa campaign` with `run`, `resume`, `pause`, `queue` and `report`; normal run must not rerun completed staging items, and `--dry-run`, `--items` and `--status` filters must be supported.
 - [ ] **V2-WORKSPACE-01:** Local review workspace supports verification, approval, reading draft review, visual evidence review and scoring review.
 - [ ] **V2-WRITE-01:** Claim-level citation checks produce review guidance, not final academic conclusions.
 - [ ] **V2-WRITE-02:** Phase 13 hardening/eval must monitor campaign failure scenarios including authorization errors, blocked/partial aggregation, review queue ordering regression, formal request non-execution, metadata intake not writing formal metadata, completed-item non-rerun, low-confidence/high-priority queue admission, and campaign error-policy semantics.

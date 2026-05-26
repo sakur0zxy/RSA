@@ -416,6 +416,50 @@ def build_parser() -> argparse.ArgumentParser:
         help="只读查看 campaign 队列数量、重复项、已链接项和阻塞项。",
     )
     campaign_status.add_argument("campaign_id", help="campaign 编号，例如 C001。")
+    campaign_run = campaign_subcommands.add_parser(
+        "run",
+        help="按阶段队列限流运行 campaign；自动产物进入 staging/review，不绕过 formal gate。",
+    )
+    campaign_run.add_argument("campaign_id", help="campaign 编号，例如 C001。")
+    campaign_run.add_argument("--dry-run", action="store_true", help="只生成运行计划和监管队列，不实际运行单篇 workflow。")
+    campaign_run.add_argument("--item", "--items", action="append", dest="item_ids", help="只处理指定 campaign item，可重复传入。")
+    campaign_run.add_argument("--status", action="append", dest="status_filter", help="只处理指定 item status，可重复传入。")
+    campaign_run.add_argument("--max-acquisition", type=int, help="覆盖 acquisition 阶段并发上限。")
+    campaign_run.add_argument("--max-reading-draft", type=int, help="覆盖 reading draft 阶段并发上限。")
+    campaign_run.add_argument("--max-visual", type=int, help="覆盖 visual extraction 阶段并发上限。")
+    campaign_run.add_argument("--max-scoring", type=int, help="覆盖 scoring 阶段并发上限。")
+    campaign_resume = campaign_subcommands.add_parser(
+        "resume",
+        help="从 campaign run ledger 恢复未完成项；已完成项不会重复执行。",
+    )
+    campaign_resume.add_argument("campaign_id", help="campaign 编号，例如 C001。")
+    campaign_resume.add_argument("--item", "--items", action="append", dest="item_ids", help="只恢复指定 campaign item，可重复传入。")
+    campaign_resume.add_argument("--status", action="append", dest="status_filter", help="只恢复指定 item status，可重复传入。")
+    campaign_pause = campaign_subcommands.add_parser(
+        "pause",
+        help="暂停 campaign run，并写入中文暂停原因。",
+    )
+    campaign_pause.add_argument("campaign_id", help="campaign 编号，例如 C001。")
+    campaign_pause.add_argument("--reason", help="中文暂停原因。")
+    campaign_queue = campaign_subcommands.add_parser(
+        "queue",
+        help="生成或查看 review queue；也支持 queue review C001 --item QI001 --decision accepted。",
+    )
+    campaign_queue.add_argument("first", help="campaign_id，或固定写 review。")
+    campaign_queue.add_argument("second", nargs="?", help="当 first=review 时，这里是 campaign_id。")
+    campaign_queue.add_argument("--item", dest="queue_item_id", help="要标记的 review queue item，例如 QI001。")
+    campaign_queue.add_argument(
+        "--decision",
+        choices=["accepted", "deferred", "rejected", "needs_followup"],
+        help="监管队列决策；不等于 formal approval。",
+    )
+    campaign_queue.add_argument("--reviewer", help="监管人。")
+    campaign_queue.add_argument("--reason", help="中文监管原因。")
+    campaign_report = campaign_subcommands.add_parser(
+        "report",
+        help="生成 campaign 中文批量报告，汇总自动化状态、监管队列和正式写入边界。",
+    )
+    campaign_report.add_argument("campaign_id", help="campaign 编号，例如 C001。")
 
     score_group = subcommands.add_parser(
         "score",
@@ -1069,8 +1113,15 @@ def _run_campaign_command(args: argparse.Namespace, root: Path) -> int:
         CampaignError,
         campaign_status,
         create_campaign,
+        generate_review_queue,
         import_campaign_items,
+        pause_campaign_run,
+        resume_campaign_run,
+        review_campaign_queue_item,
+        run_campaign,
         validate_campaign,
+        validate_campaign_run,
+        write_batch_report,
     )
 
     config = load_project_config(root)
@@ -1115,6 +1166,83 @@ def _run_campaign_command(args: argparse.Namespace, root: Path) -> int:
                 f"duplicate={status.duplicate_count}, needs_review={status.needs_review_count}, "
                 f"blocked={status.blocked_count}; 文件={status.path}"
             )
+            return 0
+        if args.campaign_command == "run":
+            result = run_campaign(
+                config,
+                args.campaign_id,
+                dry_run=args.dry_run,
+                item_ids=args.item_ids,
+                status_filter=args.status_filter,
+                max_acquisition=args.max_acquisition,
+                max_reading_draft=args.max_reading_draft,
+                max_visual=args.max_visual,
+                max_scoring=args.max_scoring,
+            )
+            errors = [] if args.dry_run else validate_campaign_run(config, args.campaign_id)
+            if errors:
+                for error in errors:
+                    print(f"campaign run 校验失败: {error}", file=sys.stderr)
+                return 1
+            print(
+                f"campaign 运行完成: {result.campaign_id} status={result.campaign_status}, "
+                f"processed={result.processed_count}, linked={result.linked_count}, queued={result.queued_count}, "
+                f"blocked={result.blocked_count}, formal_requests={result.formal_request_count}; "
+                f"run={result.path}; queue={result.review_queue_path}; report={result.batch_report_path}"
+            )
+            return 0
+        if args.campaign_command == "resume":
+            result = resume_campaign_run(
+                config,
+                args.campaign_id,
+                item_ids=args.item_ids,
+                status_filter=args.status_filter,
+            )
+            print(
+                f"campaign 恢复完成: {result.campaign_id} status={result.campaign_status}; "
+                f"run={result.path}; queue={result.review_queue_path}; report={result.batch_report_path}"
+            )
+            return 0
+        if args.campaign_command == "pause":
+            result = pause_campaign_run(config, args.campaign_id, reason_zh=args.reason)
+            print(
+                f"campaign 已暂停: {result.campaign_id} status={result.campaign_status}; "
+                f"run={result.path}; report={result.batch_report_path}"
+            )
+            return 0
+        if args.campaign_command == "queue":
+            if args.first == "review":
+                if not args.second:
+                    print("rsa campaign queue review 需要 campaign_id，例如 C001。", file=sys.stderr)
+                    return 2
+                if not args.queue_item_id or not args.decision or not args.reviewer:
+                    print("queue review 需要 --item、--decision 和 --reviewer。", file=sys.stderr)
+                    return 2
+                result = review_campaign_queue_item(
+                    config,
+                    args.second,
+                    queue_item_id=args.queue_item_id,
+                    decision=args.decision,
+                    reviewer=args.reviewer,
+                    reason_zh=args.reason,
+                )
+                print(
+                    f"review queue 已记录监管决策: {result.campaign_id} {result.item_id} "
+                    f"decision={result.decision}; history={result.history_count}; 文件={result.path}"
+                )
+                return 0
+            result = generate_review_queue(config, args.first)
+            print(
+                f"review queue 已生成: {result.campaign_id} -> total={result.total_count}, "
+                f"blocked={result.blocked_count}, partial={result.partial_count}, "
+                f"needs_review={result.needs_review_count}, auto_triaged={result.auto_triaged_count}, "
+                f"high_priority={result.high_priority_count}, low_confidence={result.low_confidence_count}; "
+                f"文件={result.path}"
+            )
+            return 0
+        if args.campaign_command == "report":
+            path = write_batch_report(config, args.campaign_id)
+            print(f"campaign 批量报告已生成: {args.campaign_id} -> {path}")
             return 0
     except CampaignError as exc:
         print(f"批量队列操作失败: {exc}", file=sys.stderr)

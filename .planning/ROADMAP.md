@@ -38,7 +38,7 @@
 - [x] Phase 8.2: Campaign Foundation (INSERTED) - 1/1 plan，完成于 2026-05-19；提前实现不依赖 Phase 9/10 的批量候选队列、CSV/TSV/YAML 导入、轻量去重、正式 metadata 链接和只读状态校验。
 - [x] Phase 9: Evidence Signals & AI Scoring - 3/3 plans，完成于 2026-05-21；融合正文证据、视觉证据候选和 campaign 队列，生成 relevance、quality、read priority 辅助评分、review packet 和 campaign scoring summary。
 - [x] Phase 10: Workflow Orchestrator - 3/3 plans，完成于 2026-05-21；串联 v1/v2 命令，为单篇论文提供顺序、可恢复、可监控的 workflow primitive，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
-- [ ] Phase 11: Campaign & Batch Review - 在 Phase 10 workflow primitive 之上支持批量候选、受控流水线并行、review queue、状态流转、排序和批量异常聚合。
+- [x] Phase 11: Campaign & Batch Review - 3/3 plans，完成于 2026-05-26；在 Phase 10 workflow primitive 之上支持批量候选、受控流水线并行、metadata intake、review queue、状态流转、排序和批量异常聚合。
 - [ ] Phase 12: Local Review Workspace - 提供本地监管台审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
 - [ ] Phase 13: Writing Safety & Hardening - 做 claim-level citation check，并增强 eval、回归测试、prompt/template drift 检测和 guardrails。
 - [ ] Phase 14: Background Worker & Scheduled Automation - 作为运行形态升级，支持后台 worker、异步任务执行、长任务恢复、status 监控、定时 campaign run 和 worker 日志摘要。
@@ -47,7 +47,7 @@
 
 ## 下一步
 
-当前执行目标：**Phase 11: Campaign & Batch Review context 已完成，下一步进入 Phase 11 planning**。
+当前执行目标：**Phase 11: Campaign & Batch Review 已完成，下一步进入 Phase 12 Local Review Workspace 讨论/计划**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -81,7 +81,7 @@ Phase 10/11 的自动化分工已经锁定为“单篇顺序链 + campaign 级�
 
 Phase 10 已完成 Workflow Orchestrator：它新增 `rsa workflow run|resume|status|report|stop|rerun`，把单篇正式文献自动推进到中文 review packet；run state 写入 `01_literature/workflows/P###/RUN-###.yaml`，并保留 future interfaces 给后续 LLM visual analysis 和高级图表智能。Phase 10 不执行 campaign worker queue、不并行处理多篇论文、不绕过 formal write gate。
 
-Phase 11 context 已完成：Phase 11 将在 Phase 10 single-paper workflow primitive 之上实现 campaign 级小规模流水线并行、metadata intake request、formal write request 待审对象、review queue、batch report、pause/resume 和中文监管输出。Phase 11 默认自动推进阅读、分析、评分和 review packet，但正式写入仍必须通过人工确认的 formal gate。
+Phase 11 已完成：Phase 11 在 Phase 10 single-paper workflow primitive 之上实现 campaign 级小规模流水线并行、metadata intake request、formal write request 待审对象、review queue、batch report、pause/resume 和中文监管输出。Phase 11 默认自动推进阅读、分析、评分和 review packet，但正式写入仍必须通过人工确认的 formal gate。
 
 Phase 14 已加入路线图，定位为 Background Worker & Scheduled Automation，即“运行形态升级”。它在 Phase 11 同步 CLI、Phase 12 本地监管台和 Phase 13 hardening 稳定后，再处理后台 worker、异步任务、长任务恢复、status 监控和定时 campaign run；它不重写 Phase 10/11 逻辑，不绕过 formal write gate，不做 multi-agent。
 
@@ -92,11 +92,11 @@ Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-14 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 20/20 completed for Phase 6-10 planned | Phase 11 context complete，next plan Phase 11 | 2026-05-26 |
+| v2.0 Scaled Literature Workstation | 6-14 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 23/23 completed for Phase 6-11 planned | Phase 11 complete，next Phase 12 | 2026-05-26 |
 
 ---
 
-*Roadmap updated after Phase 11 campaign discussion context: 2026-05-26*
+*Roadmap updated after Phase 11 campaign implementation: 2026-05-26*
 
 ## GSD 解析索引
 
@@ -158,7 +158,7 @@ Status: complete. Chain existing v1/v2 commands into a single-paper sequential, 
 
 ### Phase 11: Campaign & Batch Review
 
-Status: planned. Integrate campaign queues with Phase 10 workflow runs, controlled pipeline parallelism, ranking, filtering, review queue automation and batch exception aggregation.
+Status: complete. Integrate campaign queues with Phase 10 workflow runs, controlled pipeline parallelism, ranking, filtering, review queue automation and batch exception aggregation.
 
 ### Phase 12: Local Review Workspace
 

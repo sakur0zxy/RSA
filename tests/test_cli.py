@@ -735,6 +735,74 @@ def test_cli_campaign_create_import_validate_status(tmp_path, capsys):
     assert candidate_path.read_text(encoding="utf-8") == before
 
 
+def test_cli_campaign_run_queue_report_and_review(tmp_path, capsys):
+    prepare_project(tmp_path)
+    csv_path = tmp_path / "campaign_run.csv"
+    csv_path.write_text(
+        "title,doi,year,first_author\n"
+        "Campaign Run Paper,10.1234/campaign-run,2026,Ada\n",
+        encoding="utf-8",
+    )
+    created = main(
+        [
+            "--root",
+            str(tmp_path),
+            "campaign",
+            "create",
+            "--name-zh",
+            "CLI campaign run",
+            "--objective-zh",
+            "验证 Phase 11 campaign run。",
+        ]
+    )
+    capsys.readouterr()
+    imported = main(["--root", str(tmp_path), "campaign", "import", "C001", "--file", str(csv_path)])
+    capsys.readouterr()
+
+    run = main(["--root", str(tmp_path), "campaign", "run", "C001", "--dry-run"])
+    run_out = capsys.readouterr()
+    queue = main(["--root", str(tmp_path), "campaign", "queue", "C001"])
+    queue_out = capsys.readouterr()
+    report = main(["--root", str(tmp_path), "campaign", "report", "C001"])
+    report_out = capsys.readouterr()
+
+    queue_path = tmp_path / "01_literature" / "campaigns" / "C001_review_queue.yaml"
+    queue_data = yaml.safe_load(queue_path.read_text(encoding="utf-8"))
+    queue_item_id = queue_data["queue_items"][0]["queue_item_id"]
+    reviewed = main(
+        [
+            "--root",
+            str(tmp_path),
+            "campaign",
+            "queue",
+            "review",
+            "C001",
+            "--item",
+            queue_item_id,
+            "--decision",
+            "accepted",
+            "--reviewer",
+            "zxy",
+            "--reason",
+            "进入后续流程",
+        ]
+    )
+    reviewed_out = capsys.readouterr()
+
+    assert created == 0
+    assert imported == 0
+    assert run == 0
+    assert "campaign 运行完成" in run_out.out
+    assert queue == 0
+    assert "review queue 已生成" in queue_out.out
+    assert report == 0
+    assert "campaign 批量报告已生成" in report_out.out
+    assert reviewed == 0
+    assert "review queue 已记录监管决策" in reviewed_out.out
+    assert (tmp_path / "01_literature" / "campaigns" / "C001_run.yaml").exists()
+    assert (tmp_path / "01_literature" / "campaigns" / "C001_batch_report.md").exists()
+
+
 def write_cli_scoring_note(root):
     source = root / "01_literature" / "pdfs" / "P001" / "source.pdf"
     source.parent.mkdir(parents=True, exist_ok=True)

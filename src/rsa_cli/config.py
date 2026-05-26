@@ -58,6 +58,14 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "retryable_statuses": ["failed"],
         },
     },
+    "campaign": {
+        "concurrency": {
+            "acquisition": 2,
+            "reading_draft": 2,
+            "visual_extraction": 1,
+            "scoring": 2,
+        },
+    },
 }
 
 
@@ -200,6 +208,23 @@ class ProjectConfig:
         return dict(self.workflow.get("retry_policy", {}) or {})
 
     @property
+    def campaign(self) -> dict[str, Any]:
+        return dict(self.data.get("campaign", {}) or {})
+
+    @property
+    def campaign_concurrency(self) -> dict[str, int]:
+        concurrency = self.campaign.get("concurrency", {}) or {}
+        if not isinstance(concurrency, dict):
+            return {}
+        normalized: dict[str, int] = {}
+        for key, value in concurrency.items():
+            try:
+                normalized[str(key)] = int(value)
+            except (TypeError, ValueError) as exc:
+                raise ConfigError(f"campaign.concurrency.{key} 必须为正整数") from exc
+        return normalized
+
+    @property
     def reading_draft_ready_score_threshold(self) -> int:
         return int(self.reading_draft_review.get("ready_score_threshold", 6))
 
@@ -289,6 +314,13 @@ def validate_config(config: ProjectConfig) -> None:
         raise ConfigError("workflow.skip_steps 必须是 list")
     if not isinstance(config.workflow_retry_policy, dict):
         raise ConfigError("workflow.retry_policy 必须是 mapping")
+    if not isinstance(config.campaign, dict):
+        raise ConfigError("campaign 必须是 mapping")
+    if not isinstance(config.campaign.get("concurrency", {}), dict):
+        raise ConfigError("campaign.concurrency 必须是 mapping")
+    for key, value in config.campaign_concurrency.items():
+        if value <= 0:
+            raise ConfigError(f"campaign.concurrency.{key} 必须为正整数")
     if not config.output_policy:
         raise ConfigError("rounds.output_policy 不能为空")
     if not config.approval_mode:
