@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
 status: ready_to_plan
-stopped_at: Phase 10 complete (3/3) - ready to discuss Phase 11
-last_updated: 2026-05-21T15:15:36.359Z
-last_activity: 2026-05-21
+stopped_at: Phase 11 context complete - ready to plan Phase 11
+last_updated: 2026-05-26T22:45:12.1696449+08:00
+last_activity: 2026-05-26
 progress:
-  total_phases: 16
-  completed_phases: 12
+  total_phases: 17
+  completed_phases: 13
   total_plans: 14
   completed_plans: 34
-  percent: 75
+  percent: 76
 ---
 
 # 项目状态
@@ -29,9 +29,9 @@ progress:
 Phase: 11
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-05-21
+Last activity: 2026-05-26
 
-进度: [████████░░] 75%
+进度: [████████░░] 76%
 
 ## 进度指标
 
@@ -58,6 +58,10 @@ Last activity: 2026-05-21
 | 8.2 | 1 | complete |
 | 9 | 3 | complete |
 | 10 | 3 | complete |
+| 11 | 3 planned | context complete |
+| 12 | TBD | planned |
+| 13 | TBD | planned |
+| 14 | TBD | planned |
 
 ## 累积上下文
 
@@ -78,6 +82,10 @@ Last activity: 2026-05-21
 - Phase 8 Auto Reading Draft 支持 `rsa note draft P###`，从 source ledger 或 `--source-file` 生成中文自动阅读草稿、AI 初审分、review packet、local-only extraction cache 和 prompt packet。
 - Phase 8 `ready_for_review` 只表示 AI 初审后建议人工监管，不等于 `approved`，也不允许绕过 formal write gate。
 - Phase 9 Evidence Signals & AI Scoring 支持 `rsa score P###`、`rsa score validate|status|review P###` 和 `rsa score campaign C###`；评分只进入 scoring YAML、review packet 和 campaign scoring summary，不写入 formal records。
+- Phase 11 context 已锁定：campaign 批量处理采用 `linked` 自动 workflow、`queued` 自动 metadata intake request；多篇之间小规模流水线并行，每篇内部继续按 Phase 10 顺序链执行。
+- Phase 11 review queue 是监管入口，不是 formal approval 列表；`accepted | deferred | rejected | needs_followup` 只表示队列项处理状态。
+- Phase 11 不执行 formal write；metadata intake accepted 后只生成 formal write request，正式写入仍必须通过人工确认的 formal gate。
+- Phase 14 已加入路线图，定位为 Background Worker & Scheduled Automation，即运行形态升级；它不重写 Phase 10/11，不绕过 formal write gate，不做 multi-agent。
 
 ### 待办
 
@@ -89,13 +97,14 @@ Last activity: 2026-05-21
 - Phase 8.2 已完成不依赖 Phase 9/10 的 campaign foundation：`rsa campaign create|import|validate|status`、`01_literature/campaigns/C###.yaml`、CSV/TSV/YAML 导入、轻量去重和 formal metadata 链接。
 - Phase 9 已完成正文证据、Phase 8.1 视觉候选和 campaign 队列的评分闭环，但仍不能把未人工确认的 AI 评分或图像解释写入 formal records。
 - Phase 10 已完成单篇 workflow primitive：`rsa workflow run|resume|status|report|stop|rerun` 串联 acquisition、reading draft、visual extraction、scoring 和 review packet，并保持 formal write gate 不可绕过。
+- Phase 11 planning 必须读取 `.planning/phases/11-campaign-batch-review/11-CONTEXT.md`，并按 3 个 plan 拆分：metadata intake/run state、pipeline runner/concurrency、review queue/batch report/docs/tests。
 - Browser session 下载得到的 PDF 只是本地授权阅读材料，不能自动写入 metadata、literature_map、agent_research_notes 或论文正文。
 
 ## 会话连续性
 
-Last session: 2026-05-21T14:43:21.489Z
-Stopped at: Phase 10 complete (3/3) - ready to discuss Phase 11
-Resume file: .planning/phases/10-workflow-orchestrator/10-VERIFICATION.md
+Last session: 2026-05-26T22:45:12.1696449+08:00
+Stopped at: Phase 11 context complete - ready to plan Phase 11
+Resume file: .planning/phases/11-campaign-batch-review/11-CONTEXT.md
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
@@ -123,6 +132,8 @@ Resume file: .planning/phases/10-workflow-orchestrator/10-VERIFICATION.md
 **Completed Phase:** 09 (evidence-signals-ai-scoring) — 3 plans — 2026-05-21
 **Planned Phase:** 10 (workflow-orchestrator) — 3 plans — 2026-05-21
 **Completed Phase:** 10 (workflow-orchestrator) — 3 plans — 2026-05-21
+**Discussed Phase:** 11 (campaign-batch-review) — context complete — 2026-05-26
+**Inserted Phase:** 14 (background-worker-scheduled-automation) — planned future runtime-shape upgrade — 2026-05-26
 
 ## Accumulated Context
 

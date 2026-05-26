@@ -3,7 +3,7 @@
 ## 里程碑
 
 - **v1.0 Local Harness** - Phase 1-5，已于 2026-05-13 发布。详见 `.planning/milestones/v1.0-ROADMAP.md`。
-- **v2.0 Scaled Literature Workstation** - Phase 6-13 与插入 Phase 7.1、Phase 8.1、Phase 8.2 为核心范围；重型 metadata 集成、高级图表智能和 multi-agent 编排为延后范围。
+- **v2.0 Scaled Literature Workstation** - Phase 6-14 与插入 Phase 7.1、Phase 8.1、Phase 8.2 为核心范围；重型 metadata 集成、高级图表智能和 multi-agent 编排为延后范围。
 
 ## v2 全局原则
 
@@ -41,12 +41,13 @@
 - [ ] Phase 11: Campaign & Batch Review - 在 Phase 10 workflow primitive 之上支持批量候选、受控流水线并行、review queue、状态流转、排序和批量异常聚合。
 - [ ] Phase 12: Local Review Workspace - 提供本地监管台审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
 - [ ] Phase 13: Writing Safety & Hardening - 做 claim-level citation check，并增强 eval、回归测试、prompt/template drift 检测和 guardrails。
+- [ ] Phase 14: Background Worker & Scheduled Automation - 作为运行形态升级，支持后台 worker、异步任务执行、长任务恢复、status 监控、定时 campaign run 和 worker 日志摘要。
 
 </details>
 
 ## 下一步
 
-当前执行目标：**进入 Phase 11: Campaign & Batch Review 讨论/规划**。
+当前执行目标：**Phase 11: Campaign & Batch Review context 已完成，下一步进入 Phase 11 planning**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -80,18 +81,22 @@ Phase 10/11 的自动化分工已经锁定为“单篇顺序链 + campaign 级�
 
 Phase 10 已完成 Workflow Orchestrator：它新增 `rsa workflow run|resume|status|report|stop|rerun`，把单篇正式文献自动推进到中文 review packet；run state 写入 `01_literature/workflows/P###/RUN-###.yaml`，并保留 future interfaces 给后续 LLM visual analysis 和高级图表智能。Phase 10 不执行 campaign worker queue、不并行处理多篇论文、不绕过 formal write gate。
 
-Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成、高级图表智能、复杂多 agent 编排。轻量 DOI/BibTeX 补全、title/author/year 标准化和 dedup 辅助可在 Phase 9 内按主闭环需要处理。
+Phase 11 context 已完成：Phase 11 将在 Phase 10 single-paper workflow primitive 之上实现 campaign 级小规模流水线并行、metadata intake request、formal write request 待审对象、review queue、batch report、pause/resume 和中文监管输出。Phase 11 默认自动推进阅读、分析、评分和 review packet，但正式写入仍必须通过人工确认的 formal gate。
+
+Phase 14 已加入路线图，定位为 Background Worker & Scheduled Automation，即“运行形态升级”。它在 Phase 11 同步 CLI、Phase 12 本地监管台和 Phase 13 hardening 稳定后，再处理后台 worker、异步任务、长任务恢复、status 监控和定时 campaign run；它不重写 Phase 10/11 逻辑，不绕过 formal write gate，不做 multi-agent。
+
+Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成、高级图表智能、复杂多 agent 编排。轻量 DOI/BibTeX 补全、title/author/year 标准化和 dedup 辅助可在 Phase 9/11 内按主闭环需要处理。
 
 ## 进度
 
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-13 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 20/20 completed for Phase 6-10 planned | Phase 10 complete，next discuss Phase 11 | 2026-05-21 |
+| v2.0 Scaled Literature Workstation | 6-14 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 20/20 completed for Phase 6-10 planned | Phase 11 context complete，next plan Phase 11 | 2026-05-26 |
 
 ---
 
-*Roadmap updated after Phase 9 evidence scoring implementation: 2026-05-21*
+*Roadmap updated after Phase 11 campaign discussion context: 2026-05-26*
 
 ## GSD 解析索引
 
@@ -162,3 +167,7 @@ Status: planned. Provide a local supervision workspace for candidates, PDFs, rea
 ### Phase 13: Writing Safety & Hardening
 
 Status: planned. Add claim-level citation checks, regression coverage, prompt/template drift detection and stronger guardrails.
+
+### Phase 14: Background Worker & Scheduled Automation
+
+Status: planned. Upgrade the runtime shape after Phase 11-13 by adding background workers, async task execution, long-task recovery, status monitoring, scheduled campaign runs and worker log summaries without bypassing formal-write gates.
