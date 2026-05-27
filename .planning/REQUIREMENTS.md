@@ -117,7 +117,7 @@
 - [x] **V2-CAMPAIGN-07:** Campaign review queues must group items by status, sort within groups by read priority/risk/confidence, preserve artifact links, and support `accepted | deferred | rejected | needs_followup` review decisions without treating them as formal approvals.
 - [x] **V2-CAMPAIGN-08:** Campaign run state and batch reports must be stored beside the campaign in local YAML/Markdown, use Chinese-first supervision text, avoid sensitive/full-log content, and keep `C###.yaml` as a lightweight queue index.
 - [x] **V2-CAMPAIGN-09:** Campaign CLI must extend `rsa campaign` with `run`, `resume`, `pause`, `queue` and `report`; normal run must not rerun completed staging items, and `--dry-run`, `--items` and `--status` filters must be supported.
-- [ ] **V2-WORKSPACE-01:** Local review workspace supports verification, approval, reading draft review, visual evidence review and scoring review.
+- [x] **V2-WORKSPACE-01:** Local review workspace supports verification, approval, reading draft review, visual evidence review and scoring review.
 - [ ] **V2-WRITE-01:** Claim-level citation checks produce review guidance, not final academic conclusions.
 - [ ] **V2-WRITE-02:** Phase 13 hardening/eval must monitor campaign failure scenarios including authorization errors, blocked/partial aggregation, review queue ordering regression, formal request non-execution, metadata intake not writing formal metadata, completed-item non-rerun, low-confidence/high-priority queue admission, and campaign error-policy semantics.
 - [ ] **V2-WORKER-01:** Phase 14 adds Background Worker & Scheduled Automation only after the synchronous Phase 11 campaign path, Phase 12 supervision workspace and Phase 13 hardening have a stable contract.

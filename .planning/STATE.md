@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: executing
-stopped_at: Phase 11 complete - ready to discuss Phase 12
-last_updated: "2026-05-27T12:20:59.341Z"
+status: ready_to_plan
+stopped_at: Phase 12 complete (3/3) — ready to discuss Phase 13
+last_updated: 2026-05-27T12:34:04.833Z
 last_activity: 2026-05-27
 progress:
   total_phases: 16
-  completed_phases: 14
+  completed_phases: 15
   total_plans: 40
-  completed_plans: 37
-  percent: 88
+  completed_plans: 40
+  percent: 94
 ---
 
 # 项目状态
@@ -22,22 +22,22 @@ progress:
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** Phase 12 Local Review Workspace
+**当前重点:** Phase 13 Writing Safety & Hardening
 
 ## 当前位置
 
-Phase: 12
+Phase: 13
 Plan: Not started
-Status: Ready to execute
+Status: Ready to plan
 Last activity: 2026-05-27
 
-进度: [█████████░] 87%
+进度: [█████████░] 94%
 
 ## 进度指标
 
 **速度:**
 
-- 已完成 plans: 37
+- 已完成 plans: 40
 - 平均耗时: N/A
 - 总执行时间: 0 hours
 
@@ -59,7 +59,7 @@ Last activity: 2026-05-27
 | 9 | 3 | complete |
 | 10 | 3 | complete |
 | 11 | 3 | complete |
-| 12 | TBD | planned |
+| 12 | 3 | complete |
 | 13 | TBD | planned |
 | 14 | TBD | planned |
 
@@ -97,14 +97,15 @@ Last activity: 2026-05-27
 - Phase 8.2 已完成不依赖 Phase 9/10 的 campaign foundation：`rsa campaign create|import|validate|status`、`01_literature/campaigns/C###.yaml`、CSV/TSV/YAML 导入、轻量去重和 formal metadata 链接。
 - Phase 9 已完成正文证据、Phase 8.1 视觉候选和 campaign 队列的评分闭环，但仍不能把未人工确认的 AI 评分或图像解释写入 formal records。
 - Phase 10 已完成单篇 workflow primitive：`rsa workflow run|resume|status|report|stop|rerun` 串联 acquisition、reading draft、visual extraction、scoring 和 review packet，并保持 formal write gate 不可绕过。
-- Phase 12 planning 必须延续中文优先、staging/review 与 formal gate 分离、用户监管而非自动正式批准的原则。
+- Phase 12 已完成本地 review workspace：`rsa review build|status|open|clean` 生成静态监管台、`review_workspace_manifest.yaml`、分组页、对象页和 actions checklist；只做监管导航，不执行 formal write。
+- Phase 13 planning 必须继续覆盖 claim-level citation check、failure scenario monitoring、prompt/template drift 和 writing safety hardening。
 - Browser session 下载得到的 PDF 只是本地授权阅读材料，不能自动写入 metadata、literature_map、agent_research_notes 或论文正文。
 
 ## 会话连续性
 
-Last session: 2026-05-26T22:45:12.1696449+08:00
-Stopped at: Phase 11 complete - ready to discuss Phase 12
-Resume file: .planning/phases/11-campaign-batch-review/11-VERIFICATION.md
+Last session: 2026-05-27T20:34:04+08:00
+Stopped at: Phase 12 complete - ready to discuss Phase 13
+Resume file: .planning/phases/12-local-review-workspace/12-VERIFICATION.md
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
@@ -135,6 +136,9 @@ Resume file: .planning/phases/11-campaign-batch-review/11-VERIFICATION.md
 **Discussed Phase:** 11 (campaign-batch-review) — context complete — 2026-05-26
 **Planned Phase:** 11 (campaign-batch-review) — 3 plans — 2026-05-26
 **Completed Phase:** 11 (campaign-batch-review) — 3 plans — 2026-05-26
+**Discussed Phase:** 12 (local-review-workspace) — context complete — 2026-05-27
+**Planned Phase:** 12 (local-review-workspace) — 3 plans — 2026-05-27
+**Completed Phase:** 12 (local-review-workspace) — 3 plans — 2026-05-27
 **Inserted Phase:** 14 (background-worker-scheduled-automation) — planned future runtime-shape upgrade — 2026-05-26
 
 ## Accumulated Context

@@ -39,7 +39,7 @@
 - [x] Phase 9: Evidence Signals & AI Scoring - 3/3 plans，完成于 2026-05-21；融合正文证据、视觉证据候选和 campaign 队列，生成 relevance、quality、read priority 辅助评分、review packet 和 campaign scoring summary。
 - [x] Phase 10: Workflow Orchestrator - 3/3 plans，完成于 2026-05-21；串联 v1/v2 命令，为单篇论文提供顺序、可恢复、可监控的 workflow primitive，默认自动跑到 review packet，并让用户监控关键环节和调整流程。
 - [x] Phase 11: Campaign & Batch Review - 3/3 plans，完成于 2026-05-26；在 Phase 10 workflow primitive 之上支持批量候选、受控流水线并行、metadata intake、review queue、状态流转、排序和批量异常聚合。
-- [ ] Phase 12: Local Review Workspace - 提供本地监管台审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
+- [x] Phase 12: Local Review Workspace - 3/3 plans，完成于 2026-05-27；生成本地静态监管台、manifest、分组页、对象页和操作清单，用于审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
 - [ ] Phase 13: Writing Safety & Hardening - 做 claim-level citation check，并增强 eval、回归测试、prompt/template drift 检测和 guardrails。
 - [ ] Phase 14: Background Worker & Scheduled Automation - 作为运行形态升级，支持后台 worker、异步任务执行、长任务恢复、status 监控、定时 campaign run 和 worker 日志摘要。
 
@@ -47,7 +47,7 @@
 
 ## 下一步
 
-当前执行目标：**Phase 11: Campaign & Batch Review 已完成，下一步进入 Phase 12 Local Review Workspace 讨论/计划**。
+当前执行目标：**Phase 12: Local Review Workspace 已完成，下一步进入 Phase 13 Writing Safety & Hardening 讨论/计划**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -92,11 +92,11 @@ Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-14 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 23/23 completed for Phase 6-11 planned | Phase 11 complete，next Phase 12 | 2026-05-26 |
+| v2.0 Scaled Literature Workstation | 6-14 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 26/26 completed for Phase 6-12 planned | Phase 12 complete，next Phase 13 | 2026-05-27 |
 
 ---
 
-*Roadmap updated after Phase 11 campaign implementation: 2026-05-26*
+*Roadmap updated after Phase 12 local review workspace implementation: 2026-05-27*
 
 ## GSD 解析索引
 
@@ -162,7 +162,7 @@ Status: complete. Integrate campaign queues with Phase 10 workflow runs, control
 
 ### Phase 12: Local Review Workspace
 
-Status: planned. Provide a local supervision workspace for candidates, PDFs, reading drafts, visual evidence, scoring and formal write requests.
+Status: complete. Provide a local supervision workspace for candidates, PDFs, reading drafts, visual evidence, scoring and formal write requests.
 
 ### Phase 13: Writing Safety & Hardening
 
