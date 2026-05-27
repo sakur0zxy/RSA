@@ -269,6 +269,25 @@ def test_readme_documents_phase10_workflow_orchestrator():
         assert needle in text
 
 
+def test_readme_documents_phase12_local_review_workspace():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for needle in [
+        "rsa --root . review build --campaign C001",
+        "rsa --root . review build --paper P001",
+        "rsa --root . review status",
+        "rsa --root . review clean --generated-only",
+        "review_workspace_manifest.yaml",
+        "index.html",
+        "groups/*.html",
+        "objects/*.html",
+        "formal_write_request",
+        "只展示命令，不自动执行",
+        "不会直接写入 `metadata/`",
+    ]:
+        assert needle in text
+
+
 def test_init_writes_localized_templates_and_formal_records(tmp_path):
     config = load_project_config(tmp_path)
 

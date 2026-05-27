@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-174%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-179%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -32,6 +32,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Campaign batch review | `rsa campaign run/resume/pause/queue/report` 把 campaign 队列接入单篇 workflow、metadata intake、review queue 和中文批量报告；自动运行到监管队列，正式写入仍需人工确认。 |
 | AI scoring | `rsa score` 融合 reading note、视觉候选和 campaign 队列，生成 relevance、quality、read priority 三类 0-10 辅助评分；只用于排序、初审和监管。 |
 | Workflow orchestrator | `rsa workflow run/resume/status/report/stop/rerun` 把单篇论文顺序跑到 review packet，保留中文状态、可恢复 run state 和 Phase 11 可复用的 campaign 字段。 |
+| Local review workspace | `rsa review build/status/open/clean` 生成本地静态监管台，集中查看 campaign、单篇 workflow、reading note、visual evidence、AI scoring 和 formal write request。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
@@ -58,8 +59,9 @@ flowchart TD
   F2 --> G["Reading note<br/>阅读笔记"]
   G --> V["Visual evidence candidates<br/>图表/表格候选证据"]
   V --> S["AI scoring<br/>辅助评分与监管"]
+  S --> W["Local review workspace<br/>本地监管台"]
   E --> H["Literature map<br/>文献映射"]
-  S --> I["Formal write gate<br/>正式写入门禁"]
+  W --> I["Formal write gate<br/>正式写入门禁"]
   H --> J["Gap report<br/>研究空白报告"]
   I --> H
 ```
@@ -171,6 +173,10 @@ rsa --root . eval compare
 | `rsa workflow run P001` | 串联 acquisition、reading draft、visual extraction、scoring 和 review packet，自动跑到需要监管的位置。 |
 | `rsa workflow status P001` / `report P001` | 只读查看最近一次 workflow run 的状态、步骤、下一步建议和中文监管包。 |
 | `rsa workflow resume P001` / `rerun P001` / `stop P001` | 显式恢复、重跑指定步骤或暂停单篇 workflow；campaign 批量调度属于 Phase 11。 |
+| `rsa review build --campaign C001` | 生成 campaign 级本地静态监管台，聚合 review queue、metadata intake、batch report 和 formal write request。 |
+| `rsa review build --paper P001` | 生成单篇 paper 级本地静态监管台，聚合 metadata、source ledger、reading note、workflow、visual evidence 和 scoring。 |
+| `rsa review status` / `open` | 只读查看最近监管台状态，或打开最近生成的 `index.html`。 |
+| `rsa review clean --generated-only` | 清理生成的 HTML、manifest 和 checklist，保留人工记录。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
@@ -324,6 +330,46 @@ Phase 10 只处理单篇顺序链；`campaign_id` 和 `campaign_item_id` 只是�
 
 预留接口：run state 中保留 `llm_visual_analysis`、`advanced_analysis.curve_extraction`、`advanced_analysis.table_structure` 和 `advanced_analysis.multimodal_interpretation`，当前默认 `not_run`。这些接口用于后续高级图表智能，不代表 Phase 10 已经生成图像学术结论。
 
+## Local Review Workspace
+
+Phase 12 提供本地静态监管台。它把自动流程已经生成的 staging/review 材料集中到一个中文页面包里，方便用户快速查看异常、证据链接、AI 初审建议和下一步 CLI 命令。
+
+```powershell
+rsa --root . review build --campaign C001
+rsa --root . review build --paper P001
+rsa --root . review status
+rsa --root . review open
+rsa --root . review clean --generated-only
+```
+
+输出目录：
+
+- `01_literature/review_workspace/index.html`：总览、统计、优先处理项和建议动作。
+- `01_literature/review_workspace/groups/*.html`：按紧急度分组查看。
+- `01_literature/review_workspace/objects/*.html`：单个监管对象详情。
+- `01_literature/review_workspace/review_workspace_manifest.yaml`：机器可读 manifest，后续 Web UI 可以复用。
+- `01_literature/review_workspace/actions_checklist.md`：终端友好的人工处理命令清单。
+
+默认分组顺序：
+
+1. `formal_write_request`：涉及正式写入请求，必须人工确认。
+2. `blocked`：自动流程已 fail closed，需要补输入、授权或依赖。
+3. `partial`：部分完成，可继续但需要查看降级原因。
+4. `needs_followup`：需要补材料、复核或人工处理。
+5. `low_confidence`：AI/证据置信度低。
+6. `high_priority`：阅读优先级高，建议优先监管。
+7. `auto_triaged`：机器已初审，但尚未人工处理。
+8. `completed_staging`：staging 层已完成，可抽查。
+
+每个 review object 会显示：
+
+- 标题、对象类型、当前 status 和中文原因。
+- reading note、workflow report、visual candidates、scoring packet、campaign queue、metadata request 或 formal write request 等证据链接。
+- AI 建议、评分、置信度或优先级。
+- 建议下一步 CLI 命令，例如 `rsa campaign queue review ...`、`rsa score review ...`、`rsa formal apply-note ...`。
+
+监管台只展示命令，不自动执行，不在页面内编辑文件，也不会直接写入 `metadata/`、`literature_map.md` 或 `agent_research_notes.md`。重复运行 `rsa review build` 会覆盖生成的 HTML、manifest 和 checklist，但保留 `review_workspace/user_records/` 等人工记录。
+
 ## Browser Session Provider 示例
 
 把下面配置放入 `.rsa/local.yaml`，用于本地自定义资料库。字段名保持英文稳定，中文说明用于提醒授权边界。
@@ -374,6 +420,7 @@ rsa --root . source find P001 --provider university_library_browser
   source_candidates/        # P###.yaml 候选来源、匹配证据和下载状态
   campaigns/                # C###.yaml 批量候选队列、轻量去重和状态汇总
   workflows/                # P###/RUN-###.yaml 单篇 workflow 状态和中文监管包
+  review_workspace/         # 本地静态监管台、manifest、分组页、对象页和操作清单
   pdfs/                     # 本地-only PDF，git 忽略
   assets/                   # 本地-only 截图/结果图；manifest.yaml 与 visual_evidence_candidates.yaml 可审计
     P###/crops/             # 本地-only 视觉候选裁图
@@ -409,6 +456,9 @@ tests/                      # 回归测试
 - `rsa campaign ...` 只管理批量候选队列和去重状态，不执行 AI scoring、workflow orchestration、review UI 或 formal write。
 - Campaign 中的 `linked` 只表示候选匹配到现有 `metadata/P###.yaml`，不代表论文已经完成阅读、评分或正式结论。
 - `rsa workflow ...` 只自动推进单篇 staging/review 链路，不会并行处理多篇论文，也不会执行 formal write。
+- `rsa review build ...` 只生成本地静态监管台和机器可读 manifest，不会自动执行页面中的命令。
+- `review_workspace_manifest.yaml` 是监管视图索引，不是正式科研记录；缺失文件会以中文标记，不会伪装成成功。
+- `rsa review clean --generated-only` 只清理生成的 HTML/manifest/checklist，必须保留人工记录。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。
@@ -434,13 +484,13 @@ python -m pytest -q
 rsa --root . eval compare
 ```
 
-当前回归基线：143 个测试通过；`rsa eval compare` 仍用于本地 harness 基线比较。
+当前回归基线：179 个 pytest 测试通过；`rsa eval compare` 仍用于本地 harness 基线比较。
 
 ## 项目状态
 
 - 当前里程碑：`v1.0 Local Harness`
-- 当前版本：`v2.0` Phase 11 完成
-- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、AI 辅助评分、单篇 workflow 和 campaign batch review
+- 当前版本：`v2.0` Phase 12 完成
+- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、AI 辅助评分、单篇 workflow、campaign batch review 和本地 review workspace
 - 主要用户语言：中文优先
 - 语言策略：见 `.planning/LANGUAGE-POLICY.md`
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释
@@ -457,7 +507,7 @@ v2 建议优先扩展这些方向：
 6. AI 辅助评分：相关性、质量和阅读优先级。
 7. 批量候选文献导入和 campaign review queue。
 8. DOI/Crossref/OpenAlex 等 scholarly API 进入 staging。
-9. 本地 review UI。
+9. 本地 review workspace。Phase 12 已完成静态监管台；未来可升级为 Web UI。
 10. Claim-level citation check。
 11. 更强的 research-quality evals。
 12. 可选 multi-agent orchestration。

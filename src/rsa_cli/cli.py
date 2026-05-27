@@ -547,6 +547,36 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_rerun.add_argument("paper_id", help="正式文献编号，例如 P001。")
     workflow_rerun.add_argument("--from-step", required=True, help="重新执行起点，例如 visual_extraction。")
 
+    review_group = subcommands.add_parser(
+        "review",
+        help="生成、查看、打开或清理本地静态监管台；只展示 staging/review 信息，不写正式记录。",
+    )
+    review_subcommands = review_group.add_subparsers(dest="review_command", required=True)
+    review_build = review_subcommands.add_parser(
+        "build",
+        help="生成本地 review workspace，可按 campaign 或单篇 paper 聚合证据。",
+    )
+    review_target = review_build.add_mutually_exclusive_group(required=True)
+    review_target.add_argument("--campaign", help="campaign 编号，例如 C001。")
+    review_target.add_argument("--paper", help="正式文献编号，例如 P001。")
+    review_subcommands.add_parser(
+        "status",
+        help="只读查看最近生成的 review workspace 目标、统计和 index 路径。",
+    )
+    review_subcommands.add_parser(
+        "open",
+        help="打开最近生成的 review workspace index.html；缺失时 fail closed。",
+    )
+    review_clean = review_subcommands.add_parser(
+        "clean",
+        help="清理自动生成的 review workspace 页面和 manifest，保留人工记录。",
+    )
+    review_clean.add_argument(
+        "--generated-only",
+        action="store_true",
+        help="只清理生成文件；Phase 12 当前必须使用该模式。",
+    )
+
     eval_group = subcommands.add_parser(
         "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
     )
@@ -1468,6 +1498,63 @@ def _workflow_next_action_text(status: str | None) -> str:
     return "查看 workflow status 和 report。"
 
 
+def _run_review_command(args: argparse.Namespace, root: Path) -> int:
+    from .review_workspace import (
+        ReviewWorkspaceError,
+        build_review_workspace,
+        clean_review_workspace,
+        open_review_workspace,
+        review_workspace_status,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.review_command == "build":
+            result = build_review_workspace(
+                config,
+                campaign_id=args.campaign,
+                paper_id=args.paper,
+            )
+            print(
+                f"本地监管台已生成: target={result.target_type}:{result.target_id}, "
+                f"objects={result.object_count}, actions={result.action_count}, "
+                f"missing_links={result.missing_count}; index={result.index_path}; "
+                f"manifest={result.manifest_path}"
+            )
+            return 0
+        if args.review_command == "status":
+            status = review_workspace_status(config)
+            if not status.exists:
+                print(f"本地监管台状态: 尚未生成；目录={status.root}")
+                return 0
+            print(
+                f"本地监管台状态: target={status.target_type}:{status.target_id}, "
+                f"objects={status.object_count}, actions={status.action_count}, "
+                f"missing_links={status.missing_count}, generated_at={status.generated_at}; "
+                f"index={status.index_path}; manifest={status.manifest_path}"
+            )
+            return 0
+        if args.review_command == "open":
+            path = open_review_workspace(config)
+            print(f"已打开本地监管台: {path}")
+            return 0
+        if args.review_command == "clean":
+            if not args.generated_only:
+                print("review clean 需要 --generated-only，避免误删人工记录。", file=sys.stderr)
+                return 2
+            result = clean_review_workspace(config, generated_only=True)
+            preserved = ", ".join(str(path) for path in result.preserved_paths) or "无"
+            print(
+                f"本地监管台生成文件已清理: removed={result.removed_count}; "
+                f"preserved={preserved}; root={result.root}"
+            )
+            return 0
+    except ReviewWorkspaceError as exc:
+        print(f"本地监管台操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -1586,6 +1673,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_score_command(args, root)
         if args.command == "workflow":
             return _run_workflow_command(args, root)
+        if args.command == "review":
+            return _run_review_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":

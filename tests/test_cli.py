@@ -72,6 +72,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "campaign" in captured.out
     assert "score" in captured.out
     assert "workflow" in captured.out
+    assert "review" in captured.out
     assert "eval" in captured.out
     assert "formal" in captured.out
 
@@ -801,6 +802,54 @@ def test_cli_campaign_run_queue_report_and_review(tmp_path, capsys):
     assert "review queue 已记录监管决策" in reviewed_out.out
     assert (tmp_path / "01_literature" / "campaigns" / "C001_run.yaml").exists()
     assert (tmp_path / "01_literature" / "campaigns" / "C001_batch_report.md").exists()
+
+
+def test_cli_review_build_status_and_clean_are_chinese(tmp_path, capsys):
+    prepare_project(tmp_path)
+    csv_path = tmp_path / "review_workspace.csv"
+    csv_path.write_text(
+        "title,doi,year,first_author\n"
+        "Review Workspace CLI Paper,10.1234/review-workspace-cli,2026,Ada\n",
+        encoding="utf-8",
+    )
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            "campaign",
+            "create",
+            "--name-zh",
+            "监管台 CLI",
+            "--objective-zh",
+            "验证 review workspace CLI。",
+        ]
+    )
+    capsys.readouterr()
+    main(["--root", str(tmp_path), "campaign", "import", "C001", "--file", str(csv_path)])
+    capsys.readouterr()
+    main(["--root", str(tmp_path), "campaign", "run", "C001", "--dry-run"])
+    capsys.readouterr()
+
+    build = main(["--root", str(tmp_path), "review", "build", "--campaign", "C001"])
+    build_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "review", "status"])
+    status_out = capsys.readouterr()
+    clean_missing_flag = main(["--root", str(tmp_path), "review", "clean"])
+    clean_missing_flag_out = capsys.readouterr()
+    clean = main(["--root", str(tmp_path), "review", "clean", "--generated-only"])
+    clean_out = capsys.readouterr()
+
+    assert build == 0
+    assert "本地监管台已生成" in build_out.out
+    assert "manifest=" in build_out.out
+    assert status == 0
+    assert "本地监管台状态" in status_out.out
+    assert "target=campaign:C001" in status_out.out
+    assert clean_missing_flag == 2
+    assert "需要 --generated-only" in clean_missing_flag_out.err
+    assert clean == 0
+    assert "生成文件已清理" in clean_out.out
+    assert not (tmp_path / "01_literature" / "review_workspace" / "index.html").exists()
 
 
 def write_cli_scoring_note(root):

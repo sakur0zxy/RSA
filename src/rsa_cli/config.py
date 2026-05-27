@@ -151,6 +151,10 @@ class ProjectConfig:
         return self.literature_root / "workflows"
 
     @property
+    def review_workspace_root(self) -> Path:
+        return self.literature_root / "review_workspace"
+
+    @property
     def pdfs_root(self) -> Path:
         return self.literature_root / "pdfs"
 

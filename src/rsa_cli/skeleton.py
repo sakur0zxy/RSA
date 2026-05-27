@@ -19,6 +19,7 @@ LITERATURE_DIRECTORIES = [
     "campaigns",
     "scores",
     "workflows",
+    "review_workspace",
     "pdfs",
     "assets",
     "extracted",
