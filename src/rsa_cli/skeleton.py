@@ -21,6 +21,7 @@ LITERATURE_DIRECTORIES = [
     "workflows",
     "review_workspace",
     "safety",
+    "workers",
     "pdfs",
     "assets",
     "extracted",

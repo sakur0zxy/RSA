@@ -159,6 +159,10 @@ class ProjectConfig:
         return self.literature_root / "safety"
 
     @property
+    def workers_root(self) -> Path:
+        return self.literature_root / "workers"
+
+    @property
     def pdfs_root(self) -> Path:
         return self.literature_root / "pdfs"
 

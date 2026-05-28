@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: ready_to_plan
-stopped_at: Phase 13 complete (3/3) - ready to discuss Phase 14
-last_updated: 2026-05-28T15:52:15.000Z
-last_activity: 2026-05-28
+status: milestone_complete
+stopped_at: Milestone complete (Phase 14 was final phase)
+last_updated: 2026-05-29T00:16:34+08:00
+last_activity: 2026-05-29
 progress:
   total_phases: 17
-  completed_phases: 16
-  total_plans: 43
-  completed_plans: 43
-  percent: 94
+  completed_phases: 17
+  total_plans: 46
+  completed_plans: 46
+  percent: 100
 ---
 
 # 项目状态
@@ -22,22 +22,22 @@ progress:
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** Phase 14 Background Worker & Scheduled Automation
+**当前重点:** v2.0 core complete; deferred enhancements or next milestone only
 
 ## 当前位置
 
 Phase: 14
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-28
+Plan: 3/3 complete
+Status: Milestone complete
+Last activity: 2026-05-29
 
-进度: [█████████░] 94%
+进度: [██████████] 100%
 
 ## 进度指标
 
 **速度:**
 
-- 已完成 plans: 40
+- 已完成 plans: 46
 - 平均耗时: N/A
 - 总执行时间: 0 hours
 
@@ -61,7 +61,7 @@ Last activity: 2026-05-28
 | 11 | 3 | complete |
 | 12 | 3 | complete |
 | 13 | 3 | complete |
-| 14 | TBD | planned |
+| 14 | 3 | complete |
 
 ## 累积上下文
 
@@ -85,7 +85,7 @@ Last activity: 2026-05-28
 - Phase 11 已完成：campaign 批量处理采用 `linked` 自动 workflow、`queued` 自动 metadata intake request；多篇之间小规模流水线并行，每篇内部继续按 Phase 10 顺序链执行。
 - Phase 11 review queue 是监管入口，不是 formal approval 列表；`accepted | deferred | rejected | needs_followup` 只表示队列项处理状态。
 - Phase 11 不执行 formal write；metadata intake accepted 后只生成 formal write request，正式写入仍必须通过人工确认的 formal gate。
-- Phase 14 已加入路线图，定位为 Background Worker & Scheduled Automation，即运行形态升级；它不重写 Phase 10/11，不绕过 formal write gate，不做 multi-agent。
+- Phase 14 已完成 Background Worker & Scheduled Automation：新增本地 worker queue、one-shot runner、schedule 入队、status/logs、cancel/recover，并继续保持不重写 Phase 10/11、不绕过 formal write gate、不做 multi-agent。
 
 ### 待办
 
@@ -98,7 +98,7 @@ Last activity: 2026-05-28
 - Phase 9 已完成正文证据、Phase 8.1 视觉候选和 campaign 队列的评分闭环，但仍不能把未人工确认的 AI 评分或图像解释写入 formal records。
 - Phase 10 已完成单篇 workflow primitive：`rsa workflow run|resume|status|report|stop|rerun` 串联 acquisition、reading draft、visual extraction、scoring 和 review packet，并保持 formal write gate 不可绕过。
 - Phase 12 已完成本地 review workspace：`rsa review build|status|open|clean` 生成静态监管台、`review_workspace_manifest.yaml`、分组页、对象页和 actions checklist；只做监管导航，不执行 formal write。
-- Phase 13 planning 必须继续覆盖 claim-level citation check、failure scenario monitoring、prompt/template drift 和 writing safety hardening。
+- Phase 13 已覆盖 claim-level citation check、failure scenario monitoring、prompt/template drift 和 writing safety hardening。
 - Browser session 下载得到的 PDF 只是本地授权阅读材料，不能自动写入 metadata、literature_map、agent_research_notes 或论文正文。
 
 - Phase 13 已完成 writing safety hardening：`rsa safety check|validate|status|campaign` 只写 `01_literature/safety/`，提供 claim-level citation review、campaign failure monitor、deterministic drift anchors 和 formal boundary 检查，不生成正式学术结论。
@@ -106,7 +106,7 @@ Last activity: 2026-05-28
 ## 会话连续性
 
 Last session: 2026-05-27T20:34:04+08:00
-Stopped at: Phase 13 complete - ready to discuss Phase 14
+Stopped at: Milestone complete - Phase 14 completed
 Resume file: .planning/phases/13-writing-safety-hardening/13-VERIFICATION.md
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
@@ -145,6 +145,9 @@ Resume file: .planning/phases/13-writing-safety-hardening/13-VERIFICATION.md
 **Planned Phase:** 13 (writing-safety-hardening) - 3 plans - 2026-05-28
 **Completed Phase:** 13 (writing-safety-hardening) - 3 plans - 2026-05-28
 **Inserted Phase:** 14 (background-worker-scheduled-automation) — planned future runtime-shape upgrade — 2026-05-26
+**Discussed Phase:** 14 (background-worker-scheduled-automation) - context complete - 2026-05-29
+**Planned Phase:** 14 (background-worker-scheduled-automation) - 3 plans - 2026-05-29
+**Completed Phase:** 14 (background-worker-scheduled-automation) - 3 plans - 2026-05-29
 
 ## Accumulated Context
 

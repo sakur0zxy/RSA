@@ -74,6 +74,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "workflow" in captured.out
     assert "review" in captured.out
     assert "safety" in captured.out
+    assert "worker" in captured.out
     assert "eval" in captured.out
     assert "formal" in captured.out
 

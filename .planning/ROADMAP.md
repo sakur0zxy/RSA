@@ -28,7 +28,7 @@
 </details>
 
 <details open>
-<summary>v2.0 Scaled Literature Workstation - 规划中</summary>
+<summary>v2.0 Scaled Literature Workstation - 已完成核心闭环</summary>
 
 - [x] Phase 6: Asset & Source Foundation - 建立 PDF、截图、图表、结果图和 source ledger 的本地资产基础。
 - [x] Phase 7: Authorized Acquisition - 3/3 plans，完成于 2026-05-14；支持 open access、用户提供和用户授权来源的自动全文获取，不绕过 paywall。
@@ -41,13 +41,13 @@
 - [x] Phase 11: Campaign & Batch Review - 3/3 plans，完成于 2026-05-26；在 Phase 10 workflow primitive 之上支持批量候选、受控流水线并行、metadata intake、review queue、状态流转、排序和批量异常聚合。
 - [x] Phase 12: Local Review Workspace - 3/3 plans，完成于 2026-05-27；生成本地静态监管台、manifest、分组页、对象页和操作清单，用于审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
 - [x] Phase 13: Writing Safety & Hardening - 3/3 plans，完成于 2026-05-28；新增 `rsa safety check|validate|status|campaign`，生成 claim-level citation review、campaign failure monitor 和中文 safety audit，继续保持 formal write gate。
-- [ ] Phase 14: Background Worker & Scheduled Automation - 作为运行形态升级，支持后台 worker、异步任务执行、长任务恢复、status 监控、定时 campaign run 和 worker 日志摘要。
+- [x] Phase 14: Background Worker & Scheduled Automation - 3/3 plans，完成于 2026-05-29；新增 `rsa worker enqueue|run|status|logs|cancel|recover|schedule`，支持本地 worker queue、one-shot runner、schedule 入队、status/logs 和恢复/取消语义，并保持 formal write gate。
 
 </details>
 
 ## 下一步
 
-当前执行目标：**Phase 13: Writing Safety & Hardening 已完成，下一步进入 Phase 14 Background Worker & Scheduled Automation 讨论/计划**。
+当前执行目标：**v2.0 核心闭环已完成；后续只处理 deferred 增强或新里程碑**。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -83,7 +83,7 @@ Phase 10 已完成 Workflow Orchestrator：它新增 `rsa workflow run|resume|st
 
 Phase 11 已完成：Phase 11 在 Phase 10 single-paper workflow primitive 之上实现 campaign 级小规模流水线并行、metadata intake request、formal write request 待审对象、review queue、batch report、pause/resume 和中文监管输出。Phase 11 默认自动推进阅读、分析、评分和 review packet，但正式写入仍必须通过人工确认的 formal gate。
 
-Phase 14 已加入路线图，定位为 Background Worker & Scheduled Automation，即“运行形态升级”。它在 Phase 11 同步 CLI、Phase 12 本地监管台和 Phase 13 hardening 稳定后，再处理后台 worker、异步任务、长任务恢复、status 监控和定时 campaign run；它不重写 Phase 10/11 逻辑，不绕过 formal write gate，不做 multi-agent。
+Phase 14 已完成 Background Worker & Scheduled Automation，即“运行形态升级”。它在 Phase 11 同步 CLI、Phase 12 本地监管台和 Phase 13 hardening 稳定后，新增本地 worker queue、one-shot runner、schedule 入队、status/logs 和 cancel/recover；它不重写 Phase 10/11 逻辑，不绕过 formal write gate，不做 multi-agent。
 
 Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成、高级图表智能、复杂多 agent 编排。轻量 DOI/BibTeX 补全、title/author/year 标准化和 dedup 辅助可在 Phase 9/11 内按主闭环需要处理。
 
@@ -92,11 +92,11 @@ Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-14 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 29/29 completed for Phase 6-13 planned | Phase 13 complete，next Phase 14 | 2026-05-28 |
+| v2.0 Scaled Literature Workstation | 6-14 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 32/32 completed for Phase 6-14 planned | v2.0 core complete | 2026-05-29 |
 
 ---
 
-*Roadmap updated after Phase 12 local review workspace implementation: 2026-05-27*
+*Roadmap updated after Phase 14 worker automation implementation: 2026-05-29*
 
 ## GSD 解析索引
 
@@ -170,4 +170,4 @@ Status: complete. Adds claim-level citation checks, campaign failure monitoring,
 
 ### Phase 14: Background Worker & Scheduled Automation
 
-Status: planned. Upgrade the runtime shape after Phase 11-13 by adding background workers, async task execution, long-task recovery, status monitoring, scheduled campaign runs and worker log summaries without bypassing formal-write gates.
+Status: complete. Upgrades the runtime shape after Phase 11-13 with local worker queue, one-shot task execution, explicit recovery/cancel, status monitoring, scheduled enqueue and worker log summaries without bypassing formal-write gates.

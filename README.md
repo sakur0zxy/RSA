@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-179%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-192%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -34,6 +34,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Workflow orchestrator | `rsa workflow run/resume/status/report/stop/rerun` 把单篇论文顺序跑到 review packet，保留中文状态、可恢复 run state 和 Phase 11 可复用的 campaign 字段。 |
 | Local review workspace | `rsa review build/status/open/clean` 生成本地静态监管台，集中查看 campaign、单篇 workflow、reading note、visual evidence、AI scoring 和 formal write request。 |
 | Writing safety | `rsa safety check/validate/status/campaign` 生成 claim-level citation review 和 campaign failure monitor；结果只进入 safety 审计记录，不是正式学术结论。 |
+| Background worker | `rsa worker enqueue/run/status/logs/schedule` 把 campaign、review workspace 和 safety 任务放入本地队列或定时入队；worker 只推进 staging/review 自动化，不执行 formal write。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
@@ -181,6 +182,11 @@ rsa --root . eval compare
 | `rsa safety check P001` | 生成单篇论文写作安全检查，抽取 claim_ref 并检查引用链是否能回到原文证据。 |
 | `rsa safety validate P001` / `status P001` | 只读校验或查看 `P###_safety.yaml`，不修改正式记录。 |
 | `rsa safety campaign C001` | 生成 campaign failure monitor，检查批量异常聚合、formal request 非自动执行和 metadata intake 边界。 |
+| `rsa worker enqueue campaign-run C001` | 把 campaign run 任务放入本地 worker queue，不立即执行。 |
+| `rsa worker run --max-tasks 1` | 按队列顺序执行本地 worker 任务；单个失败会记录并继续处理后续任务。 |
+| `rsa worker run --include-due --max-tasks 5` | 先把到期 schedule 入队，再执行最多 5 个 queued 任务。 |
+| `rsa worker status` / `logs` | 查看 worker queue、schedule 概览和中文日志摘要。 |
+| `rsa worker schedule add campaign-run C001 --interval-hours 24` | 新增本地定时入队规则；schedule 只入队，不直接执行任务。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
@@ -402,6 +408,32 @@ rsa --root . safety campaign C001
 
 Phase 13 的所有结果都是 review guidance，不会创建或修改 `metadata/P###.yaml`、`literature_map.md`、`agent_research_notes.md`、`paper_index.md` 或论文正文。正式写入仍必须走 existing formal write gate 和人工确认。
 
+## Background Worker & Scheduled Automation
+
+Phase 14 把已经稳定的同步 CLI 流程包成一个本地 worker queue。它适合让 campaign、review workspace 和 safety 检查在用户不盯着终端的情况下持续推进；用户通过状态、日志、监管台和 safety report 监督结果。它不是后台云服务，也不是 multi-agent 调度器。
+
+```powershell
+rsa --root . worker enqueue campaign-run C001
+rsa --root . worker run --max-tasks 1
+rsa --root . worker run --include-due --max-tasks 5
+rsa --root . worker status
+rsa --root . worker logs
+rsa --root . worker schedule add campaign-run C001 --interval-hours 24
+rsa --root . worker schedule due
+```
+
+输出文件：
+- `01_literature/workers/queue.yaml`：机器可读任务队列，记录 `task_id`、`task_type`、`target_id`、`status`、`artifacts`、`future_interfaces` 和中文下一步建议。
+- `01_literature/workers/schedules.yaml`：本地 schedule 定义；schedule 只把到期任务放入 queue，不直接执行。
+- `01_literature/workers/worker_log.md`：中文摘要日志，只记录任务状态和产物路径，不保存密码、cookies、全文 PDF 或大型 prompt。
+
+Phase 14 当前实现的是可测试的一次性 runner：`rsa worker run` 会处理 queued 任务然后退出。后续可用 Windows Task Scheduler、cron 或 daemon wrapper 调用它；接口中已经预留 `daemon_mode`、`external_scheduler`、`task_lock`、`heartbeat`、`worker_id`、`max_runtime_seconds` 和 `failure_detector_plugins`。
+
+安全边界：
+- worker 复用 Phase 10/11/12/13 的既有函数，不重写 workflow、campaign、review workspace 或 safety 逻辑。
+- worker 不执行 formal write；`formal_write_allowed` 固定为 `false`，正式记录仍需人工确认。
+- worker 任务失败会 fail closed，写入中文错误和修复建议，不把失败伪装成成功。
+
 ## Browser Session Provider 示例
 
 把下面配置放入 `.rsa/local.yaml`，用于本地自定义资料库。字段名保持英文稳定，中文说明用于提醒授权边界。
@@ -454,6 +486,7 @@ rsa --root . source find P001 --provider university_library_browser
   workflows/                # P###/RUN-###.yaml 单篇 workflow 状态和中文监管包
   review_workspace/         # 本地静态监管台、manifest、分组页、对象页和操作清单
   safety/                   # Phase 13 写作安全、引用链和 campaign failure monitor 审计记录
+  workers/                  # Phase 14 本地 worker queue、schedule 和中文日志
   pdfs/                     # 本地-only PDF，git 忽略
   assets/                   # 本地-only 截图/结果图；manifest.yaml 与 visual_evidence_candidates.yaml 可审计
     P###/crops/             # 本地-only 视觉候选裁图
@@ -494,6 +527,7 @@ tests/                      # 回归测试
 - `rsa review clean --generated-only` 只清理生成的 HTML/manifest/checklist，必须保留人工记录。
 - `rsa safety check ...` 和 `rsa safety campaign ...` 只写 `01_literature/safety/` 审计记录；`safety_status=passed` 也不等于正式批准。
 - `claim_refs` 和 campaign failure monitor 只用于提示证据链或批量状态风险，不能直接写入正式 metadata、文献映射、研究笔记或论文正文。
+- `rsa worker ...` 只调度 staging/review 自动化任务，不执行 formal write；worker queue 中的 `formal_write_allowed` 必须保持 `false`。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。
@@ -519,13 +553,13 @@ python -m pytest -q
 rsa --root . eval compare
 ```
 
-当前回归基线：187 个 pytest 测试通过；`rsa eval compare` 仍用于本地 harness 基线比较。
+当前回归基线：192 个 pytest 测试通过；`rsa eval compare` 仍用于本地 harness 基线比较。
 
 ## 项目状态
 
 - 当前里程碑：`v1.0 Local Harness`
-- 当前版本：`v2.0` Phase 13 完成
-- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、AI 辅助评分、单篇 workflow、campaign batch review、本地 review workspace 和写作安全检查
+- 当前版本：`v2.0` Phase 14 完成
+- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、AI 辅助评分、单篇 workflow、campaign batch review、本地 review workspace、写作安全检查和本地 worker automation
 - 主要用户语言：中文优先
 - 语言策略：见 `.planning/LANGUAGE-POLICY.md`
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释
@@ -544,8 +578,8 @@ v2 建议优先扩展这些方向：
 8. DOI/Crossref/OpenAlex 等 scholarly API 进入 staging。
 9. 本地 review workspace。Phase 12 已完成静态监管台；未来可升级为 Web UI。
 10. Claim-level citation check。Phase 13 已完成 safety audit 和 campaign failure monitor。
-11. Background worker 与 scheduled automation。Phase 14 负责运行形态升级。
-12. 更强的 research-quality evals 和可选 multi-agent orchestration。
+11. Background worker 与 scheduled automation。Phase 14 已完成本地 queue、one-shot runner、schedule 入队、status/logs 和恢复/取消语义。
+12. 后续可选增强：更强的 research-quality evals、Web review UI、advanced figure intelligence 和可选 multi-agent orchestration。
 
 更多 GSD 文档：
 

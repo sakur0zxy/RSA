@@ -310,6 +310,25 @@ def test_readme_documents_phase13_writing_safety():
         assert needle in text
 
 
+def test_readme_documents_phase14_worker_automation():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for needle in [
+        "rsa --root . worker enqueue campaign-run C001",
+        "rsa --root . worker run --max-tasks 1",
+        "rsa --root . worker run --include-due --max-tasks 5",
+        "rsa --root . worker status",
+        "rsa --root . worker logs",
+        "rsa --root . worker schedule add campaign-run C001 --interval-hours 24",
+        "01_literature/workers/queue.yaml",
+        "01_literature/workers/schedules.yaml",
+        "01_literature/workers/worker_log.md",
+        "不执行 formal write",
+        "正式记录仍需人工确认",
+    ]:
+        assert needle in text
+
+
 def test_init_writes_localized_templates_and_formal_records(tmp_path):
     config = load_project_config(tmp_path)
 

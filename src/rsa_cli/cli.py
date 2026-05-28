@@ -603,6 +603,84 @@ def build_parser() -> argparse.ArgumentParser:
     )
     safety_campaign.add_argument("campaign_id", help="campaign 编号，例如 C001。")
 
+    worker_group = subcommands.add_parser(
+        "worker",
+        help="运行 Phase 14 本地 worker queue 和定时入队；只调度 staging/review，不执行 formal write。",
+    )
+    worker_subcommands = worker_group.add_subparsers(dest="worker_command", required=True)
+    worker_enqueue = worker_subcommands.add_parser(
+        "enqueue",
+        help="把一个 campaign/review/safety 任务放入本地 worker queue。",
+    )
+    worker_enqueue.add_argument(
+        "task_type",
+        choices=[
+            "campaign-run",
+            "campaign-resume",
+            "campaign-queue",
+            "campaign-report",
+            "campaign-safety",
+            "review-workspace",
+        ],
+        help="任务类型；会记录为下划线形式，例如 campaign_run。",
+    )
+    worker_enqueue.add_argument("target_id", help="当前支持 campaign 编号，例如 C001。")
+    worker_run = worker_subcommands.add_parser(
+        "run",
+        help="按队列顺序执行本地 worker 任务；单个失败不会拖死后续任务。",
+    )
+    worker_run.add_argument("--max-tasks", type=int, help="本次最多处理的 queued 任务数。")
+    worker_run.add_argument(
+        "--include-due",
+        action="store_true",
+        help="运行前先把到期 schedule 放入 worker queue。",
+    )
+    worker_subcommands.add_parser("status", help="只读查看 worker queue 和 schedule 概览。")
+    worker_cancel = worker_subcommands.add_parser(
+        "cancel", help="取消尚未完成的 worker 任务。"
+    )
+    worker_cancel.add_argument("task_id", help="worker task 编号，例如 WT001。")
+    worker_cancel.add_argument("--reason", help="中文取消原因。")
+    worker_recover = worker_subcommands.add_parser(
+        "recover", help="把 failed/running/blocked 任务恢复为 queued，等待重试。"
+    )
+    worker_recover.add_argument("task_id", help="worker task 编号，例如 WT001。")
+    worker_recover.add_argument("--reason", help="中文恢复原因。")
+    worker_logs = worker_subcommands.add_parser(
+        "logs", help="只读查看最近 worker_log.md 摘要。"
+    )
+    worker_logs.add_argument("--max-lines", type=int, default=20, help="显示最近多少行。")
+    worker_schedule = worker_subcommands.add_parser(
+        "schedule", help="管理本地定时入队规则；schedule 只入队，不直接执行。"
+    )
+    worker_schedule_subcommands = worker_schedule.add_subparsers(
+        dest="worker_schedule_command", required=True
+    )
+    worker_schedule_add = worker_schedule_subcommands.add_parser(
+        "add", help="新增一个本地 schedule。"
+    )
+    worker_schedule_add.add_argument(
+        "task_type",
+        choices=[
+            "campaign-run",
+            "campaign-resume",
+            "campaign-queue",
+            "campaign-report",
+            "campaign-safety",
+            "review-workspace",
+        ],
+        help="任务类型；会记录为下划线形式，例如 campaign_run。",
+    )
+    worker_schedule_add.add_argument("target_id", help="当前支持 campaign 编号，例如 C001。")
+    worker_schedule_add.add_argument(
+        "--interval-hours", required=True, type=int, help="入队间隔小时数，必须为正整数。"
+    )
+    worker_schedule_add.add_argument("--start-at", help="首次入队时间，ISO 8601 格式。")
+    worker_schedule_subcommands.add_parser("list", help="只读列出 schedule。")
+    worker_schedule_subcommands.add_parser(
+        "due", help="把当前已到期的 schedule 放入 worker queue。"
+    )
+
     eval_group = subcommands.add_parser(
         "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
     )
@@ -1640,6 +1718,111 @@ def _run_safety_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_worker_command(args: argparse.Namespace, root: Path) -> int:
+    from .worker import (
+        WorkerError,
+        add_worker_schedule,
+        cancel_worker_task,
+        enqueue_due_schedules,
+        enqueue_worker_task,
+        list_worker_schedules,
+        read_worker_logs,
+        recover_worker_task,
+        run_worker,
+        worker_status,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.worker_command == "enqueue":
+            result = enqueue_worker_task(config, args.task_type, args.target_id)
+            print(
+                f"worker 任务已入队: {result.task_id} -> {result.task_type} "
+                f"{result.target_id}; queue={result.path}; 正式写入仍需人工确认。"
+            )
+            return 0
+        if args.worker_command == "run":
+            result = run_worker(
+                config,
+                max_tasks=args.max_tasks,
+                include_due=args.include_due,
+            )
+            print(
+                f"worker 运行完成: processed={result.processed_count}, "
+                f"completed={result.completed_count}, failed={result.failed_count}, "
+                f"queued_remaining={result.queued_remaining_count}, "
+                f"due_enqueued={result.due_enqueued_count}; queue={result.path}"
+            )
+            return 0 if result.failed_count == 0 else 1
+        if args.worker_command == "status":
+            status = worker_status(config)
+            print(
+                f"worker 状态: total={status.total_count}, queued={status.queued_count}, "
+                f"running={status.running_count}, completed={status.completed_count}, "
+                f"failed={status.failed_count}, cancelled={status.cancelled_count}, "
+                f"schedules={status.enabled_schedule_count}/{status.schedule_count}, "
+                f"last_task={status.last_task_id or '无'}; queue={status.path}; "
+                f"schedules_file={status.schedule_path}; log={status.log_path}"
+            )
+            if status.last_message_zh:
+                print(f"最近消息: {status.last_message_zh}")
+            return 0
+        if args.worker_command == "cancel":
+            result = cancel_worker_task(config, args.task_id, reason_zh=args.reason)
+            print(f"worker 任务已取消: {result.task_id}; queue={result.path}")
+            return 0
+        if args.worker_command == "recover":
+            result = recover_worker_task(config, args.task_id, reason_zh=args.reason)
+            print(f"worker 任务已恢复为 queued: {result.task_id}; queue={result.path}")
+            return 0
+        if args.worker_command == "logs":
+            lines = read_worker_logs(config, max_lines=args.max_lines)
+            if not lines:
+                print("worker log 为空；尚未有入队或运行记录。")
+                return 0
+            print("\n".join(lines))
+            return 0
+        if args.worker_command == "schedule":
+            if args.worker_schedule_command == "add":
+                result = add_worker_schedule(
+                    config,
+                    args.task_type,
+                    args.target_id,
+                    interval_hours=args.interval_hours,
+                    start_at=args.start_at,
+                )
+                print(
+                    f"worker schedule 已新增: {result.schedule_id} -> {result.task_type} "
+                    f"{result.target_id}; next_run_at={result.next_run_at}; "
+                    f"schedules={result.path}"
+                )
+                return 0
+            if args.worker_schedule_command == "list":
+                schedules = list_worker_schedules(config)
+                if not schedules:
+                    print("worker schedule 为空。")
+                    return 0
+                for item in schedules:
+                    print(
+                        f"{item.get('schedule_id')} {item.get('task_type')} "
+                        f"{item.get('target_id')} enabled={item.get('enabled')} "
+                        f"next_run_at={item.get('next_run_at')}"
+                    )
+                return 0
+            if args.worker_schedule_command == "due":
+                result = enqueue_due_schedules(config)
+                print(
+                    f"到期 schedule 已入队: enqueued={result.enqueued_count}, "
+                    f"schedules={','.join(result.due_schedule_ids) or '无'}; "
+                    f"file={result.path}"
+                )
+                return 0
+    except WorkerError as exc:
+        print(f"worker 操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -1762,6 +1945,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_review_command(args, root)
         if args.command == "safety":
             return _run_safety_command(args, root)
+        if args.command == "worker":
+            return _run_worker_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":
