@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
 status: ready_to_plan
-stopped_at: Phase 12 complete (3/3) — ready to discuss Phase 13
-last_updated: 2026-05-27T12:34:04.833Z
-last_activity: 2026-05-27
+stopped_at: Phase 13 complete (3/3) - ready to discuss Phase 14
+last_updated: 2026-05-28T15:52:15.000Z
+last_activity: 2026-05-28
 progress:
-  total_phases: 16
-  completed_phases: 15
-  total_plans: 40
-  completed_plans: 40
+  total_phases: 17
+  completed_phases: 16
+  total_plans: 43
+  completed_plans: 43
   percent: 94
 ---
 
@@ -22,14 +22,14 @@ progress:
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** Phase 13 Writing Safety & Hardening
+**当前重点:** Phase 14 Background Worker & Scheduled Automation
 
 ## 当前位置
 
-Phase: 13
+Phase: 14
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-05-27
+Last activity: 2026-05-28
 
 进度: [█████████░] 94%
 
@@ -60,7 +60,7 @@ Last activity: 2026-05-27
 | 10 | 3 | complete |
 | 11 | 3 | complete |
 | 12 | 3 | complete |
-| 13 | TBD | planned |
+| 13 | 3 | complete |
 | 14 | TBD | planned |
 
 ## 累积上下文
@@ -101,11 +101,13 @@ Last activity: 2026-05-27
 - Phase 13 planning 必须继续覆盖 claim-level citation check、failure scenario monitoring、prompt/template drift 和 writing safety hardening。
 - Browser session 下载得到的 PDF 只是本地授权阅读材料，不能自动写入 metadata、literature_map、agent_research_notes 或论文正文。
 
+- Phase 13 已完成 writing safety hardening：`rsa safety check|validate|status|campaign` 只写 `01_literature/safety/`，提供 claim-level citation review、campaign failure monitor、deterministic drift anchors 和 formal boundary 检查，不生成正式学术结论。
+
 ## 会话连续性
 
 Last session: 2026-05-27T20:34:04+08:00
-Stopped at: Phase 12 complete - ready to discuss Phase 13
-Resume file: .planning/phases/12-local-review-workspace/12-VERIFICATION.md
+Stopped at: Phase 13 complete - ready to discuss Phase 14
+Resume file: .planning/phases/13-writing-safety-hardening/13-VERIFICATION.md
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
@@ -139,6 +141,9 @@ Resume file: .planning/phases/12-local-review-workspace/12-VERIFICATION.md
 **Discussed Phase:** 12 (local-review-workspace) — context complete — 2026-05-27
 **Planned Phase:** 12 (local-review-workspace) — 3 plans — 2026-05-27
 **Completed Phase:** 12 (local-review-workspace) — 3 plans — 2026-05-27
+**Discussed Phase:** 13 (writing-safety-hardening) - context complete - 2026-05-28
+**Planned Phase:** 13 (writing-safety-hardening) - 3 plans - 2026-05-28
+**Completed Phase:** 13 (writing-safety-hardening) - 3 plans - 2026-05-28
 **Inserted Phase:** 14 (background-worker-scheduled-automation) — planned future runtime-shape upgrade — 2026-05-26
 
 ## Accumulated Context

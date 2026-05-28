@@ -33,6 +33,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | AI scoring | `rsa score` 融合 reading note、视觉候选和 campaign 队列，生成 relevance、quality、read priority 三类 0-10 辅助评分；只用于排序、初审和监管。 |
 | Workflow orchestrator | `rsa workflow run/resume/status/report/stop/rerun` 把单篇论文顺序跑到 review packet，保留中文状态、可恢复 run state 和 Phase 11 可复用的 campaign 字段。 |
 | Local review workspace | `rsa review build/status/open/clean` 生成本地静态监管台，集中查看 campaign、单篇 workflow、reading note、visual evidence、AI scoring 和 formal write request。 |
+| Writing safety | `rsa safety check/validate/status/campaign` 生成 claim-level citation review 和 campaign failure monitor；结果只进入 safety 审计记录，不是正式学术结论。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
@@ -177,6 +178,9 @@ rsa --root . eval compare
 | `rsa review build --paper P001` | 生成单篇 paper 级本地静态监管台，聚合 metadata、source ledger、reading note、workflow、visual evidence 和 scoring。 |
 | `rsa review status` / `open` | 只读查看最近监管台状态，或打开最近生成的 `index.html`。 |
 | `rsa review clean --generated-only` | 清理生成的 HTML、manifest 和 checklist，保留人工记录。 |
+| `rsa safety check P001` | 生成单篇论文写作安全检查，抽取 claim_ref 并检查引用链是否能回到原文证据。 |
+| `rsa safety validate P001` / `status P001` | 只读校验或查看 `P###_safety.yaml`，不修改正式记录。 |
+| `rsa safety campaign C001` | 生成 campaign failure monitor，检查批量异常聚合、formal request 非自动执行和 metadata intake 边界。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
@@ -370,6 +374,34 @@ rsa --root . review clean --generated-only
 
 监管台只展示命令，不自动执行，不在页面内编辑文件，也不会直接写入 `metadata/`、`literature_map.md` 或 `agent_research_notes.md`。重复运行 `rsa review build` 会覆盖生成的 HTML、manifest 和 checklist，但保留 `review_workspace/user_records/` 等人工记录。
 
+## Writing Safety & Hardening
+
+Phase 13 提供写作安全和引用链加固。它检查已经进入 staging/review 的阅读笔记、短引用、评分 provenance、视觉证据候选和 campaign 队列状态，帮助用户在写入正式科研记录或写文章前发现证据链缺口。
+
+```powershell
+rsa --root . safety check P001
+rsa --root . safety validate P001
+rsa --root . safety status P001
+rsa --root . safety campaign C001
+```
+
+输出文件：
+
+- `01_literature/safety/P###_safety.yaml`：机器可读的 claim-level citation review。
+- `01_literature/safety/P###_safety_report.md`：中文写作安全报告。
+- `01_literature/safety/C###_campaign_safety.yaml`：campaign failure monitor 记录。
+- `01_literature/safety/C###_campaign_safety_report.md`：中文批量安全报告。
+
+核心字段：
+
+- `claim_refs`：每条 staged claim 或短引用的回源对象，保留 `claim_id`、`source_type`、`paper_id`、`page`、`section`、`source_chunk_id`、`visual_candidate_id`、`region_bbox`、`evidence_level`、`status`、`warning_zh` 和 `repair_hint_zh`。
+- `safety_status`：只表示安全检查状态，可为 `passed`、`needs_review`、`blocked` 或 `missing`；它不是 formal approval。
+- `future_interfaces`：预留 `llm_claim_review`、`citation_graph` 和 `advanced_figure_claim_binding`，后续可以接入更强的 LLM 复核或图表智能，但当前默认 `not_run`。
+
+`rsa safety campaign C001` 会检查 Phase 11 的关键失败场景：授权错误、blocked/partial 聚合、review queue 排序回归、formal request 非自动执行、metadata intake 不直接写 formal metadata、completed item 不重复运行、低置信度/高优先级队列准入和 campaign error-policy 语义。
+
+Phase 13 的所有结果都是 review guidance，不会创建或修改 `metadata/P###.yaml`、`literature_map.md`、`agent_research_notes.md`、`paper_index.md` 或论文正文。正式写入仍必须走 existing formal write gate 和人工确认。
+
 ## Browser Session Provider 示例
 
 把下面配置放入 `.rsa/local.yaml`，用于本地自定义资料库。字段名保持英文稳定，中文说明用于提醒授权边界。
@@ -421,6 +453,7 @@ rsa --root . source find P001 --provider university_library_browser
   campaigns/                # C###.yaml 批量候选队列、轻量去重和状态汇总
   workflows/                # P###/RUN-###.yaml 单篇 workflow 状态和中文监管包
   review_workspace/         # 本地静态监管台、manifest、分组页、对象页和操作清单
+  safety/                   # Phase 13 写作安全、引用链和 campaign failure monitor 审计记录
   pdfs/                     # 本地-only PDF，git 忽略
   assets/                   # 本地-only 截图/结果图；manifest.yaml 与 visual_evidence_candidates.yaml 可审计
     P###/crops/             # 本地-only 视觉候选裁图
@@ -459,6 +492,8 @@ tests/                      # 回归测试
 - `rsa review build ...` 只生成本地静态监管台和机器可读 manifest，不会自动执行页面中的命令。
 - `review_workspace_manifest.yaml` 是监管视图索引，不是正式科研记录；缺失文件会以中文标记，不会伪装成成功。
 - `rsa review clean --generated-only` 只清理生成的 HTML/manifest/checklist，必须保留人工记录。
+- `rsa safety check ...` 和 `rsa safety campaign ...` 只写 `01_literature/safety/` 审计记录；`safety_status=passed` 也不等于正式批准。
+- `claim_refs` 和 campaign failure monitor 只用于提示证据链或批量状态风险，不能直接写入正式 metadata、文献映射、研究笔记或论文正文。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。
@@ -484,13 +519,13 @@ python -m pytest -q
 rsa --root . eval compare
 ```
 
-当前回归基线：179 个 pytest 测试通过；`rsa eval compare` 仍用于本地 harness 基线比较。
+当前回归基线：187 个 pytest 测试通过；`rsa eval compare` 仍用于本地 harness 基线比较。
 
 ## 项目状态
 
 - 当前里程碑：`v1.0 Local Harness`
-- 当前版本：`v2.0` Phase 12 完成
-- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、AI 辅助评分、单篇 workflow、campaign batch review 和本地 review workspace
+- 当前版本：`v2.0` Phase 13 完成
+- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、AI 辅助评分、单篇 workflow、campaign batch review、本地 review workspace 和写作安全检查
 - 主要用户语言：中文优先
 - 语言策略：见 `.planning/LANGUAGE-POLICY.md`
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释
@@ -508,9 +543,9 @@ v2 建议优先扩展这些方向：
 7. 批量候选文献导入和 campaign review queue。
 8. DOI/Crossref/OpenAlex 等 scholarly API 进入 staging。
 9. 本地 review workspace。Phase 12 已完成静态监管台；未来可升级为 Web UI。
-10. Claim-level citation check。
-11. 更强的 research-quality evals。
-12. 可选 multi-agent orchestration。
+10. Claim-level citation check。Phase 13 已完成 safety audit 和 campaign failure monitor。
+11. Background worker 与 scheduled automation。Phase 14 负责运行形态升级。
+12. 更强的 research-quality evals 和可选 multi-agent orchestration。
 
 更多 GSD 文档：
 

@@ -288,6 +288,28 @@ def test_readme_documents_phase12_local_review_workspace():
         assert needle in text
 
 
+def test_readme_documents_phase13_writing_safety():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for needle in [
+        "rsa --root . safety check P001",
+        "rsa --root . safety validate P001",
+        "rsa --root . safety status P001",
+        "rsa --root . safety campaign C001",
+        "01_literature/safety/P###_safety.yaml",
+        "01_literature/safety/C###_campaign_safety.yaml",
+        "claim_refs",
+        "safety_status",
+        "llm_claim_review",
+        "citation_graph",
+        "advanced_figure_claim_binding",
+        "不是 formal approval",
+        "不直接写 formal metadata",
+        "只写 `01_literature/safety/` 审计记录",
+    ]:
+        assert needle in text
+
+
 def test_init_writes_localized_templates_and_formal_records(tmp_path):
     config = load_project_config(tmp_path)
 

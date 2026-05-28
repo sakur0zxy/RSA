@@ -577,6 +577,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="只清理生成文件；Phase 12 当前必须使用该模式。",
     )
 
+    safety_group = subcommands.add_parser(
+        "safety",
+        help="运行 Phase 13 写作安全、引用链和 campaign failure monitor；只写 safety 审计记录，不写正式记录。",
+    )
+    safety_subcommands = safety_group.add_subparsers(dest="safety_command", required=True)
+    safety_check = safety_subcommands.add_parser(
+        "check",
+        help="生成单篇论文 claim-level citation safety 记录和中文报告。",
+    )
+    safety_check.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    safety_validate = safety_subcommands.add_parser(
+        "validate",
+        help="只读校验 P###_safety.yaml，不修改任何文件。",
+    )
+    safety_validate.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    safety_status = safety_subcommands.add_parser(
+        "status",
+        help="只读查看 P### safety 检查状态。",
+    )
+    safety_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+    safety_campaign = safety_subcommands.add_parser(
+        "campaign",
+        help="生成 campaign failure monitor 安全审计记录和中文报告。",
+    )
+    safety_campaign.add_argument("campaign_id", help="campaign 编号，例如 C001。")
+
     eval_group = subcommands.add_parser(
         "eval", help="运行本地 harness eval fixtures、baseline 和回归比较。"
     )
@@ -1555,6 +1581,65 @@ def _run_review_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_safety_command(args: argparse.Namespace, root: Path) -> int:
+    from .safety import (
+        SafetyError,
+        check_campaign_safety,
+        check_paper_safety,
+        safety_status,
+        validate_campaign_safety_record,
+        validate_safety_record,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.safety_command == "check":
+            result = check_paper_safety(config, args.paper_id)
+            print(
+                f"写作安全检查完成: {args.paper_id} -> status={result.safety_status}, "
+                f"claims={result.claim_count}, warnings={result.warning_count}, "
+                f"blocked={result.blocked_count}; 文件={result.path}; report={result.report_path}"
+            )
+            return 0 if result.safety_status in {"passed", "needs_review"} else 1
+        if args.safety_command == "validate":
+            errors = validate_safety_record(config, args.paper_id)
+            if errors:
+                for error in errors:
+                    print(f"safety 记录无效: {error}", file=sys.stderr)
+                return 1
+            print(f"safety 记录有效: {args.paper_id}")
+            return 0
+        if args.safety_command == "status":
+            status = safety_status(config, args.paper_id)
+            if not status.exists:
+                print(f"safety 状态: {args.paper_id} -> missing; 文件={status.path}")
+                return 0
+            print(
+                f"safety 状态: {args.paper_id} -> status={status.safety_status}, "
+                f"claims={status.claim_count}, warnings={status.warning_count}, "
+                f"blocked={status.blocked_count}, generated_at={status.generated_at}; "
+                f"文件={status.path}; report={status.report_path}"
+            )
+            return 0
+        if args.safety_command == "campaign":
+            result = check_campaign_safety(config, args.campaign_id)
+            errors = validate_campaign_safety_record(config, args.campaign_id)
+            if errors:
+                for error in errors:
+                    print(f"campaign safety 记录无效: {error}", file=sys.stderr)
+                return 1
+            print(
+                f"campaign 安全监测完成: {args.campaign_id} -> status={result.safety_status}, "
+                f"checks={result.check_count}, warnings={result.warning_count}, "
+                f"blocked={result.blocked_count}; 文件={result.path}; report={result.report_path}"
+            )
+            return 0 if result.safety_status in {"passed", "needs_review"} else 1
+    except SafetyError as exc:
+        print(f"safety 操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -1675,6 +1760,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_workflow_command(args, root)
         if args.command == "review":
             return _run_review_command(args, root)
+        if args.command == "safety":
+            return _run_safety_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":

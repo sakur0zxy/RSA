@@ -16,6 +16,7 @@ REQUIRED_DIRECTORIES = {
     "scores",
     "workflows",
     "review_workspace",
+    "safety",
     "pdfs",
     "assets",
     "extracted",
