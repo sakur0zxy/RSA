@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: executing
-stopped_at: Phase 16 complete; running project health and release-readiness audit
-last_updated: "2026-05-31T12:49:50.399Z"
-last_activity: 2026-05-31
+status: complete
+stopped_at: Phase 17 complete; dynamic workflow policy engine and audits complete
+last_updated: "2026-06-01T00:00:00.000Z"
+last_activity: 2026-06-01
 progress:
   total_phases: 19
   completed_phases: 19
-  total_plans: 51
-  completed_plans: 51
+  total_plans: 54
+  completed_plans: 54
   percent: 100
 ---
 
@@ -22,22 +22,22 @@ progress:
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** Phase 16 completed; project-level GSD health, UAT, milestone and code-review audit in progress
+**当前重点:** Phase 17 completed; dynamic workflow policy engine, audits and release-readiness docs complete
 
 ## 当前位置
 
-Phase: Project audit after Phase 16
-Plan: 51/51 complete
-Status: Auditing and release-readiness documentation update
-Last activity: 2026-05-31
+Phase: Project audit after Phase 17
+Plan: 54/54 complete
+Status: Complete
+Last activity: 2026-06-01
 
-进度: [█████████░] 95%
+进度: [██████████] 100%
 
 ## 进度指标
 
 **速度:**
 
-- 已完成 plans: 48
+- 已完成 plans: 54
 - 平均耗时: N/A
 - 总执行时间: 0 hours
 
@@ -64,6 +64,7 @@ Last activity: 2026-05-31
 | 14 | 3 | complete |
 | 15 | 2 | complete |
 | 16 | 3 | complete |
+| 17 | 3 | complete |
 
 ## 累积上下文
 
@@ -92,7 +93,7 @@ Last activity: 2026-05-31
 
 ### 待办
 
-- Phase 17 已加入路线图；下一步是运行 `gsd-discuss-phase 17`，明确 bounded dynamic workflow 的 policy schema、决策审计、用户覆盖和 formal gate 边界。
+- Phase 17 已完成：bounded dynamic workflow 使用本地 YAML policy、DW### audit record、中文 report 和人工 override；不会执行 formal write，也不会成为自由形式 LLM planner。
 - v2.0 主闭环仍保持完成状态；deferred advanced integrations、advanced figure intelligence 和 multi-agent orchestration 继续作为未来范围，不并入 Phase 17 首版。
 
 ### 阻塞和关注点
@@ -110,7 +111,7 @@ Last activity: 2026-05-31
 ## 会话连续性
 
 Last session: 2026-06-01T10:45:00+08:00
-Stopped at: Phase 16 complete; project health, UAT, milestone audit, code review and release-readiness docs complete
+Stopped at: Phase 17 complete; dynamic workflow policy engine, audits and release-readiness docs complete
 Resume file: .planning/ROADMAP.md
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
@@ -160,6 +161,9 @@ Resume file: .planning/ROADMAP.md
 **Discussed Phase:** 16 (research-plan-driven-literature-discovery) - context complete - 2026-05-31
 **Planned Phase:** 16 (research-plan-driven-literature-discovery) - 3 plans - 2026-05-31
 **Completed Phase:** 16 (research-plan-driven-literature-discovery) - 3 plans - 2026-05-31
+**Discussed Phase:** 17 (dynamic-workflow-policy-engine) - context complete - 2026-06-01
+**Planned Phase:** 17 (dynamic-workflow-policy-engine) - 3 plans - 2026-06-01
+**Completed Phase:** 17 (dynamic-workflow-policy-engine) - 3 plans - 2026-06-01
 
 ## Accumulated Context
 
@@ -172,3 +176,4 @@ Resume file: .planning/ROADMAP.md
 - Phase 16 completed: `rsa discovery run|validate|status` creates discovery profiles, query bundles, legal provider results, reports and campaign staging imports without writing formal metadata.
 - Phase 16 audited: GSD health and UAT checks passed; milestone audit and code review artifacts added; full pytest reported 206 passed and eval compare reported zero regressions.
 - Phase 17 added: Dynamic Workflow Policy Engine. It should add a bounded, auditable policy layer for choosing next actions from current workflow state, evidence, confidence, dependency checks and user configuration without becoming a free-form AI planner or bypassing formal-write gates.
+- Phase 17 completed: `rsa dynamic evaluate|validate|status|override` writes DW### YAML/report audit records from a local policy, supports human override, keeps `formal_write_allowed=false`, and reserves LLM/policy/Web adapters without implementing them.

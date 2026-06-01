@@ -39,3 +39,8 @@ discovery:
     - "crossref"
     - "offline"
   automation_mode: "monitored_auto"
+dynamic_workflow:
+  default_policy: "templates/dynamic_workflow_policy.yaml"
+  automation_mode: "monitored_auto"
+  min_confidence_to_run: "medium"
+  allow_llm_suggestions: false

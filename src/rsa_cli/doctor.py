@@ -223,6 +223,35 @@ def _check_discovery_config(config: ProjectConfig) -> DoctorCheck:
     )
 
 
+def _check_dynamic_workflow_policy(config: ProjectConfig) -> DoctorCheck:
+    from .dynamic_workflow import DynamicWorkflowError, load_dynamic_policy
+
+    try:
+        policy, source = load_dynamic_policy(config)
+    except DynamicWorkflowError as exc:
+        return _check(
+            name="Dynamic workflow policy",
+            status="BLOCKED",
+            summary_zh=f"动态工作流策略无效: {exc}",
+            affected_commands=["rsa dynamic evaluate", "rsa dynamic validate"],
+            repair_hint_zh="请修复 templates/dynamic_workflow_policy.yaml，确保 schema_version、rules 和中文 reason_zh 有效。",
+            details={"policy": str(config.dynamic_workflow_default_policy), "error": str(exc)},
+        )
+    return _check(
+        name="Dynamic workflow policy",
+        status="OK",
+        summary_zh="动态工作流策略有效；自动建议不会绕过 formal write gate。",
+        affected_commands=["rsa dynamic evaluate", "rsa dynamic validate", "rsa dynamic status"],
+        repair_hint_zh="无需修复。",
+        details={
+            "policy_id": policy.get("policy_id"),
+            "policy_source": source,
+            "automation_mode": config.dynamic_workflow_automation_mode,
+            "llm_suggestions_enabled": config.dynamic_workflow_allow_llm_suggestions,
+        },
+    )
+
+
 def _check_codex_oauth(config: ProjectConfig) -> tuple[DoctorCheck, dict[str, Any]]:
     status = codex_oauth_status(config)
     payload = status_as_dict(status)
@@ -291,6 +320,7 @@ def build_doctor_report(config: ProjectConfig) -> DoctorReport:
             ),
             _check_playwright_chromium(),
             _check_discovery_config(config),
+            _check_dynamic_workflow_policy(config),
         ]
     )
     codex_check, codex_payload = _check_codex_oauth(config)

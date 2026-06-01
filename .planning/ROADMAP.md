@@ -142,10 +142,12 @@ Boundary:
 **Goal:** Add a bounded dynamic workflow policy layer that can decide next actions from current artifacts, evidence level, dependency state, confidence, failures and user configuration, while keeping every decision auditable and never bypassing formal write gates.
 **Requirements**: V2-DYNAMIC-01 through V2-DYNAMIC-08
 **Depends on:** Phase 16
-**Plans:** 0 plans
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 17 to break down)
+- [x] 17-01 Policy Schema And Project Foundation
+- [x] 17-02 CLI Decisions And Human Override
+- [x] 17-03 Tests Documentation And Audits
 
 Boundary:
 - Dynamic workflow is a policy engine above existing Phase 10/11 primitives, not a replacement for workflow, campaign, worker or review workspace.
@@ -157,7 +159,7 @@ Boundary:
 
 ---
 
-*Roadmap updated after Phase 16 project audit and release-readiness pass: 2026-06-01*
+*Roadmap updated after Phase 17 dynamic workflow implementation and release-readiness pass: 2026-06-01*
 
 ## GSD 解析索引
 
@@ -243,4 +245,4 @@ Status: complete. Convert a user-provided research plan into auditable search qu
 
 ### Phase 17: Dynamic Workflow Policy Engine
 
-Status: planned. Add a bounded policy engine above existing workflow/campaign/worker primitives so RSA can choose auditable next actions from current state, evidence, confidence, dependency checks and user configuration without becoming a free-form AI planner or bypassing formal-write gates.
+Status: complete. Add a bounded policy engine above existing workflow/campaign/worker primitives so RSA can choose auditable next actions from current state, evidence, confidence, dependency checks and user configuration without becoming a free-form AI planner or bypassing formal-write gates.

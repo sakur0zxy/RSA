@@ -67,12 +67,18 @@ RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`pytho
 - AI-assisted scoring - v2 Phase 9
 - Single-paper workflow orchestrator - v2 Phase 10
 - Campaign batch review queue and reports - v2 Phase 11
+- Local review workspace - v2 Phase 12
+- Writing safety and campaign failure monitor - v2 Phase 13
+- Background worker and scheduled automation - v2 Phase 14
+- Codex OAuth LLM provider - v2 Phase 15
+- Research plan driven literature discovery - v2 Phase 16
+- Dynamic workflow policy engine - v2 Phase 17
 
-### 下一阶段
+### 当前阶段
 
-- Phase 11 已完成 campaign batch review 的同步 CLI 主链，下一步推进 Phase 12 Local Review Workspace。
-- Phase 12 只提供本地监管台，不应绕过 formal write gate，也不应把 review decision 当作正式批准。
-- 增加 review workspace、writing safety 或 background worker 能力时，必须保留 v1 formal write guardrails、Phase 7 授权边界和 Phase 11 review queue 语义。
+- Phase 17 已完成 dynamic workflow policy engine；v2 主链路已经具备 discovery -> campaign -> acquisition -> reading draft -> visual evidence -> scoring -> workflow/review -> safety/worker/dynamic decision 的本地闭环。
+- 后续如果继续扩展，优先作为 deferred enhancement 处理，例如 Web review UI、advanced figure intelligence、policy plugins 或更强 evals。
+- 新能力必须继续保留 v1 formal write guardrails、Phase 7 授权边界、Phase 11 review queue 语义和 Phase 17 dynamic decision 的 `formal_write_allowed=false` 边界。
 
 ### 除非重新打开，否则不做
 
@@ -92,6 +98,7 @@ RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`pytho
 - `01_literature/sources/` 存放每篇文献的 source ledger。
 - `01_literature/source_candidates/` 存放授权获取候选、匹配证据、审查状态和下载结果。
 - `01_literature/assets/P###/manifest.yaml` 存放截图、图表和结果图 manifest。
+- `01_literature/dynamic_workflows/` 存放 DW### 动态工作流决策记录和中文监管报告。
 - `01_literature/literature_map.md` 将已验证文献连接到 topic question 和 planned output。
 - `01_literature/synthesis/` 存放 gap report 和 eval report。
 - `.planning/` 存放 GSD context、archive、retrospective 和 v2 discussion。
@@ -126,21 +133,17 @@ RSA 的普通用户基础版必须能实现当前 agent 的核心闭环。`pytho
 | 自动化采用分层并行 | 单篇论文内部必须按依赖顺序跑；多篇论文可在 campaign 层受控并行，避免 Phase 10 膨胀成批量调度系统 | v2 Phase 10/11 已验证 |
 | Campaign review queue 不等于 formal approval | `accepted | deferred | rejected | needs_followup` 只表示监管队列项处理状态；正式写入仍必须走 formal gate | v2 Phase 11 已验证 |
 | 基础版覆盖核心 agent 功能 | 普通用户不应为了当前核心闭环手动猜 optional extras；缺外部资源由自检给中文修复路径 | 全局设计已锁定，待 Phase 8/后续实现落地 |
+| Dynamic workflow 只生成审计化下一步建议 | 自动化需要更高，但不能让自由 planner 或 worker 越过正式写入门禁 | v2 Phase 17 已验证 |
 
-## 下一里程碑目标
+## 后续可选增强
 
-v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
+v2 主闭环已经具备当前计划内的本地科研 agent harness 能力；后续扩展应继续遵守“不污染 formal records、中文优先、local-first、fail closed”的约束。
 
-1. PDF、截图和重要结果图的 asset management。
-2. Authorized download / source trace，只允许 open access、用户提供或用户授权来源。已在 Phase 7/7.1 完成。
-3. Auto reading draft，基于本地或已授权全文生成可审阅阅读草稿。下一步。
-4. Visual evidence extraction，把 Phase 8 的候选 `asset_suggestions` 转成可审阅裁图、caption、基础 OCR 和来源追踪。
-5. Evidence extraction / structured reading signals，在评分前抽取正文证据和视觉证据候选。
-6. AI-assisted scoring rubric，区分 relevance、quality 和 read priority，且不直接进入 formal records。
-7. Workflow orchestrator，串联已有命令，把单篇论文按依赖顺序自动跑到 review packet，同时允许用户监控关键环节和调整流程。
-8. Campaign controlled parallelism 和 batch review queue：多篇论文之间允许小规模流水线并行，但每篇论文内部仍复用 Phase 10 的顺序 workflow primitive。
-9. Local review workspace，用于监管候选、PDF、阅读草稿、视觉证据、评分和 formal approval。
-10. 面向后续写作的 claim-level citation check。
+1. Web review UI：把当前静态 review workspace 升级为更交互的本地 Web 监管台。
+2. Advanced figure intelligence：曲线数据还原、高级表格结构理解和多模态图表解释。
+3. Policy plugins：扩展 Phase 17 dynamic workflow policy，但仍需可审计、可验证、可人工覆盖。
+4. 更强的 research-quality evals：对 prompt、parser、template 和 policy drift 做更细回归。
+5. 可选 multi-agent orchestration：仅在 formal gate、审计和监管机制稳定后再考虑。
 
 重型 Crossref/OpenAlex/Zotero 深集成、高级图表智能和 multi-agent 编排不纳入 v2 主闭环；只有 DOI/BibTeX 基础补全、title/author/year 标准化和 dedup 辅助可以按 Phase 9 主闭环需要收窄实现。
 
@@ -148,4 +151,4 @@ v2 应重点扩展文献工作规模，同时不削弱 v1 安全边界：
 
 ---
 
-*Last updated: 2026-05-26 after Phase 11 campaign batch review implementation*
+*Last updated: 2026-06-01 after Phase 17 dynamic workflow implementation and project audit*

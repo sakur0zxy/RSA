@@ -213,6 +213,15 @@ def test_later_phase_seed_templates_are_safe_and_localized():
         "human_approvals",
         "formal_write_request_count",
     )
+    assert_in_root_and_fallback(
+        "dynamic_workflow_policy.yaml",
+        "Dynamic Workflow Policy",
+        "schema_version",
+        "phase17-dynamic-policy-v1",
+        "formal_write_guard",
+        "selected_action",
+        "future_interfaces",
+    )
 
     assert "不得下载未授权 PDF" in root_template("pdf_acquisition_report.md")
     assert "不会因为填写本模板而自动写入正式记录" in root_template("map_integration.md")
@@ -367,6 +376,23 @@ def test_readme_documents_phase16_research_plan_discovery():
         assert needle in text
 
 
+def test_readme_documents_phase17_dynamic_workflow():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for needle in [
+        "rsa --root . dynamic evaluate P001",
+        "rsa --root . dynamic evaluate C001",
+        "rsa --root . dynamic validate DW001",
+        "rsa --root . dynamic override DW001",
+        "01_literature/dynamic_workflows/DW###.yaml",
+        "templates/dynamic_workflow_policy.yaml",
+        "selected_action",
+        "formal_write_allowed",
+        "formal write gate",
+    ]:
+        assert needle in text
+
+
 def test_init_writes_localized_templates_and_formal_records(tmp_path):
     config = load_project_config(tmp_path)
 
@@ -399,6 +425,9 @@ def test_init_writes_localized_templates_and_formal_records(tmp_path):
     assert "tools_used" in (tmp_path / "templates" / "trace_summary.md").read_text(
         encoding="utf-8"
     )
+    assert "phase17-dynamic-policy-v1" in (
+        tmp_path / "templates" / "dynamic_workflow_policy.yaml"
+    ).read_text(encoding="utf-8")
 
 
 def test_language_policy_is_documented_for_chinese_users():

@@ -19,6 +19,7 @@ REQUIRED_DIRECTORIES = {
     "safety",
     "workers",
     "discovery",
+    "dynamic_workflows",
     "pdfs",
     "assets",
     "extracted",
@@ -46,6 +47,7 @@ REQUIRED_TEMPLATES = {
     "source_candidates.yaml",
     "browser_session_provider.yaml",
     "asset_manifest.yaml",
+    "dynamic_workflow_policy.yaml",
 }
 
 

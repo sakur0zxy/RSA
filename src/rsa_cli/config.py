@@ -81,6 +81,12 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "allowed_providers": ["openalex", "crossref", "offline"],
         "automation_mode": "monitored_auto",
     },
+    "dynamic_workflow": {
+        "default_policy": "templates/dynamic_workflow_policy.yaml",
+        "automation_mode": "monitored_auto",
+        "min_confidence_to_run": "medium",
+        "allow_llm_suggestions": False,
+    },
 }
 
 
@@ -182,6 +188,10 @@ class ProjectConfig:
         return self.literature_root / "discovery"
 
     @property
+    def dynamic_workflows_root(self) -> Path:
+        return self.literature_root / "dynamic_workflows"
+
+    @property
     def pdfs_root(self) -> Path:
         return self.literature_root / "pdfs"
 
@@ -266,6 +276,28 @@ class ProjectConfig:
     @property
     def discovery(self) -> dict[str, Any]:
         return dict(self.data.get("discovery", {}) or {})
+
+    @property
+    def dynamic_workflow(self) -> dict[str, Any]:
+        return dict(self.data.get("dynamic_workflow", {}) or {})
+
+    @property
+    def dynamic_workflow_default_policy(self) -> Path:
+        return self.resolve_path(
+            str(self.dynamic_workflow.get("default_policy", "templates/dynamic_workflow_policy.yaml"))
+        )
+
+    @property
+    def dynamic_workflow_automation_mode(self) -> str:
+        return str(self.dynamic_workflow.get("automation_mode", "monitored_auto"))
+
+    @property
+    def dynamic_workflow_min_confidence_to_run(self) -> str:
+        return str(self.dynamic_workflow.get("min_confidence_to_run", "medium"))
+
+    @property
+    def dynamic_workflow_allow_llm_suggestions(self) -> bool:
+        return bool(self.dynamic_workflow.get("allow_llm_suggestions", False))
 
     @property
     def discovery_default_provider(self) -> str:
@@ -388,6 +420,10 @@ def validate_config(config: ProjectConfig) -> None:
         raise ConfigError("discovery 必须是 mapping")
     if not isinstance(config.discovery.get("allowed_providers", []), list):
         raise ConfigError("discovery.allowed_providers 必须是 list")
+    if not isinstance(config.dynamic_workflow, dict):
+        raise ConfigError("dynamic_workflow 必须是 mapping")
+    if not isinstance(config.dynamic_workflow.get("allow_llm_suggestions", False), bool):
+        raise ConfigError("dynamic_workflow.allow_llm_suggestions 必须是 bool")
     for key, value in config.campaign_concurrency.items():
         if value <= 0:
             raise ConfigError(f"campaign.concurrency.{key} 必须为正整数")

@@ -439,6 +439,96 @@ formal_write_request_count: 0
 | paper_id | reading_note | status | human_approval |
 |----------|--------------|--------|----------------|
 """,
+    "dynamic_workflow_policy.yaml": """# Dynamic Workflow Policy / 动态工作流策略
+# 本文件定义 RSA 如何根据当前状态自动选择下一步动作。
+# 字段名保持英文稳定；中文说明用于帮助中文用户审阅。
+schema_version: phase17-dynamic-policy-v1
+policy_id: default_dynamic_workflow
+description_zh: "保守默认策略：自动建议下一步，但不绕过人工 formal 写入门禁。"
+automation_mode: monitored_auto
+rules:
+  - rule_id: formal_write_guard
+    stop_before_formal_write:
+      target_type: formal_write
+    selected_action: stop_before_formal_write
+    confidence: high
+    reason_zh: "涉及正式写入，动态工作流只能停止并提示人工确认。"
+
+  - rule_id: paper_missing_metadata
+    block_if:
+      target_type: paper
+      artifact_missing:
+        - metadata
+    selected_action: block
+    confidence: high
+    reason_zh: "未找到正式 metadata/P###.yaml，不能启动后续自动链路。"
+    repair_hint_zh: "先通过 metadata gate 创建并确认正式元数据。"
+
+  - rule_id: campaign_missing_record
+    block_if:
+      target_type: campaign
+      artifact_missing:
+        - campaign
+    selected_action: block
+    confidence: high
+    reason_zh: "未找到 campaign 记录，不能启动批量调度。"
+    repair_hint_zh: "先创建 campaign YAML 或导入候选列表。"
+
+  - rule_id: paper_blocked_workflow_retry
+    retry_if:
+      target_type: paper
+      workflow_status_in:
+        - blocked
+        - failed
+    selected_action: retry_workflow
+    confidence: medium
+    reason_zh: "单篇工作流处于失败或阻塞状态，建议按原状态恢复或重试。"
+
+  - rule_id: paper_needs_review
+    route_to_review_if:
+      target_type: paper
+      workflow_status_in:
+        - partial
+        - needs_review
+        - stopped
+    selected_action: route_to_review
+    confidence: medium
+    reason_zh: "当前论文已有部分结果或需要审阅，建议进入监管队列。"
+
+  - rule_id: paper_ready_to_run
+    run_if:
+      target_type: paper
+      artifact_exists:
+        - metadata
+      artifact_missing:
+        - workflow_run
+    selected_action: run_workflow
+    confidence: medium
+    reason_zh: "已存在正式 metadata，但尚未发现 workflow run，可启动单篇自动链路。"
+
+  - rule_id: campaign_ready_to_run
+    run_if:
+      target_type: campaign
+      artifact_exists:
+        - campaign
+      artifact_missing:
+        - campaign_run
+    selected_action: run_campaign
+    confidence: medium
+    reason_zh: "已存在 campaign 记录，但尚未发现 campaign run，可启动批量受控流水线。"
+
+  - rule_id: fallback_review
+    route_to_review_if:
+      always: true
+    selected_action: route_to_review
+    confidence: low
+    reason_zh: "未命中更明确的自动规则，保守进入人工监管队列。"
+future_interfaces:
+  llm_suggestion_adapter: reserved
+  learned_policy_adapter: reserved
+  web_review_adapter: reserved
+  advanced_signal_adapter: reserved
+""",
 }
 
 

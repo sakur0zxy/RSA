@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-206%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-215%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -35,6 +35,7 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Local review workspace | `rsa review build/status/open/clean` 生成本地静态监管台，集中查看 campaign、单篇 workflow、reading note、visual evidence、AI scoring 和 formal write request。 |
 | Writing safety | `rsa safety check/validate/status/campaign` 生成 claim-level citation review 和 campaign failure monitor；结果只进入 safety 审计记录，不是正式学术结论。 |
 | Background worker | `rsa worker enqueue/run/status/logs/schedule` 把 campaign、review workspace 和 safety 任务放入本地队列或定时入队；worker 只推进 staging/review 自动化，不执行 formal write。 |
+| Dynamic workflow | `rsa dynamic evaluate/validate/status/override` 根据当前状态自动建议下一步动作，生成 DW### 决策记录；只做受控调度建议，不绕过 formal write gate。 |
 | Codex OAuth LLM provider | `rsa llm codex status/import/clear` 管理可选 `codex_oauth` provider，让 RSA 在本地凭据可用时把 Codex/ChatGPT 账号会话用于 reading draft；凭据 local-only，AI 产物仍只进入 staging/review。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
@@ -66,8 +67,10 @@ flowchart TD
   F2 --> G["Reading note<br/>阅读笔记"]
   G --> V["Visual evidence candidates<br/>图表/表格候选证据"]
   V --> S["AI scoring<br/>辅助评分与监管"]
-  S --> W["Local review workspace<br/>本地监管台"]
+  S --> Y["Dynamic workflow<br/>动态下一步决策"]
+  Y --> W["Local review workspace<br/>本地监管台"]
   E --> H["Literature map<br/>文献映射"]
+  Y --> I["Formal write gate<br/>正式写入门禁"]
   W --> I["Formal write gate<br/>正式写入门禁"]
   H --> J["Gap report<br/>研究空白报告"]
   I --> H
@@ -210,6 +213,10 @@ rsa --root . discovery status DR001
 | `rsa workflow run P001` | 串联 acquisition、reading draft、visual extraction、scoring 和 review packet，自动跑到需要监管的位置。 |
 | `rsa workflow status P001` / `report P001` | 只读查看最近一次 workflow run 的状态、步骤、下一步建议和中文监管包。 |
 | `rsa workflow resume P001` / `rerun P001` / `stop P001` | 显式恢复、重跑指定步骤或暂停单篇 workflow；campaign 批量调度属于 Phase 11。 |
+| `rsa dynamic evaluate P001` | 根据当前论文状态生成 `DW###.yaml` 和中文报告，建议 run/retry/review/block 等下一步动作。 |
+| `rsa dynamic evaluate C001` | 根据 campaign 状态建议是否启动批量流水线、进入监管或 fail closed。 |
+| `rsa dynamic validate DW001` / `status DW001` | 只读校验或查看动态工作流决策记录，不修改正式记录。 |
+| `rsa dynamic override DW001 --decision accepted --reviewer zxy --reason "..."` | 记录人工监管覆盖；`accepted` 不等于 formal approval。 |
 | `rsa review build --campaign C001` | 生成 campaign 级本地静态监管台，聚合 review queue、metadata intake、batch report 和 formal write request。 |
 | `rsa review build --paper P001` | 生成单篇 paper 级本地静态监管台，聚合 metadata、source ledger、reading note、workflow、visual evidence 和 scoring。 |
 | `rsa review status` / `open` | 只读查看最近监管台状态，或打开最近生成的 `index.html`。 |
@@ -258,6 +265,32 @@ rsa --root . discovery status DR001
 - provider 不可用、计划不可读、证据不足或 rate limit 时 fail closed，写中文状态和修复建议。
 - 发现候选只进入 staging/campaign，不创建正式 `paper_id`，不写 `paper_index.md`，不绕过 formal write gate。
 - 预留 `llm_query_generation`、`iterative_query_refinement`、`provider_plugins`、`scholarly_metadata_enrichment`、`discovery_eval` 和 `web_review_ui` 接口，后续可以扩展，但当前 v2 实现保持收敛。
+
+## Dynamic Workflow Policy
+
+Phase 17 提供一个保守的动态工作流策略引擎。它读取当前文件状态、workflow/campaign/scoring 状态和本地 YAML 策略，自动生成下一步建议；它不直接执行正式写入，也不会替代人工审批。
+
+```powershell
+rsa --root . dynamic evaluate P001
+rsa --root . dynamic evaluate C001
+rsa --root . dynamic evaluate formal_write --target-type formal_write --trigger formal_write_request
+rsa --root . dynamic validate DW001
+rsa --root . dynamic status DW001
+rsa --root . dynamic override DW001 --decision accepted --reviewer zxy --reason "已确认可以继续执行建议动作。"
+```
+
+主要产物：
+
+- `templates/dynamic_workflow_policy.yaml`：默认策略文件，包含 `run_if`、`retry_if`、`block_if`、`route_to_review_if` 和 `stop_before_formal_write` 规则组。
+- `01_literature/dynamic_workflows/DW###.yaml`：机器可读决策记录，包含 `selected_action`、`reason_zh`、`confidence`、`inputs`、`next_actions`、`formal_write_allowed` 和 `human_override`。
+- `01_literature/dynamic_workflows/DW###_report.md`：中文监管报告，用于快速查看为什么建议这一步。
+
+边界：
+
+- `selected_action` 只是建议，不代表命令已经执行。
+- `formal_write_allowed` 必须保持 `false`；涉及 `metadata/`、`literature_map.md` 或 `agent_research_notes.md` 的正式写入仍必须走 `rsa formal ... --human-confirmed`。
+- 默认策略只做单目标状态判断，不做自由形式 LLM planner、不做后台 daemon、不做 multi-agent 调度。
+- 预留 `llm_suggestion_adapter`、`learned_policy_adapter`、`web_review_adapter` 和 `advanced_signal_adapter`，后续扩展时可以接入更复杂的策略来源。
 
 ## Visual Evidence Workflow
 
@@ -582,6 +615,7 @@ rsa --root . source find P001 --provider university_library_browser
   review_workspace/         # 本地静态监管台、manifest、分组页、对象页和操作清单
   safety/                   # Phase 13 写作安全、引用链和 campaign failure monitor 审计记录
   workers/                  # Phase 14 本地 worker queue、schedule 和中文日志
+  dynamic_workflows/        # Phase 17 DW### 动态工作流决策记录和中文报告
   pdfs/                     # 本地-only PDF，git 忽略
   assets/                   # 本地-only 截图/结果图；manifest.yaml 与 visual_evidence_candidates.yaml 可审计
     P###/crops/             # 本地-only 视觉候选裁图
@@ -626,6 +660,7 @@ tests/                      # 回归测试
 - `rsa safety check ...` 和 `rsa safety campaign ...` 只写 `01_literature/safety/` 审计记录；`safety_status=passed` 也不等于正式批准。
 - `claim_refs` 和 campaign failure monitor 只用于提示证据链或批量状态风险，不能直接写入正式 metadata、文献映射、研究笔记或论文正文。
 - `rsa worker ...` 只调度 staging/review 自动化任务，不执行 formal write；worker queue 中的 `formal_write_allowed` 必须保持 `false`。
+- `rsa dynamic ...` 只根据状态和策略生成下一步建议与审计记录；`selected_action` 不是已执行动作，`formal_write_allowed` 必须保持 `false`。
 - `rsa llm codex ...` 只管理可选 LLM provider 的本地凭据和状态；不会输出 token，不会抓取浏览器 cookies，也不会让 AI 产物直接进入 formal records。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
@@ -652,13 +687,13 @@ python -m pytest -q
 rsa --root . eval compare
 ```
 
-当前回归基线：`python -m pytest -q` 为 206 passed；`rsa --root . eval compare` 为 0 regressions。
+当前回归基线：`python -m pytest -q` 为 215 passed；`rsa --root . eval compare` 为 0 regressions。
 
 ## 项目状态
 
 - 当前里程碑：`v2.0 Scaled Literature Workstation`
-- 当前版本：`v2.0` Phase 16 已完成实现与验证
-- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、campaign foundation、AI 辅助评分、单篇 workflow、campaign batch review、本地 review workspace、写作安全检查、本地 worker automation、可选 Codex OAuth LLM provider 和科研计划驱动文献发现
+- 当前版本：`v2.0` Phase 17 已完成实现与验证
+- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、campaign foundation、AI 辅助评分、单篇 workflow、campaign batch review、本地 review workspace、写作安全检查、本地 worker automation、可选 Codex OAuth LLM provider、科研计划驱动文献发现和动态工作流策略引擎
 - 主要用户语言：中文优先
 - 语言策略：见 `.planning/LANGUAGE-POLICY.md`
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释
@@ -680,7 +715,8 @@ v2 建议优先扩展这些方向：
 11. Background worker 与 scheduled automation。Phase 14 已完成本地 queue、one-shot runner、schedule 入队、status/logs 和恢复/取消语义。
 12. Codex OAuth LLM provider。Phase 15 已完成可选 `codex_oauth` provider、local-only auth store、provider preflight 和 reading draft 集成。
 13. 科研计划驱动文献发现。Phase 16 已完成，目标是把科研计划转为检索式和候选 campaign，再复用现有下载、阅读、评分和监管链路。
-14. 后续可选增强：更强的 research-quality evals、Web review UI、advanced figure intelligence 和可选 multi-agent orchestration。
+14. Dynamic workflow。Phase 17 已完成本地 YAML 策略、DW### 决策记录、中文报告、人工覆盖和 formal gate 边界。
+15. 后续可选增强：更强的 research-quality evals、Web review UI、advanced figure intelligence 和可选 multi-agent orchestration。
 
 更多 GSD 文档：
 

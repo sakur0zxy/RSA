@@ -30,6 +30,7 @@ templates_root: custom_templates
     assert config.pdfs_root == tmp_path / "custom_literature" / "pdfs"
     assert config.extracted_root == tmp_path / "custom_literature" / "extracted"
     assert config.discovery_root == tmp_path / "custom_literature" / "discovery"
+    assert config.dynamic_workflows_root == tmp_path / "custom_literature" / "dynamic_workflows"
     assert config.sessions_root == tmp_path / ".rsa" / "sessions"
     assert config.auth_root == tmp_path / ".rsa" / "auth"
     assert config.topic_profiles_root == tmp_path / "custom_literature" / "topic_profiles"
@@ -51,6 +52,10 @@ templates_root: custom_templates
     assert config.discovery_default_max_results == 5
     assert config.discovery_allowed_providers == ["openalex", "crossref", "offline"]
     assert config.discovery_automation_mode == "monitored_auto"
+    assert config.dynamic_workflow_default_policy == tmp_path / "templates" / "dynamic_workflow_policy.yaml"
+    assert config.dynamic_workflow_automation_mode == "monitored_auto"
+    assert config.dynamic_workflow_min_confidence_to_run == "medium"
+    assert config.dynamic_workflow_allow_llm_suggestions is False
 
 
 def test_local_overrides_win_over_project_defaults(tmp_path):

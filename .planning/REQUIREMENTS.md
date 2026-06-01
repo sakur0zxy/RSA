@@ -147,14 +147,14 @@
 
 ### Phase 17: Dynamic Workflow Policy Engine
 
-- [ ] **V2-DYNAMIC-01:** RSA can evaluate a local workflow policy against current artifacts, evidence levels, dependency state, confidence, failures and user configuration to produce auditable `next_actions`.
-- [ ] **V2-DYNAMIC-02:** Dynamic workflow remains bounded: it reuses Phase 10 single-paper workflow, Phase 11 campaign scheduling, Phase 12 review workspace, Phase 13 safety checks and Phase 14 worker queue instead of replacing them.
-- [ ] **V2-DYNAMIC-03:** Policy decisions must be stored as local YAML/Markdown audit records with stable English keys and Chinese explanations, including `decision_id`, `trigger`, `inputs`, `selected_action`, `reason_zh`, `confidence`, `evidence_level`, `blocked_reason_zh` and `repair_hint_zh`.
-- [ ] **V2-DYNAMIC-04:** Policy rules must support conservative conditions such as `run_if`, `skip_if`, `retry_if`, `block_if`, `route_to_review_if` and `stop_before_formal_write`.
-- [ ] **V2-DYNAMIC-05:** Users can inspect, validate and override dynamic workflow decisions through Chinese-first CLI commands without editing formal records directly.
-- [ ] **V2-DYNAMIC-06:** AI or LLM assistance may suggest policy actions only as staging/review guidance; it must record evidence and confidence and must not directly execute formal writes.
-- [ ] **V2-DYNAMIC-07:** Dynamic workflow must fail closed on invalid policy files, missing required artifacts, conflicting actions, unsupported steps, dependency blocks or low confidence.
-- [ ] **V2-DYNAMIC-08:** Phase 17 reserves extension interfaces for policy plugins, LLM policy suggestions, Web UI policy editing and learned heuristics, but the first implementation must stay local-first, deterministic where possible and conservative by default.
+- [x] **V2-DYNAMIC-01:** RSA can evaluate a local workflow policy against current artifacts, evidence levels, dependency state, confidence, failures and user configuration to produce auditable `next_actions`.
+- [x] **V2-DYNAMIC-02:** Dynamic workflow remains bounded: it reuses Phase 10 single-paper workflow, Phase 11 campaign scheduling, Phase 12 review workspace, Phase 13 safety checks and Phase 14 worker queue instead of replacing them.
+- [x] **V2-DYNAMIC-03:** Policy decisions must be stored as local YAML/Markdown audit records with stable English keys and Chinese explanations, including `decision_id`, `trigger`, `inputs`, `selected_action`, `reason_zh`, `confidence`, `evidence_level`, `blocked_reason_zh` and `repair_hint_zh`.
+- [x] **V2-DYNAMIC-04:** Policy rules must support conservative conditions such as `run_if`, `skip_if`, `retry_if`, `block_if`, `route_to_review_if` and `stop_before_formal_write`.
+- [x] **V2-DYNAMIC-05:** Users can inspect, validate and override dynamic workflow decisions through Chinese-first CLI commands without editing formal records directly.
+- [x] **V2-DYNAMIC-06:** AI or LLM assistance may suggest policy actions only as staging/review guidance; it must record evidence and confidence and must not directly execute formal writes.
+- [x] **V2-DYNAMIC-07:** Dynamic workflow must fail closed on invalid policy files, missing required artifacts, conflicting actions, unsupported steps, dependency blocks or low confidence.
+- [x] **V2-DYNAMIC-08:** Phase 17 reserves extension interfaces for policy plugins, LLM policy suggestions, Web UI policy editing and learned heuristics, but the first implementation must stay local-first, deterministic where possible and conservative by default.
 
 ### Deferred
 

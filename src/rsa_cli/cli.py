@@ -607,6 +607,47 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_rerun.add_argument("paper_id", help="正式文献编号，例如 P001。")
     workflow_rerun.add_argument("--from-step", required=True, help="重新执行起点，例如 visual_extraction。")
 
+    dynamic_group = subcommands.add_parser(
+        "dynamic",
+        help="Phase 17 动态工作流策略引擎：根据状态建议下一步动作；不绕过 formal 人工确认。",
+    )
+    dynamic_subcommands = dynamic_group.add_subparsers(dest="dynamic_command", required=True)
+    dynamic_evaluate = dynamic_subcommands.add_parser(
+        "evaluate",
+        help="评估 P###、C### 或 formal_write 目标，生成 DW### 决策记录和中文报告。",
+    )
+    dynamic_evaluate.add_argument("target_id", help="目标编号，例如 P001、C001 或 formal_write。")
+    dynamic_evaluate.add_argument(
+        "--target-type",
+        choices=["paper", "campaign", "formal_write"],
+        help="目标类型；省略时根据 target_id 推断。",
+    )
+    dynamic_evaluate.add_argument("--trigger", default="manual", help="触发来源，默认 manual。")
+    dynamic_evaluate.add_argument("--policy", help="可选动态工作流策略 YAML。")
+    dynamic_validate = dynamic_subcommands.add_parser(
+        "validate",
+        help="只读校验 DW### 决策记录；不传 decision_id 时校验全部。",
+    )
+    dynamic_validate.add_argument("decision_id", nargs="?", help="决策编号，例如 DW001。")
+    dynamic_status = dynamic_subcommands.add_parser(
+        "status",
+        help="只读查看动态工作流决策状态；不传 decision_id 时汇总全部。",
+    )
+    dynamic_status.add_argument("decision_id", nargs="?", help="决策编号，例如 DW001。")
+    dynamic_override = dynamic_subcommands.add_parser(
+        "override",
+        help="记录人工监管覆盖；decision 使用 accepted/deferred/rejected/needs_followup。",
+    )
+    dynamic_override.add_argument("decision_id", help="决策编号，例如 DW001。")
+    dynamic_override.add_argument(
+        "--decision",
+        required=True,
+        choices=["accepted", "deferred", "rejected", "needs_followup"],
+        help="人工监管决策，不等于 formal approval。",
+    )
+    dynamic_override.add_argument("--reviewer", required=True, help="监管人。")
+    dynamic_override.add_argument("--reason", required=True, help="中文监管原因。")
+
     review_group = subcommands.add_parser(
         "review",
         help="生成、查看、打开或清理本地静态监管台；只展示 staging/review 信息，不写正式记录。",
@@ -1749,6 +1790,84 @@ def _workflow_next_action_text(status: str | None) -> str:
     return "查看 workflow status 和 report。"
 
 
+def _run_dynamic_command(args: argparse.Namespace, root: Path) -> int:
+    from .dynamic_workflow import (
+        DynamicWorkflowError,
+        dynamic_workflow_status,
+        evaluate_dynamic_workflow,
+        override_dynamic_decision,
+        validate_dynamic_decisions,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.dynamic_command == "evaluate":
+            result = evaluate_dynamic_workflow(
+                config,
+                args.target_id,
+                target_type=args.target_type,
+                trigger=args.trigger,
+                policy_file=args.policy,
+            )
+            next_commands = ", ".join(
+                str(action.get("command"))
+                for action in result.next_actions
+                if isinstance(action, dict) and action.get("command")
+            ) or "无自动命令"
+            print(
+                f"动态工作流决策已生成: {result.decision_id} -> "
+                f"target={result.target_type}:{result.target_id}, "
+                f"action={result.selected_action}, status={result.status}, "
+                f"confidence={result.confidence}; 文件={result.decision_path}; "
+                f"报告={result.report_path}; 下一步={next_commands}"
+            )
+            return 0 if result.status != "blocked" else 1
+        if args.dynamic_command == "validate":
+            errors = validate_dynamic_decisions(config, args.decision_id)
+            if errors:
+                for error in errors:
+                    print(f"dynamic workflow 记录无效: {error}", file=sys.stderr)
+                return 1
+            target = args.decision_id or "全部记录"
+            print(f"dynamic workflow 记录有效: {target}")
+            return 0
+        if args.dynamic_command == "status":
+            status = dynamic_workflow_status(config, args.decision_id)
+            if not status.exists:
+                print(f"dynamic workflow 状态: 尚无记录；路径={status.path or config.dynamic_workflows_root}")
+                return 0
+            if args.decision_id:
+                print(
+                    f"dynamic workflow 状态: {args.decision_id} -> "
+                    f"status={status.status}, action={status.selected_action}, "
+                    f"target={status.target_type}:{status.target_id}; 文件={status.path}"
+                )
+            else:
+                counts = ", ".join(f"{key}={value}" for key, value in sorted(status.counts.items())) or "无"
+                print(
+                    f"dynamic workflow 汇总: latest={status.decision_id or '无'}, "
+                    f"counts={counts}; 最新文件={status.path}"
+                )
+            return 0
+        if args.dynamic_command == "override":
+            result = override_dynamic_decision(
+                config,
+                args.decision_id,
+                decision=args.decision,
+                reviewer=args.reviewer,
+                reason_zh=args.reason,
+            )
+            print(
+                f"dynamic workflow 人工监管已记录: {result.decision_id} -> "
+                f"decision={result.status}, reviewer={result.reviewer}; 文件={result.path}"
+            )
+            return 0
+    except DynamicWorkflowError as exc:
+        print(f"dynamic workflow 操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
 def _run_review_command(args: argparse.Namespace, root: Path) -> int:
     from .review_workspace import (
         ReviewWorkspaceError,
@@ -2036,6 +2155,12 @@ def _run_doctor_command(args: argparse.Namespace, root: Path) -> int:
             f"allowed={','.join(config.discovery_allowed_providers)}, "
             f"automation_mode={config.discovery_automation_mode}"
         )
+        print(
+            "dynamic_workflow: "
+            f"policy={config.dynamic_workflow_default_policy}, "
+            f"automation_mode={config.dynamic_workflow_automation_mode}, "
+            f"llm_suggestions={config.dynamic_workflow_allow_llm_suggestions}"
+        )
         print("checks:")
         for check in report.checks:
             affected = ", ".join(check.affected_commands) or "无"
@@ -2169,6 +2294,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_score_command(args, root)
         if args.command == "workflow":
             return _run_workflow_command(args, root)
+        if args.command == "dynamic":
+            return _run_dynamic_command(args, root)
         if args.command == "review":
             return _run_review_command(args, root)
         if args.command == "safety":

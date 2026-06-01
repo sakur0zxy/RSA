@@ -110,6 +110,15 @@ Phase 7.1 browser session provider:
 - Session-backed downloads still go through source candidates, source ledger, hash/deduplication, PDF acquisition report and formal write guardrails.
 - A session-downloaded PDF is authorized reading material only; it must not automatically write `metadata`, `literature_map.md`, `agent_research_notes.md`, or thesis conclusions.
 - v1 browser session support is limited to cookie-based direct PDF URLs. DOM search, database page clicking and JS download flows belong in a later phase.
+
+Phase 17 dynamic workflow:
+
+- `rsa dynamic evaluate P001` / `C001` generates a DW### decision record and Chinese report from local policy and current artifact state.
+- `rsa dynamic validate [DW###]` and `rsa dynamic status [DW###]` are read-only.
+- `rsa dynamic override DW### --decision accepted|deferred|rejected|needs_followup --reviewer ... --reason ...` records human supervision only; it is not formal approval.
+- `templates/dynamic_workflow_policy.yaml` is the default policy source. Keep rules conservative and auditable.
+- `selected_action` is a recommendation, not proof that the action ran.
+- `formal_write_allowed` must remain `false`; never use dynamic workflow to write `metadata/`, `literature_map.md`, `agent_research_notes.md`, or thesis conclusions directly.
 <!-- GSD:rsa-cli-end -->
 
 <!-- GSD:profile-start -->

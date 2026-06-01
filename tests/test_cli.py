@@ -78,6 +78,7 @@ def test_help_lists_expected_subcommands(capsys):
     assert "campaign" in captured.out
     assert "score" in captured.out
     assert "workflow" in captured.out
+    assert "dynamic" in captured.out
     assert "review" in captured.out
     assert "safety" in captured.out
     assert "worker" in captured.out
@@ -298,6 +299,56 @@ def test_cli_add_paper_success_allocates_sequential_ids(tmp_path, capsys):
     assert (metadata_root / "P001.yaml").exists()
     assert (metadata_root / "P002.yaml").exists()
     assert (tmp_path / "01_literature" / "assets" / "P001" / ".gitkeep").exists()
+
+
+def test_cli_dynamic_evaluate_validate_status_and_override(tmp_path, capsys):
+    prepare_project(tmp_path)
+    main(
+        [
+            "--root",
+            str(tmp_path),
+            *add_paper_args("Dynamic CLI Paper"),
+            "--human-confirmed",
+            "--confirmed-by",
+            "zxy",
+        ]
+    )
+    capsys.readouterr()
+
+    evaluated = main(["--root", str(tmp_path), "dynamic", "evaluate", "P001"])
+    evaluated_out = capsys.readouterr()
+    validated = main(["--root", str(tmp_path), "dynamic", "validate", "DW001"])
+    validated_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "dynamic", "status", "DW001"])
+    status_out = capsys.readouterr()
+    overridden = main(
+        [
+            "--root",
+            str(tmp_path),
+            "dynamic",
+            "override",
+            "DW001",
+            "--decision",
+            "accepted",
+            "--reviewer",
+            "zxy",
+            "--reason",
+            "已确认可以继续执行建议动作。",
+        ]
+    )
+    override_out = capsys.readouterr()
+
+    assert evaluated == 0
+    assert "动态工作流决策已生成" in evaluated_out.out
+    assert "run_workflow" in evaluated_out.out
+    assert validated == 0
+    assert "dynamic workflow 记录有效" in validated_out.out
+    assert status == 0
+    assert "target=paper:P001" in status_out.out
+    assert overridden == 0
+    assert "decision=accepted" in override_out.out
+    assert (tmp_path / "01_literature" / "dynamic_workflows" / "DW001.yaml").exists()
+    assert (tmp_path / "01_literature" / "dynamic_workflows" / "DW001_report.md").exists()
 
 
 def test_cli_validate_metadata_reports_success_and_errors_without_traceback(tmp_path, capsys):
@@ -1429,6 +1480,7 @@ reading_draft:
     assert doctor_json == 0
     assert payload["overall_status"] in {"OK", "WARN", "BLOCKED"}
     assert {"PyYAML", "pypdf", "PyMuPDF", "Playwright", "Discovery provider config"} <= check_names
+    assert "Dynamic workflow policy" in check_names
     assert all(check["status"] in {"OK", "WARN", "BLOCKED"} for check in payload["checks"])
     assert all("repair_hint_zh" in check for check in payload["checks"])
     assert cleared == 0

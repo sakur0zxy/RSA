@@ -23,6 +23,7 @@ LITERATURE_DIRECTORIES = [
     "safety",
     "workers",
     "discovery",
+    "dynamic_workflows",
     "pdfs",
     "assets",
     "extracted",
