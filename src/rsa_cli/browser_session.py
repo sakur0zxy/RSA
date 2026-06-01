@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import re
@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import yaml
 
 from .config import ProjectConfig
+from .doctor import playwright_repair_hint_zh
 
 
 BROWSER_SESSION_REQUIRED_FIELDS = {
@@ -207,8 +208,7 @@ def _playwright_login_runner(
         from playwright.sync_api import sync_playwright
     except ImportError as exc:
         raise BrowserSessionError(
-            "浏览器登录需要可选依赖 Playwright；请安装 "
-            "`rsa-research-agent[browser]`，然后运行 `python -m playwright install chromium`。"
+            f"浏览器登录需要 Playwright Python 包；{playwright_repair_hint_zh()}"
         ) from exc
 
     if headless and wait_seconds is None:

@@ -18,6 +18,7 @@ REQUIRED_DIRECTORIES = {
     "review_workspace",
     "safety",
     "workers",
+    "discovery",
     "pdfs",
     "assets",
     "extracted",

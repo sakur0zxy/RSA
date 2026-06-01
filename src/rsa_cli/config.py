@@ -39,6 +39,14 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "temperature": 0,
             "language": "zh",
             "prompt_profile": "default",
+            "codex_oauth": {
+                "auth_store": ".rsa/auth/codex_oauth.yaml",
+                "codex_home": None,
+                "token_source": "rsa_store",
+                "refresh_command": None,
+                "base_url": "https://chatgpt.com/backend-api/codex",
+                "response_endpoint": None,
+            },
         },
         "review": {
             "ready_score_threshold": 6,
@@ -65,6 +73,13 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "visual_extraction": 1,
             "scoring": 2,
         },
+    },
+    "discovery": {
+        "default_provider": "openalex",
+        "default_max_queries": 3,
+        "default_max_results": 5,
+        "allowed_providers": ["openalex", "crossref", "offline"],
+        "automation_mode": "monitored_auto",
     },
 }
 
@@ -163,6 +178,10 @@ class ProjectConfig:
         return self.literature_root / "workers"
 
     @property
+    def discovery_root(self) -> Path:
+        return self.literature_root / "discovery"
+
+    @property
     def pdfs_root(self) -> Path:
         return self.literature_root / "pdfs"
 
@@ -173,6 +192,10 @@ class ProjectConfig:
     @property
     def sessions_root(self) -> Path:
         return self.root / ".rsa" / "sessions"
+
+    @property
+    def auth_root(self) -> Path:
+        return self.root / ".rsa" / "auth"
 
     @property
     def topic_profiles_root(self) -> Path:
@@ -198,6 +221,10 @@ class ProjectConfig:
     @property
     def reading_draft_llm(self) -> dict[str, Any]:
         return dict(self.reading_draft.get("llm", {}))
+
+    @property
+    def reading_draft_llm_codex_oauth(self) -> dict[str, Any]:
+        return dict(self.reading_draft_llm.get("codex_oauth", {}) or {})
 
     @property
     def reading_draft_review(self) -> dict[str, Any]:
@@ -235,6 +262,31 @@ class ProjectConfig:
             except (TypeError, ValueError) as exc:
                 raise ConfigError(f"campaign.concurrency.{key} 必须为正整数") from exc
         return normalized
+
+    @property
+    def discovery(self) -> dict[str, Any]:
+        return dict(self.data.get("discovery", {}) or {})
+
+    @property
+    def discovery_default_provider(self) -> str:
+        return str(self.discovery.get("default_provider", "openalex"))
+
+    @property
+    def discovery_default_max_queries(self) -> int:
+        return int(self.discovery.get("default_max_queries", 3))
+
+    @property
+    def discovery_default_max_results(self) -> int:
+        return int(self.discovery.get("default_max_results", 5))
+
+    @property
+    def discovery_allowed_providers(self) -> list[str]:
+        providers = self.discovery.get("allowed_providers", ["openalex", "crossref", "offline"])
+        return [str(provider) for provider in providers or []]
+
+    @property
+    def discovery_automation_mode(self) -> str:
+        return str(self.discovery.get("automation_mode", "monitored_auto"))
 
     @property
     def reading_draft_ready_score_threshold(self) -> int:
@@ -316,6 +368,8 @@ def validate_config(config: ProjectConfig) -> None:
         raise ConfigError("source_discovery.custom_providers 必须是 list")
     if not isinstance(config.reading_draft.get("llm", {}), dict):
         raise ConfigError("reading_draft.llm 必须是 mapping")
+    if not isinstance(config.reading_draft_llm.get("codex_oauth", {}), dict):
+        raise ConfigError("reading_draft.llm.codex_oauth 必须是 mapping")
     if not isinstance(config.reading_draft.get("review", {}), dict):
         raise ConfigError("reading_draft.review 必须是 mapping")
     if not isinstance(config.workflow, dict):
@@ -330,9 +384,19 @@ def validate_config(config: ProjectConfig) -> None:
         raise ConfigError("campaign 必须是 mapping")
     if not isinstance(config.campaign.get("concurrency", {}), dict):
         raise ConfigError("campaign.concurrency 必须是 mapping")
+    if not isinstance(config.discovery, dict):
+        raise ConfigError("discovery 必须是 mapping")
+    if not isinstance(config.discovery.get("allowed_providers", []), list):
+        raise ConfigError("discovery.allowed_providers 必须是 list")
     for key, value in config.campaign_concurrency.items():
         if value <= 0:
             raise ConfigError(f"campaign.concurrency.{key} 必须为正整数")
+    if config.discovery_default_provider not in config.discovery_allowed_providers:
+        raise ConfigError("discovery.default_provider 必须在 discovery.allowed_providers 中")
+    if config.discovery_default_max_queries <= 0:
+        raise ConfigError("discovery.default_max_queries 必须为正整数")
+    if config.discovery_default_max_results <= 0:
+        raise ConfigError("discovery.default_max_results 必须为正整数")
     if not config.output_policy:
         raise ConfigError("rounds.output_policy 不能为空")
     if not config.approval_mode:

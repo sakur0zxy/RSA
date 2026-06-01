@@ -79,7 +79,7 @@ pip 不能可靠完成安装的外部资源，例如 Playwright Chromium、本�
 | `rsa gap generate` / `rsa gap validate` | 是 | base runtime | 无 | `BLOCKED`，中文说明 map/profile 问题 |
 | `rsa formal apply-map` / `rsa formal apply-note` | 是 | base runtime | 人工确认字段 | `BLOCKED`，缺确认或冲突时不写 formal records |
 | `rsa eval run` / `rsa eval compare` | 是 | base runtime | 无 | `BLOCKED`，中文说明 eval/baseline 问题 |
-| `rsa doctor` | 是，待实现 | base runtime | 检查所有核心外部资源 | 输出 `OK` / `WARN` / `BLOCKED` 和修复命令 |
+| `rsa doctor` | 是，已实现 | base runtime | 检查核心 Python 包、Playwright Chromium、provider 配置 | 输出 `OK` / `WARN` / `BLOCKED` 和修复命令 |
 
 ## 功能-依赖矩阵
 
@@ -146,15 +146,14 @@ pip 不能可靠完成安装的外部资源，例如 Playwright Chromium、本�
 - 返回明确中文错误，说明缺什么、影响哪个功能、如何修复。
 - expected errors 不应表现为 traceback-only。
 
-## `pyproject.toml` 分层映射草案
+## `pyproject.toml` 分层映射
 
-后续实现应收敛到以下方向：
+当前实现按以下方向维护：
 
-- `dependencies`: 当前核心闭环所需 Python 包，例如 `PyYAML`、Playwright Python 包、PDF parser。
+- `dependencies`: 当前核心闭环所需 Python 包，包括 `PyYAML`、`pypdf`、`PyMuPDF` 和 Playwright Python 包 `playwright`。
 - `optional-dependencies.dev`: 测试和开发依赖，例如 `pytest`。
-- `optional-dependencies.llm`: 未来外部 LLM 或本地模型增强。
-- `optional-dependencies.ui`: 未来本地 review UI。
-- `optional-dependencies.cloud`: 未来云端或远程服务集成。
+- `optional-dependencies.browser`: 兼容旧文档/旧安装习惯的别名；Playwright Python 包已经进入基础依赖，不再只属于 extra。
+- 未来可继续增加 `llm`、`ui`、`cloud` 等 extras，但不得把当前核心闭环拆出基础安装。
 
 兼容期可以保留旧的 `browser` extra 作为安装别名或迁移提示，但不能再把 browser session provider 的核心 Python 依赖只放在 `browser` extra 中。
 
@@ -168,13 +167,11 @@ pip 不能可靠完成安装的外部资源，例如 Playwright Chromium、本�
 - 缺 PDF parser 或 PDF 无法解析时，`rsa doctor` / `rsa note draft` fail closed，不生成伪 reading note。
 - README 功能依赖矩阵与 `pyproject.toml` / doctor 检查项保持一致。
 
-## 当前实现差距
+## 当前实现状态
 
-Phase 8 已把 PDF parser (`pypdf`) 纳入基础依赖，并为 `rsa note draft` 增加本地文本提取、prompt packet 和 fail-closed 行为。剩余差距是 `playwright` 仍位于 `browser` optional extra，`rsa doctor` 尚未实现；后续需要继续让 README、pyproject 和自检命令收敛到本策略。
-
-## 后续落地要求
-
-- Phase 8 plan 应把 PDF parser 和依赖策略纳入计划。
-- 需要新增或规划 `rsa doctor`，检查核心 Python 包、Playwright Chromium 等外部资源。
-- README 安装章节应从“browser 是可选核心能力”改为“基础安装包含核心 Python 依赖；浏览器运行资源属于一次性环境初始化”。
-- 测试需要覆盖缺依赖/缺外部资源时的中文错误提示和 fail-closed 行为。
+- `pyproject.toml` 的基础依赖已经包含 `PyYAML`、`pypdf`、`PyMuPDF` 和 Playwright Python 包。
+- `rsa doctor` 已实现全局自检，输出 `overall_status` 和逐项 `OK` / `WARN` / `BLOCKED`，并列出受影响命令与中文修复建议。
+- `rsa doctor --json` 提供机器可读诊断；`rsa doctor --strict` 可在存在 `BLOCKED` 项时返回非零退出码，便于 CI 或自动化脚本使用。
+- `rsa source login` 与 doctor 共享 Playwright 修复提示，缺 Playwright 或 Chromium 时 fail closed。
+- `rsa note draft` 使用 `pypdf` 提取授权全文，无法读取或证据不足时写入 blocked/partial 状态，不生成伪阅读结论。
+- README 需要持续保持功能-依赖矩阵与 `pyproject.toml`、doctor 检查项一致。

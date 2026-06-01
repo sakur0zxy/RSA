@@ -3,7 +3,8 @@
 ## 里程碑
 
 - **v1.0 Local Harness** - Phase 1-5，已于 2026-05-13 发布。详见 `.planning/milestones/v1.0-ROADMAP.md`。
-- **v2.0 Scaled Literature Workstation** - Phase 6-14 与插入 Phase 7.1、Phase 8.1、Phase 8.2 为核心范围；重型 metadata 集成、高级图表智能和 multi-agent 编排为延后范围。
+- **v2.0 Scaled Literature Workstation** - Phase 6-16 与插入 Phase 7.1、Phase 8.1、Phase 8.2 已完成；Phase 16 作为前置发现层，将科研计划转为候选文献 campaign；重型 metadata 集成、高级图表智能和 multi-agent 编排仍为延后范围。
+- **v2.x Dynamic Automation Layer** - Phase 17 已加入路线图，目标是在现有固定 workflow 之上增加有边界、可审计、可人工覆盖的 dynamic workflow policy engine。
 
 ## v2 全局原则
 
@@ -42,12 +43,14 @@
 - [x] Phase 12: Local Review Workspace - 3/3 plans，完成于 2026-05-27；生成本地静态监管台、manifest、分组页、对象页和操作清单，用于审阅候选、PDF、阅读草稿、视觉证据、评分和 formal write 请求。
 - [x] Phase 13: Writing Safety & Hardening - 3/3 plans，完成于 2026-05-28；新增 `rsa safety check|validate|status|campaign`，生成 claim-level citation review、campaign failure monitor 和中文 safety audit，继续保持 formal write gate。
 - [x] Phase 14: Background Worker & Scheduled Automation - 3/3 plans，完成于 2026-05-29；新增 `rsa worker enqueue|run|status|logs|cancel|recover|schedule`，支持本地 worker queue、one-shot runner、schedule 入队、status/logs 和恢复/取消语义，并保持 formal write gate。
+- [x] Phase 15: Codex Account OAuth LLM Provider - 2/2 plans，完成于 2026-05-30；新增可选 `codex_oauth` provider、`rsa llm codex status|import|clear`、`rsa doctor` provider preflight，并接入 `rsa note draft`。
+- [x] Phase 16: Research Plan Driven Literature Discovery - 3/3 plans，完成于 2026-05-31；从科研计划生成 discovery profile、query bundle、合法 provider 候选和 campaign staging 导入，不直接创建正式 metadata。
 
 </details>
 
 ## 下一步
 
-当前执行目标：**v2.0 核心闭环已完成；后续只处理 deferred 增强或新里程碑**。
+当前执行目标：Phase 17 已新增为后续 v2.x phase；下一步应运行 `gsd-discuss-phase 17`，先讨论 bounded dynamic workflow 的具体策略、配置 schema、审计记录和 formal gate 边界。
 
 Phase 6 已完成本地资产和来源记录基础：
 
@@ -87,16 +90,74 @@ Phase 14 已完成 Background Worker & Scheduled Automation，即“运行形态
 
 Deferred items：Crossref/OpenAlex/Zotero 等重型 scholarly metadata 深集成、高级图表智能、复杂多 agent 编排。轻量 DOI/BibTeX 补全、title/author/year 标准化和 dedup 辅助可在 Phase 9/11 内按主闭环需要处理。
 
+Phase 16 新增 Research Plan Driven Literature Discovery：它补齐当前 RSA 的最前置入口，把科研计划文件转为可审计的 discovery profile、检索式和候选论文 campaign。Phase 16 只负责发现候选、解释检索依据、去重初筛和导入 staging/campaign；后续全文获取、自动阅读、视觉证据、评分、workflow、worker 和监管台继续复用 Phase 7-15 的既有链路。它不直接创建 `metadata/P###.yaml`，不写 `paper_index.md`，不绕过 formal write gate。
+
 ## 进度
 
 | Milestone | Phases | Plans Complete | 状态 | 完成时间 |
 |-----------|--------|----------------|------|----------|
 | v1.0 Local Harness | 1-5 | 14/14 | 已发布 | 2026-05-13 |
-| v2.0 Scaled Literature Workstation | 6-14 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 32/32 completed for Phase 6-14 planned | v2.0 core complete | 2026-05-29 |
+| v2.0 Scaled Literature Workstation | 6-16 core + 7.1, 8.1 and 8.2 inserted; deferred advanced integrations | 37/37 completed through Phase 16 | Phase 16 complete; project audit complete | 2026-06-01 |
+| v2.x Dynamic Automation Layer | 17 | 0/0 planned | Phase added; discussion not started | Active |
+
+### Phase 15: Codex Account OAuth LLM Provider
+
+**Goal:** Add an optional, local-first LLM provider that can use a user-authorized Codex/ChatGPT account session for RSA AI tasks, modeled after Hermes Agent's `openai-codex` OAuth pattern while preserving Chinese-first UX, fail-closed behavior and formal-write boundaries.
+**Requirements**: V2-CODEX-01 through V2-CODEX-06
+**Depends on:** Phase 14
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 15-01 Codex OAuth Provider Foundation
+- [x] 15-02 Reading Draft Integration And Documentation
+
+Boundary:
+- Experimental/optional provider only; default stable providers remain API-key or OpenAI-compatible providers.
+- Do not automate ChatGPT web UI, scrape browser cookies, save account passwords or bypass OpenAI/Codex access controls.
+- Store OAuth/session material local-only and ignored by git.
+- User-visible setup, errors, doctor/preflight output and recovery guidance must be Chinese-first.
+- AI outputs produced through this provider remain staging/review artifacts and cannot bypass formal write gates.
+
+### Phase 16: Research Plan Driven Literature Discovery
+
+**Goal:** Add a Chinese-first, auditable discovery layer that reads a user-provided research plan, derives research questions and search query bundles, searches approved scholarly/custom sources, and imports candidate papers into a campaign for the existing RSA automation chain.
+**Requirements**: V2-DISCOVERY-01 through V2-DISCOVERY-08
+**Depends on:** Phase 15
+**Plans:** 3/3 plans complete
+
+Plans:
+- [x] 16-01 Discovery Profile And Query Bundle Foundation
+- [x] 16-02 Provider Search And Campaign Export
+- [x] 16-03 CLI Documentation Verification And Release Readiness
+
+Boundary:
+- Treat discovery output as staging/campaign input only; do not create formal `P###` metadata records directly.
+- Reuse Phase 8.2 campaign queues, Phase 11 metadata intake requests and Phase 7 authorized source rules instead of inventing a separate literature database.
+- User-visible query explanations, reasons, failures and review guidance must be Chinese-first; stable fields and provider keys stay English.
+- Default sources should be legal/auditable scholarly indexes or user-configured custom providers; do not bypass paywalls or use unauthorized mirrors.
+- Reserve extension interfaces for richer scholarly integrations, iterative query refinement and Web UI review, but keep v1 implementation focused on plan-to-campaign discovery.
+
+### Phase 17: Dynamic Workflow Policy Engine
+
+**Goal:** Add a bounded dynamic workflow policy layer that can decide next actions from current artifacts, evidence level, dependency state, confidence, failures and user configuration, while keeping every decision auditable and never bypassing formal write gates.
+**Requirements**: V2-DYNAMIC-01 through V2-DYNAMIC-08
+**Depends on:** Phase 16
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 17 to break down)
+
+Boundary:
+- Dynamic workflow is a policy engine above existing Phase 10/11 primitives, not a replacement for workflow, campaign, worker or review workspace.
+- Use explicit rules, state, evidence and local YAML/Markdown audit records; do not let a free-form LLM planner directly control execution.
+- Allowed outputs are `next_actions`, skipped/blocked/partial decisions, retry decisions, queue routing and supervision reasons.
+- AI may assist with recommendations only when evidence and confidence are recorded; AI recommendations remain staging/review guidance.
+- Formal writes still require existing schema validation, conflict checks and explicit human confirmation.
+- Reserve extension interfaces for future policy plugins, LLM policy suggestions and Web UI policy editing, but keep the first implementation local-first and conservative.
 
 ---
 
-*Roadmap updated after Phase 14 worker automation implementation: 2026-05-29*
+*Roadmap updated after Phase 16 project audit and release-readiness pass: 2026-06-01*
 
 ## GSD 解析索引
 
@@ -171,3 +232,15 @@ Status: complete. Adds claim-level citation checks, campaign failure monitoring,
 ### Phase 14: Background Worker & Scheduled Automation
 
 Status: complete. Upgrades the runtime shape after Phase 11-13 with local worker queue, one-shot task execution, explicit recovery/cancel, status monitoring, scheduled enqueue and worker log summaries without bypassing formal-write gates.
+
+### Phase 15: Codex Account OAuth LLM Provider
+
+Status: complete. Add an optional Codex/ChatGPT account OAuth-backed LLM provider for RSA AI tasks, with local-only credential storage, provider selection, Chinese diagnostics, fail-closed preflight and no formal-write bypass.
+
+### Phase 16: Research Plan Driven Literature Discovery
+
+Status: complete. Convert a user-provided research plan into auditable search queries and candidate literature campaigns, then hand off to existing acquisition, reading, scoring and review workflows without writing formal records directly.
+
+### Phase 17: Dynamic Workflow Policy Engine
+
+Status: planned. Add a bounded policy engine above existing workflow/campaign/worker primitives so RSA can choose auditable next actions from current state, evidence, confidence, dependency checks and user configuration without becoming a free-form AI planner or bypassing formal-write gates.

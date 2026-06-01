@@ -114,6 +114,20 @@ def build_parser() -> argparse.ArgumentParser:
 
     subcommands.add_parser("validate-index", help="校验 paper_index.md 是否与 metadata 一致。")
     subcommands.add_parser("regenerate-index", help="根据 metadata 显式重建 paper_index.md。")
+    doctor_group = subcommands.add_parser(
+        "doctor",
+        help="检查 RSA 本地环境、可选 provider 和命令级 preflight；输出中文修复建议。",
+    )
+    doctor_group.add_argument(
+        "--json",
+        action="store_true",
+        help="以 JSON 输出机器可读诊断；不会输出 token 值。",
+    )
+    doctor_group.add_argument(
+        "--strict",
+        action="store_true",
+        help="发现 BLOCKED 项时返回非零退出码；默认只报告状态，便于用户阅读诊断。",
+    )
 
     map_group = subcommands.add_parser(
         "map", help="校验或生成文献映射建议；validate 只读，propose 不写正式记录。"
@@ -379,6 +393,52 @@ def build_parser() -> argparse.ArgumentParser:
         help="只读查看视觉证据候选数量、降级状态和候选文件路径。",
     )
     visual_status.add_argument("paper_id", help="正式文献编号，例如 P001。")
+
+    discovery_group = subcommands.add_parser(
+        "discovery",
+        help="从科研计划生成检索式、合法来源候选和 campaign staging 队列；不写正式 metadata。",
+    )
+    discovery_subcommands = discovery_group.add_subparsers(
+        dest="discovery_command", required=True
+    )
+    discovery_run = discovery_subcommands.add_parser(
+        "run",
+        help="读取 .md/.txt 科研计划或 objective，自动生成发现档案、检索候选并导入 campaign。",
+    )
+    discovery_run.add_argument("--plan-file", help="科研计划 .md/.txt 文件路径。")
+    discovery_run.add_argument("--objective", help="临时科研目标文本；可与 --plan-file 合并使用。")
+    discovery_run.add_argument("--topic-profile", help="可选 topic profile id 或 YAML 路径。")
+    discovery_run.add_argument(
+        "--provider",
+        choices=["openalex", "crossref", "offline"],
+        help="合法检索 provider；默认读取 rsa.yaml 的 discovery.default_provider。",
+    )
+    discovery_run.add_argument("--max-queries", type=int, help="本次最多生成的检索式数量。")
+    discovery_run.add_argument("--max-results", type=int, help="本次最多保留的候选数量。")
+    discovery_run.add_argument(
+        "--no-search",
+        action="store_true",
+        help="只生成发现档案和检索式，不访问网络，也不创建伪候选。",
+    )
+    discovery_run.add_argument(
+        "--no-campaign",
+        action="store_true",
+        help="只生成 discovery results，不自动导入 campaign staging 队列。",
+    )
+    discovery_run.add_argument("--campaign-id", help="导入已有 campaign，未提供时自动创建。")
+    discovery_run.add_argument("--name-zh", help="自动创建 campaign 时使用的中文名称。")
+    discovery_run.add_argument("--objective-zh", help="自动创建 campaign 时使用的中文目标。")
+    discovery_run.add_argument("--created-by", help="记录创建人。")
+    discovery_validate = discovery_subcommands.add_parser(
+        "validate",
+        help="只读校验 discovery profile、query bundle 和 results，不写正式记录。",
+    )
+    discovery_validate.add_argument("discovery_id", help="发现任务编号，例如 DR001。")
+    discovery_status = discovery_subcommands.add_parser(
+        "status",
+        help="只读查看 discovery 查询数、候选数、campaign 导出状态和文件路径。",
+    )
+    discovery_status.add_argument("discovery_id", help="发现任务编号，例如 DR001。")
 
     campaign_group = subcommands.add_parser(
         "campaign",
@@ -679,6 +739,36 @@ def build_parser() -> argparse.ArgumentParser:
     worker_schedule_subcommands.add_parser("list", help="只读列出 schedule。")
     worker_schedule_subcommands.add_parser(
         "due", help="把当前已到期的 schedule 放入 worker queue。"
+    )
+
+    llm_group = subcommands.add_parser(
+        "llm",
+        help="管理 RSA 可选 LLM provider；当前支持 Codex OAuth 本地凭据状态检查。",
+    )
+    llm_subcommands = llm_group.add_subparsers(dest="llm_command", required=True)
+    llm_codex = llm_subcommands.add_parser(
+        "codex",
+        help="管理可选的 codex_oauth provider；凭据只保存在本地，不会进入 formal records。",
+    )
+    codex_subcommands = llm_codex.add_subparsers(
+        dest="codex_command", required=True
+    )
+    codex_status = codex_subcommands.add_parser(
+        "status",
+        help="只读查看 Codex OAuth provider、RSA auth store 和 Codex CLI auth.json 状态。",
+    )
+    codex_status.add_argument(
+        "--json",
+        action="store_true",
+        help="以 JSON 输出状态；不会输出 token 值。",
+    )
+    codex_subcommands.add_parser(
+        "import",
+        help="从本机 Codex CLI auth.json 导入 RSA 本地-only codex_oauth 凭据。",
+    )
+    codex_subcommands.add_parser(
+        "clear",
+        help="删除 RSA 本地 codex_oauth 凭据副本；不修改 Codex CLI 登录状态。",
     )
 
     eval_group = subcommands.add_parser(
@@ -1238,6 +1328,63 @@ def _run_visual_command(args: argparse.Namespace, root: Path) -> int:
             return 0
     except VisualError as exc:
         print(f"视觉证据操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
+def _run_discovery_command(args: argparse.Namespace, root: Path) -> int:
+    from .campaign import CampaignError
+    from .discovery import (
+        DiscoveryError,
+        discovery_status,
+        run_discovery,
+        validate_discovery,
+    )
+
+    config = load_project_config(root)
+    try:
+        if args.discovery_command == "run":
+            result = run_discovery(
+                config,
+                plan_file=args.plan_file,
+                objective=args.objective,
+                topic_profile=args.topic_profile,
+                provider=args.provider,
+                max_queries=args.max_queries,
+                max_results=args.max_results,
+                no_search=args.no_search,
+                no_campaign=args.no_campaign,
+                campaign_id=args.campaign_id,
+                name_zh=args.name_zh,
+                objective_zh=args.objective_zh,
+                created_by=args.created_by,
+            )
+            campaign_text = f", campaign={result.campaign_id}" if result.campaign_id else ""
+            print(
+                "科研计划发现完成: "
+                f"{result.discovery_id} -> status={result.status}, provider={result.provider}, "
+                f"候选={result.candidate_count}{campaign_text}; results={result.results_path}"
+            )
+            return 0 if result.status != "blocked" else 1
+        if args.discovery_command == "validate":
+            errors = validate_discovery(config, args.discovery_id)
+            if errors:
+                for error in errors:
+                    print(f"discovery 无效: {error}", file=sys.stderr)
+                return 1
+            print(f"discovery 有效: {args.discovery_id}")
+            return 0
+        if args.discovery_command == "status":
+            status = discovery_status(config, args.discovery_id)
+            print(
+                f"discovery 状态 {args.discovery_id} -> status={status.status}, "
+                f"queries={status.query_count}, candidates={status.candidate_count}, "
+                f"campaign={status.campaign_id or '无'}; "
+                f"profile={status.profile_path}; results={status.results_path}"
+            )
+            return 0
+    except (DiscoveryError, CampaignError) as exc:
+        print(f"discovery 操作失败: {exc}", file=sys.stderr)
         return 1
     return 2
 
@@ -1823,6 +1970,83 @@ def _run_worker_command(args: argparse.Namespace, root: Path) -> int:
     return 2
 
 
+def _run_llm_command(args: argparse.Namespace, root: Path) -> int:
+    from .codex_oauth import (
+        CodexOAuthError,
+        clear_codex_oauth_auth,
+        codex_oauth_status,
+        import_codex_cli_auth,
+        status_as_dict,
+    )
+
+    config = load_project_config(root)
+    if args.llm_command != "codex":
+        return 2
+    try:
+        if args.codex_command == "status":
+            status = codex_oauth_status(config)
+            if args.json:
+                import json
+
+                print(json.dumps(status_as_dict(status), ensure_ascii=False, indent=2))
+            else:
+                print(
+                    f"Codex OAuth 状态: status={status.status}, "
+                    f"configured={status.configured}, token_source={status.token_source}, "
+                    f"auth_store={status.auth_store_path}, codex_auth={status.codex_auth_path}"
+                )
+                print(f"说明: {status.message_zh}")
+                print(f"修复建议: {status.repair_hint_zh}")
+            return 0 if status.status in {"ok", "available", "not_configured"} else 1
+        if args.codex_command == "import":
+            result = import_codex_cli_auth(config)
+            print(
+                f"Codex OAuth 凭据已导入 RSA 本地存储: {result.auth_store_path}; "
+                f"来源={result.source_path}; expires_at={result.expires_at_iso or '未知'}; "
+                "token 值不会输出，且 .rsa/auth/** 不应进入 git。"
+            )
+            return 0
+        if args.codex_command == "clear":
+            path = clear_codex_oauth_auth(config)
+            print(f"Codex OAuth RSA 本地凭据已清理: {path}; Codex CLI 登录状态未修改。")
+            return 0
+    except CodexOAuthError as exc:
+        print(f"Codex OAuth 操作失败: {exc}", file=sys.stderr)
+        return 1
+    return 2
+
+
+def _run_doctor_command(args: argparse.Namespace, root: Path) -> int:
+    from .doctor import build_doctor_report, doctor_report_as_dict
+
+    config = load_project_config(root)
+    report = build_doctor_report(config)
+    if args.json:
+        import json
+
+        print(json.dumps(doctor_report_as_dict(report), ensure_ascii=False, indent=2))
+    else:
+        print(f"RSA doctor: overall_status={report.overall_status}")
+        print(f"project_root={config.root}")
+        print(f"literature_root={config.literature_root}")
+        print(f"reading_draft.llm.provider={config.reading_draft_llm.get('provider') or '未配置'}")
+        print(
+            "discovery: "
+            f"default_provider={config.discovery_default_provider}, "
+            f"allowed={','.join(config.discovery_allowed_providers)}, "
+            f"automation_mode={config.discovery_automation_mode}"
+        )
+        print("checks:")
+        for check in report.checks:
+            affected = ", ".join(check.affected_commands) or "无"
+            print(f"- {check.status} {check.name}: {check.summary_zh}")
+            print(f"  影响命令: {affected}")
+            print(f"  修复建议: {check.repair_hint_zh}")
+    if args.strict and report.overall_status == "BLOCKED":
+        return 1
+    return 0
+
+
 def _run_eval_command(args: argparse.Namespace, root: Path) -> int:
     from .evals import (
         EvalError,
@@ -1923,6 +2147,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_validate_index(root)
         if args.command == "regenerate-index":
             return _run_regenerate_index(root)
+        if args.command == "doctor":
+            return _run_doctor_command(args, root)
         if args.command == "map":
             return _run_map_command(args, root)
         if args.command == "gap":
@@ -1935,6 +2161,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_asset_command(args, root)
         if args.command == "visual":
             return _run_visual_command(args, root)
+        if args.command == "discovery":
+            return _run_discovery_command(args, root)
         if args.command == "campaign":
             return _run_campaign_command(args, root)
         if args.command == "score":
@@ -1947,6 +2175,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_safety_command(args, root)
         if args.command == "worker":
             return _run_worker_command(args, root)
+        if args.command == "llm":
+            return _run_llm_command(args, root)
         if args.command == "eval":
             return _run_eval_command(args, root)
         if args.command == "formal":

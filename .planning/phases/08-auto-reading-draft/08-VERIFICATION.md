@@ -42,7 +42,7 @@ Result:
 ## Residual Risks
 
 - Real LLM provider behavior depends on user configuration and API compatibility; unsupported or missing configuration fails closed.
-- `rsa doctor` remains a future global dependency task, although Phase 8 command-level fail-closed paths are implemented.
+- Global `rsa doctor` was completed later in v2 closeout; Phase 8 command-level fail-closed paths remain the local enforcement point for reading draft generation.
 - PDF extraction quality depends on PDF text availability; scanned-image PDFs will require Phase 8.1 or later OCR work.
 
 ## Next Phase Readiness

@@ -9,6 +9,7 @@ dist/
 
 .rsa/local.yaml
 .rsa/sessions/**
+.rsa/auth/**
 01_literature/pdfs/**
 !01_literature/pdfs/.gitkeep
 01_literature/assets/**

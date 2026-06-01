@@ -1,3 +1,7 @@
+import base64
+import json
+import time
+
 import pytest
 import yaml
 
@@ -63,18 +67,21 @@ def test_help_lists_expected_subcommands(capsys):
     assert "add-paper" in captured.out
     assert "validate-index" in captured.out
     assert "regenerate-index" in captured.out
+    assert "doctor" in captured.out
     assert "map" in captured.out
     assert "gap" in captured.out
     assert "note" in captured.out
     assert "source" in captured.out
     assert "asset" in captured.out
     assert "visual" in captured.out
+    assert "discovery" in captured.out
     assert "campaign" in captured.out
     assert "score" in captured.out
     assert "workflow" in captured.out
     assert "review" in captured.out
     assert "safety" in captured.out
     assert "worker" in captured.out
+    assert "llm" in captured.out
     assert "eval" in captured.out
     assert "formal" in captured.out
 
@@ -1177,6 +1184,41 @@ def test_cli_source_phase7_help_lists_monitored_acquisition_commands(capsys):
     assert "clear" in session_help.out
 
 
+def test_cli_discovery_run_validate_status_no_search(tmp_path, capsys):
+    prepare_project(tmp_path)
+    plan = tmp_path / "research_plan.md"
+    plan.write_text(
+        "Need robust reconstruction papers with quantitative evaluation metrics.",
+        encoding="utf-8",
+    )
+
+    run = main(
+        [
+            "--root",
+            str(tmp_path),
+            "discovery",
+            "run",
+            "--plan-file",
+            str(plan),
+            "--no-search",
+        ]
+    )
+    run_out = capsys.readouterr()
+    valid = main(["--root", str(tmp_path), "discovery", "validate", "DR001"])
+    valid_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "discovery", "status", "DR001"])
+    status_out = capsys.readouterr()
+
+    assert run == 0
+    assert "科研计划发现完成" in run_out.out
+    assert "status=not_run" in run_out.out
+    assert valid == 0
+    assert "discovery 有效" in valid_out.out
+    assert status == 0
+    assert "queries=" in status_out.out
+    assert "candidates=0" in status_out.out
+
+
 def test_cli_source_find_no_download_and_candidates_are_read_only(tmp_path, capsys):
     prepare_project(tmp_path)
     pdf = tmp_path / "authorized.pdf"
@@ -1325,6 +1367,72 @@ source_discovery:
     assert "未登录" in status_out.out
     assert clear == 0
     assert "无需清除" in clear_out.out
+
+
+def _cli_fake_jwt(exp: int) -> str:
+    payload = base64.urlsafe_b64encode(json.dumps({"exp": exp}).encode("utf-8")).rstrip(b"=")
+    return "header." + payload.decode("ascii") + ".signature"
+
+
+def test_cli_llm_codex_status_import_clear_and_doctor(tmp_path, capsys):
+    codex_home = tmp_path / "codex_home"
+    local_yaml = tmp_path / ".rsa" / "local.yaml"
+    local_yaml.parent.mkdir(parents=True, exist_ok=True)
+    local_yaml.write_text(
+        f"""
+reading_draft:
+  llm:
+    provider: codex_oauth
+    model: gpt-test
+    codex_oauth:
+      codex_home: "{codex_home.as_posix()}"
+""",
+        encoding="utf-8",
+    )
+    missing = main(["--root", str(tmp_path), "llm", "codex", "status"])
+    missing_out = capsys.readouterr()
+
+    codex_home.mkdir(parents=True, exist_ok=True)
+    (codex_home / "auth.json").write_text(
+        json.dumps(
+            {
+                "tokens": {
+                    "access_token": _cli_fake_jwt(int(time.time()) + 3600),
+                    "refresh_token": "refresh-secret",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    imported = main(["--root", str(tmp_path), "llm", "codex", "import"])
+    imported_out = capsys.readouterr()
+    status = main(["--root", str(tmp_path), "llm", "codex", "status"])
+    status_out = capsys.readouterr()
+    doctor = main(["--root", str(tmp_path), "doctor"])
+    doctor_out = capsys.readouterr()
+    doctor_json = main(["--root", str(tmp_path), "doctor", "--json"])
+    doctor_json_out = capsys.readouterr()
+    cleared = main(["--root", str(tmp_path), "llm", "codex", "clear"])
+    cleared_out = capsys.readouterr()
+
+    assert missing == 1
+    assert "Codex OAuth 状态" in missing_out.out
+    assert imported == 0
+    assert "凭据已导入" in imported_out.out
+    assert "refresh-secret" not in imported_out.out
+    assert status == 0
+    assert "status=ok" in status_out.out
+    assert doctor == 0
+    assert "RSA doctor" in doctor_out.out
+    payload = json.loads(doctor_json_out.out)
+    check_names = {check["name"] for check in payload["checks"]}
+    assert doctor_json == 0
+    assert payload["overall_status"] in {"OK", "WARN", "BLOCKED"}
+    assert {"PyYAML", "pypdf", "PyMuPDF", "Playwright", "Discovery provider config"} <= check_names
+    assert all(check["status"] in {"OK", "WARN", "BLOCKED"} for check in payload["checks"])
+    assert all("repair_hint_zh" in check for check in payload["checks"])
+    assert cleared == 0
+    assert "本地凭据已清理" in cleared_out.out
 
 
 def test_cli_eval_run_baseline_and_compare(tmp_path, capsys):

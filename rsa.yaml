@@ -21,5 +21,21 @@ reading_draft:
     temperature: 0
     language: "zh"
     prompt_profile: "default"
+    codex_oauth:
+      auth_store: ".rsa/auth/codex_oauth.yaml"
+      codex_home:
+      token_source: "rsa_store"
+      refresh_command:
+      base_url: "https://chatgpt.com/backend-api/codex"
+      response_endpoint:
   review:
     ready_score_threshold: 6
+discovery:
+  default_provider: "openalex"
+  default_max_queries: 3
+  default_max_results: 5
+  allowed_providers:
+    - "openalex"
+    - "crossref"
+    - "offline"
+  automation_mode: "monitored_auto"

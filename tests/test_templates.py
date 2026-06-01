@@ -1,3 +1,4 @@
+import tomllib
 from pathlib import Path
 
 from rsa_cli.config import load_project_config
@@ -329,6 +330,43 @@ def test_readme_documents_phase14_worker_automation():
         assert needle in text
 
 
+def test_readme_documents_phase15_codex_oauth_provider():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for needle in [
+        "rsa --root . llm codex status",
+        "rsa --root . llm codex import",
+        "rsa --root . doctor",
+        "codex_oauth",
+        ".rsa/auth/codex_oauth.yaml",
+        "不会输出 token",
+        "不自动网页登录",
+        "不抓取浏览器 cookies",
+        "不能绕过 formal write gate",
+    ]:
+        assert needle in text
+
+
+def test_readme_documents_phase16_research_plan_discovery():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for needle in [
+        "rsa --root . discovery run --plan-file research_plan.md --provider openalex",
+        "rsa --root . discovery validate DR001",
+        "Research Plan Discovery Workflow",
+        "DR###_profile.yaml",
+        "DR###_queries.yaml",
+        "DR###_results.yaml",
+        "DR###_campaign_import.yaml",
+        "不创建正式 `paper_id`",
+        "不写 `paper_index.md`",
+        "formal write gate",
+        "iterative_query_refinement",
+        "web_review_ui",
+    ]:
+        assert needle in text
+
+
 def test_init_writes_localized_templates_and_formal_records(tmp_path):
     config = load_project_config(tmp_path)
 
@@ -374,6 +412,28 @@ def test_language_policy_is_documented_for_chinese_users():
         assert "中文优先" in text
     for needle in ["YAML key", "CLI flag", "状态枚举", "代码标识"]:
         assert needle in policy
+
+
+def test_dependency_policy_matches_base_runtime_and_doctor_contract():
+    pyproject = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    dependencies = "\n".join(pyproject["project"]["dependencies"])
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    policy = (REPO_ROOT / ".planning" / "DEPENDENCY-POLICY.md").read_text(encoding="utf-8")
+
+    for package in ["PyYAML", "pypdf", "PyMuPDF", "playwright"]:
+        assert package in dependencies
+        assert package in policy
+    for needle in [
+        "功能-依赖矩阵",
+        "基础安装",
+        "一次性环境初始化",
+        "OK",
+        "WARN",
+        "BLOCKED",
+        "rsa --root . doctor",
+    ]:
+        assert needle in readme
+    assert "rsa doctor --strict" in policy
 
 
 def test_second_init_does_not_overwrite_human_edited_formal_records(tmp_path):

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Scaled Literature Workstation
-status: milestone_complete
-stopped_at: Milestone complete (Phase 14 was final phase)
-last_updated: 2026-05-29T00:16:34+08:00
-last_activity: 2026-05-29
+status: executing
+stopped_at: Phase 16 complete; running project health and release-readiness audit
+last_updated: "2026-05-31T12:49:50.399Z"
+last_activity: 2026-05-31
 progress:
-  total_phases: 17
-  completed_phases: 17
-  total_plans: 46
-  completed_plans: 46
+  total_phases: 19
+  completed_phases: 19
+  total_plans: 51
+  completed_plans: 51
   percent: 100
 ---
 
@@ -22,22 +22,22 @@ progress:
 
 **核心价值:** 让科研 agent 的每一步输出都能追溯到来源、状态和人工确认，避免把未核验的模型判断混入正式科研记录。
 
-**当前重点:** v2.0 core complete; deferred enhancements or next milestone only
+**当前重点:** Phase 16 completed; project-level GSD health, UAT, milestone and code-review audit in progress
 
 ## 当前位置
 
-Phase: 14
-Plan: 3/3 complete
-Status: Milestone complete
-Last activity: 2026-05-29
+Phase: Project audit after Phase 16
+Plan: 51/51 complete
+Status: Auditing and release-readiness documentation update
+Last activity: 2026-05-31
 
-进度: [██████████] 100%
+进度: [█████████░] 95%
 
 ## 进度指标
 
 **速度:**
 
-- 已完成 plans: 46
+- 已完成 plans: 48
 - 平均耗时: N/A
 - 总执行时间: 0 hours
 
@@ -62,6 +62,8 @@ Last activity: 2026-05-29
 | 12 | 3 | complete |
 | 13 | 3 | complete |
 | 14 | 3 | complete |
+| 15 | 2 | complete |
+| 16 | 3 | complete |
 
 ## 累积上下文
 
@@ -86,10 +88,12 @@ Last activity: 2026-05-29
 - Phase 11 review queue 是监管入口，不是 formal approval 列表；`accepted | deferred | rejected | needs_followup` 只表示队列项处理状态。
 - Phase 11 不执行 formal write；metadata intake accepted 后只生成 formal write request，正式写入仍必须通过人工确认的 formal gate。
 - Phase 14 已完成 Background Worker & Scheduled Automation：新增本地 worker queue、one-shot runner、schedule 入队、status/logs、cancel/recover，并继续保持不重写 Phase 10/11、不绕过 formal write gate、不做 multi-agent。
+- Phase 16 Research Plan Driven Literature Discovery 是前置发现层：从科研计划生成检索式和候选 campaign，不直接创建正式 metadata，也不绕过 Phase 7 授权来源规则或 formal write gate。
 
 ### 待办
 
-无。
+- Phase 17 已加入路线图；下一步是运行 `gsd-discuss-phase 17`，明确 bounded dynamic workflow 的 policy schema、决策审计、用户覆盖和 formal gate 边界。
+- v2.0 主闭环仍保持完成状态；deferred advanced integrations、advanced figure intelligence 和 multi-agent orchestration 继续作为未来范围，不并入 Phase 17 首版。
 
 ### 阻塞和关注点
 
@@ -105,9 +109,9 @@ Last activity: 2026-05-29
 
 ## 会话连续性
 
-Last session: 2026-05-27T20:34:04+08:00
-Stopped at: Milestone complete - Phase 14 completed
-Resume file: .planning/phases/13-writing-safety-hardening/13-VERIFICATION.md
+Last session: 2026-06-01T10:45:00+08:00
+Stopped at: Phase 16 complete; project health, UAT, milestone audit, code review and release-readiness docs complete
+Resume file: .planning/ROADMAP.md
 
 **已计划 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12T02:12:01.988Z
 **已完成 Phase:** 03 (Research Round Integration) - 3 plans - 2026-05-12
@@ -148,9 +152,23 @@ Resume file: .planning/phases/13-writing-safety-hardening/13-VERIFICATION.md
 **Discussed Phase:** 14 (background-worker-scheduled-automation) - context complete - 2026-05-29
 **Planned Phase:** 14 (background-worker-scheduled-automation) - 3 plans - 2026-05-29
 **Completed Phase:** 14 (background-worker-scheduled-automation) - 3 plans - 2026-05-29
+**Added Phase:** 15 (codex-account-oauth-llm-provider) - not planned - 2026-05-30
+**Discussed Phase:** 15 (codex-account-oauth-llm-provider) - context complete - 2026-05-30
+**Planned Phase:** 15 (codex-account-oauth-llm-provider) - 2 plans - 2026-05-30
+**Completed Phase:** 15 (codex-account-oauth-llm-provider) - 2 plans - 2026-05-30
+**Added Phase:** 16 (research-plan-driven-literature-discovery) - not planned - 2026-05-31
+**Discussed Phase:** 16 (research-plan-driven-literature-discovery) - context complete - 2026-05-31
+**Planned Phase:** 16 (research-plan-driven-literature-discovery) - 3 plans - 2026-05-31
+**Completed Phase:** 16 (research-plan-driven-literature-discovery) - 3 plans - 2026-05-31
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 
 - Phase 10 edited: Phase 10/11 automation split: single-paper sequential workflow primitive in Phase 10; campaign controlled pipeline parallelism in Phase 11
+- Phase 15 added: Codex Account OAuth LLM Provider
+- Phase 15 completed: optional `codex_oauth` provider reuses local Codex CLI auth through explicit import, stores RSA credentials under `.rsa/auth/`, exposes `rsa llm codex status|import|clear`, adds `rsa doctor` preflight, and connects to `rsa note draft` without bypassing formal write gates.
+- Phase 16 added: Research Plan Driven Literature Discovery. It should convert a Chinese-first research plan into auditable search queries and campaign candidates, then reuse existing source acquisition, workflow, campaign, review and formal-gate boundaries.
+- Phase 16 completed: `rsa discovery run|validate|status` creates discovery profiles, query bundles, legal provider results, reports and campaign staging imports without writing formal metadata.
+- Phase 16 audited: GSD health and UAT checks passed; milestone audit and code review artifacts added; full pytest reported 206 passed and eval compare reported zero regressions.
+- Phase 17 added: Dynamic Workflow Policy Engine. It should add a bounded, auditable policy layer for choosing next actions from current workflow state, evidence, confidence, dependency checks and user configuration without becoming a free-form AI planner or bypassing formal-write gates.

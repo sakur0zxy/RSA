@@ -4,6 +4,8 @@
 **触发原因:** 检查已计划和已实现功能是否符合核心产品原则：系统应能在用户不干预的情况下自动进行，用户可以监控重要环节并进行调整。  
 **使用的 GSD 流程:** `gsd-audit-uat` 思路；同时参考 `gsd-validate-phase` 和 `gsd-verify-work` 的适用边界。
 
+> **2026-06-01 更新:** 本文件是 Phase 7 执行前的历史专项审计。文中“Phase 7 尚未实现 / 代码待实现”的结论已经被后续 Phase 7-16 实现取代；当前状态以 `.planning/v2.0-MILESTONE-AUDIT.md`、`.planning/PROJECT-COMPLETION-AUDIT.md`、`.planning/REQUIREMENTS.md` 和 README 为准。
+
 ## GSD skill 结论
 
 - `gsd-audit-uat`：适合做跨 phase 的 UAT/verification 待办审计。本次运行 `gsd-sdk query audit-uat --raw`，结果为 `total_items: 0`，说明当前没有现成 UAT 待办项可直接复用。

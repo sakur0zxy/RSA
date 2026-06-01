@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![CLI](https://img.shields.io/badge/interface-CLI-444444)
 ![Storage](https://img.shields.io/badge/storage-Markdown%20%2F%20YAML-2F855A)
-![Tests](https://img.shields.io/badge/tests-192%20passed-2F855A)
+![Tests](https://img.shields.io/badge/tests-206%20passed-2F855A)
 
 ## 为什么需要它
 
@@ -35,11 +35,14 @@ LLM/agent 很适合辅助文献调研，但科研记录不能被未核验的模�
 | Local review workspace | `rsa review build/status/open/clean` 生成本地静态监管台，集中查看 campaign、单篇 workflow、reading note、visual evidence、AI scoring 和 formal write request。 |
 | Writing safety | `rsa safety check/validate/status/campaign` 生成 claim-level citation review 和 campaign failure monitor；结果只进入 safety 审计记录，不是正式学术结论。 |
 | Background worker | `rsa worker enqueue/run/status/logs/schedule` 把 campaign、review workspace 和 safety 任务放入本地队列或定时入队；worker 只推进 staging/review 自动化，不执行 formal write。 |
+| Codex OAuth LLM provider | `rsa llm codex status/import/clear` 管理可选 `codex_oauth` provider，让 RSA 在本地凭据可用时把 Codex/ChatGPT 账号会话用于 reading draft；凭据 local-only，AI 产物仍只进入 staging/review。 |
 | Source ledger | 登记本地、用户提供、open access 或已授权全文来源，不自动修改正式 metadata。 |
 | Authorized acquisition | 根据正式 metadata 自动发现、审查并下载规则允许的授权 PDF，保留候选、ledger、hash 和中文原因。 |
 | Browser session provider | 用户可在本地受控浏览器中登录自定义资料库，RSA 复用 `.rsa/sessions/` 中的本地 session 下载用户有权限访问的直接 PDF。 |
+| Research plan discovery | `rsa discovery run` 把科研计划、临时研究目标或 topic profile 转成可审计检索式、候选结果和 campaign staging 队列。 |
 | Asset manifest | 登记截图、图表、结果图和补充资产，真实文件 local-only，manifest 可审计。 |
 | Formal write guardrails | 正式写入必须通过 schema 校验、冲突检查和显式人工确认。 |
+| Environment doctor | `rsa doctor` 检查核心 Python 依赖、Playwright Chromium、provider 配置和修复建议，统一输出 `OK` / `WARN` / `BLOCKED`。 |
 | Harness evals | 用本地 deterministic fixtures 检查回归、越界写入和格式漂移。 |
 
 ## 语言策略
@@ -58,6 +61,8 @@ flowchart TD
   D --> E["Formal metadata<br/>正式文献记录"]
   E --> F["Authorized acquisition<br/>授权全文获取"]
   F --> F2["Browser session provider<br/>用户授权浏览器会话"]
+  P["Research plan<br/>科研计划"] --> D0["Discovery profile<br/>检索式与候选发现"]
+  D0 --> C
   F2 --> G["Reading note<br/>阅读笔记"]
   G --> V["Visual evidence candidates<br/>图表/表格候选证据"]
   V --> S["AI scoring<br/>辅助评分与监管"]
@@ -81,14 +86,36 @@ python -m pip install -e ".[dev]"
 rsa --help
 ```
 
-基础安装包含当前核心闭环需要的 Python 依赖：`PyYAML` 用于 YAML 记录，`pypdf` 用于正文文本提取，`PyMuPDF` 用于 Phase 8.1 图表/表格视觉候选裁图。缺少核心依赖时，相关命令会 fail closed，并给出中文修复提示。
+基础安装包含当前核心闭环需要的 Python 依赖：`PyYAML` 用于 YAML 记录，`pypdf` 用于正文文本提取，`PyMuPDF` 用于 Phase 8.1 图表/表格视觉候选裁图，`playwright` 用于用户授权浏览器会话控制。缺少核心依赖时，相关命令会 fail closed，并给出中文修复提示。
 
-需要浏览器登录资料库时，额外安装可选浏览器依赖：
+需要浏览器登录资料库时，还需要一次性安装 Playwright Chromium 运行资源：
 
 ```powershell
-python -m pip install -e ".[browser]"
 python -m playwright install chromium
 ```
+
+检查当前环境：
+
+```powershell
+rsa --root . doctor
+rsa --root . doctor --json
+```
+
+`rsa doctor` 会列出 `OK`、`WARN`、`BLOCKED` 状态、受影响命令和中文修复建议。自动化脚本需要阻塞失败时可使用 `rsa --root . doctor --strict`。
+
+### 功能-依赖矩阵
+
+| 功能 | 安装层 | 依赖/资源 | 缺失时行为 |
+|------|--------|-----------|------------|
+| Markdown/YAML harness、metadata、map、gap | 基础安装 | `PyYAML` | `BLOCKED`，中文提示重新安装基础依赖。 |
+| 自动阅读草稿 `rsa note draft` | 基础安装 | `pypdf`、授权 PDF 或本地全文 | `BLOCKED` 或 `partial`，不生成伪阅读结论。 |
+| 视觉证据候选 `rsa visual extract` | 基础安装 | `PyMuPDF`、授权 PDF 或本地全文 | `BLOCKED`，不生成伪图表证据。 |
+| 浏览器会话 `rsa source login` | 基础安装 + 一次性环境初始化 | `playwright`、`python -m playwright install chromium`、用户手动登录 | `BLOCKED`，输出中文修复命令，不保存密码。 |
+| 科研计划发现 `rsa discovery run` | 基础安装 | `PyYAML`、合法 provider；`--no-search` 可离线生成检索式 | provider 不可用时 fail closed，不创建伪候选。 |
+| Codex OAuth provider | 可选配置 | 本机 Codex CLI auth、`.rsa/auth/codex_oauth.yaml` | `WARN` 或 `BLOCKED`，不输出 token，不生成伪 AI 产物。 |
+| 开发测试 | `.[dev]` | `pytest` | 只影响贡献者本地验证，不影响普通用户核心流程。 |
+
+`.[browser]` extra 目前只作为兼容旧安装说明的别名保留；核心浏览器 Python 包已经在基础安装中。未来 `.[ui]`、`.[llm]`、`.[cloud]` 等 extras 只用于非核心增强。
 
 如果没有安装 editable package，也可以用：
 
@@ -131,6 +158,14 @@ rsa --root . round trace R001_gap_sar_starter
 ```powershell
 rsa --root . eval run
 rsa --root . eval compare
+```
+
+从科研计划生成可审计候选文献队列：
+
+```powershell
+rsa --root . discovery run --plan-file research_plan.md --provider openalex
+rsa --root . discovery validate DR001
+rsa --root . discovery status DR001
 ```
 
 ## 常用命令
@@ -187,9 +222,42 @@ rsa --root . eval compare
 | `rsa worker run --include-due --max-tasks 5` | 先把到期 schedule 入队，再执行最多 5 个 queued 任务。 |
 | `rsa worker status` / `logs` | 查看 worker queue、schedule 概览和中文日志摘要。 |
 | `rsa worker schedule add campaign-run C001 --interval-hours 24` | 新增本地定时入队规则；schedule 只入队，不直接执行任务。 |
+| `rsa llm codex status` | 只读检查可选 `codex_oauth` provider、RSA auth store 和 Codex CLI auth.json 状态；不会输出 token。 |
+| `rsa llm codex import` | 从本机 Codex CLI auth.json 导入 RSA 本地-only 凭据副本到 `.rsa/auth/codex_oauth.yaml`。 |
+| `rsa llm codex clear` | 删除 RSA 本地 codex_oauth 凭据副本；不修改 Codex CLI 登录状态。 |
+| `rsa discovery run` | 从科研计划、临时目标或 topic profile 生成 discovery profile、检索式、候选结果和 campaign staging 导入。 |
+| `rsa discovery validate` / `status` | 只读校验或查看 discovery 产物，不写正式记录。 |
+| `rsa doctor` | 检查本地环境、核心依赖、外部运行资源和 provider preflight，输出中文修复建议。 |
+| `rsa doctor --strict` | 发现 `BLOCKED` 项时返回非零退出码，适合 CI 或自动化检查。 |
 | `rsa formal apply-map` | 经人工确认后写入正式 literature map。 |
 | `rsa formal apply-note` | 经人工确认后写入 note 派生的正式记录。 |
 | `rsa eval run` / `baseline` / `compare` | 运行本地 eval、更新基线或比较回归。 |
+
+## Research Plan Discovery Workflow
+
+Phase 16 负责把科研计划或临时研究目标转成可审计的文献发现入口。它不替代人工判断，也不会直接创建 `metadata/P###.yaml`；发现结果只进入 discovery staging 和 campaign queue，后续继续复用授权下载、阅读草稿、视觉证据、AI scoring 和 review workspace。
+
+```powershell
+rsa --root . discovery run --plan-file research_plan.md --provider openalex
+rsa --root . discovery run --objective "调研间断孔径 SAR 的成像伪影抑制方法" --no-search
+rsa --root . discovery validate DR001
+rsa --root . discovery status DR001
+```
+
+主要产物：
+
+- `01_literature/discovery/DR###_profile.yaml`：从科研计划提取的 discovery profile，保留 `plan_source`、`research_questions`、`topic_profile` 和中文解释。
+- `01_literature/discovery/DR###_queries.yaml`：检索式 bundle，包含英文 search terms、中文 rationale、include/exclude hints 和 confidence。
+- `01_literature/discovery/DR###_results.yaml`：候选结果、source links、match evidence、dedup key、`evidence_level` 和中文原因。
+- `01_literature/discovery/DR###_report.md`：中文监管报告。
+- `01_literature/discovery/DR###_campaign_import.yaml`：导入 campaign 的 staging 文件。
+
+边界：
+
+- 默认 provider 是 `openalex`；也支持 `crossref` 和 `offline`。`--no-search` 只生成 profile/query，不访问网络，也不创建伪候选。
+- provider 不可用、计划不可读、证据不足或 rate limit 时 fail closed，写中文状态和修复建议。
+- 发现候选只进入 staging/campaign，不创建正式 `paper_id`，不写 `paper_index.md`，不绕过 formal write gate。
+- 预留 `llm_query_generation`、`iterative_query_refinement`、`provider_plugins`、`scholarly_metadata_enrichment`、`discovery_eval` 和 `web_review_ui` 接口，后续可以扩展，但当前 v2 实现保持收敛。
 
 ## Visual Evidence Workflow
 
@@ -434,6 +502,32 @@ Phase 14 当前实现的是可测试的一次性 runner：`rsa worker run` 会�
 - worker 不执行 formal write；`formal_write_allowed` 固定为 `false`，正式记录仍需人工确认。
 - worker 任务失败会 fail closed，写入中文错误和修复建议，不把失败伪装成成功。
 
+## Codex OAuth LLM Provider
+
+Phase 15 增加一个可选的 `codex_oauth` provider，用于在本机已有 Codex/ChatGPT 账号登录凭据时，为 RSA 的 AI 辅助任务提供 LLM 调用入口。当前只接入 `rsa note draft`，后续 scoring、visual LLM analysis 或 safety LLM review 可以复用同一 provider 接口，但不会在本阶段扩大实现。
+
+```powershell
+rsa --root . llm codex status
+rsa --root . llm codex import
+rsa --root . doctor
+```
+
+使用方式是在 `.rsa/local.yaml` 中显式选择 provider：
+
+```yaml
+reading_draft:
+  llm:
+    provider: codex_oauth
+    model: gpt-5
+```
+
+凭据规则：
+- RSA 默认从 `CODEX_HOME/auth.json` 或 `~/.codex/auth.json` 读取 Codex CLI 登录材料，再由 `rsa llm codex import` 复制到 `.rsa/auth/codex_oauth.yaml`。
+- `.rsa/auth/**` 是 local-only，不进入 git；CLI status 和 doctor 不会输出 token 值。
+- 当前阶段不自动刷新 token，不自动网页登录，不抓取浏览器 cookies，不保存账号密码，也不绕过 Codex/OpenAI 访问控制。
+- 缺少凭据、token 过期、模型未配置或 provider 响应格式不对时，RSA 会 fail closed，只写中文诊断和状态记录，不生成假的 reading note。
+- 通过该 provider 生成的 reading draft 仍然只是 staging/review artifact，不能绕过 formal write gate。
+
 ## Browser Session Provider 示例
 
 把下面配置放入 `.rsa/local.yaml`，用于本地自定义资料库。字段名保持英文稳定，中文说明用于提醒授权边界。
@@ -482,6 +576,7 @@ rsa --root . source find P001 --provider university_library_browser
   synthesis/                # gap report 和 eval report
   sources/                  # P###.yaml 来源 ledger
   source_candidates/        # P###.yaml 候选来源、匹配证据和下载状态
+  discovery/                # DR### 科研计划发现 profile、检索式、候选结果和报告
   campaigns/                # C###.yaml 批量候选队列、轻量去重和状态汇总
   workflows/                # P###/RUN-###.yaml 单篇 workflow 状态和中文监管包
   review_workspace/         # 本地静态监管台、manifest、分组页、对象页和操作清单
@@ -495,6 +590,8 @@ rsa --root . source find P001 --provider university_library_browser
   paper_index.md            # 正式 metadata 索引
   literature_map.md         # 正式文献到主题的映射
   agent_research_notes.md   # 人工确认后的辅助研究笔记
+.rsa/
+  auth/                     # Phase 15 本地-only Codex OAuth 凭据副本，git 忽略
 templates/                  # 用户可编辑模板
 src/rsa_cli/                # CLI 和 harness 实现
 tests/                      # 回归测试
@@ -506,6 +603,7 @@ tests/                      # 回归测试
 - 候选证据不会自动成为正式 metadata。
 - `metadata/P###.yaml` 写入必须带 `--human-confirmed` 和 `--confirmed-by`。
 - `rsa source add` 和 `rsa asset add` 只登记来源/资产 ledger，不自动修改正式 metadata。
+- `rsa discovery run` 只把科研计划转成 discovery staging 和 campaign queue；它不创建正式 `paper_id`，不写 `metadata/` 或 `paper_index.md`。
 - `rsa source find` 默认是 monitored automation：自动搜索、审查并下载规则允许的来源，但只写候选记录、source ledger、本地 PDF 和 PDF acquisition report。
 - `title_only` 只能生成候选，不能自动下载。
 - 自定义 provider 应写在 `.rsa/local.yaml`，使用 `source_discovery.custom_providers` 模板；字段名保持英文，说明和用途限制使用中文。
@@ -528,6 +626,7 @@ tests/                      # 回归测试
 - `rsa safety check ...` 和 `rsa safety campaign ...` 只写 `01_literature/safety/` 审计记录；`safety_status=passed` 也不等于正式批准。
 - `claim_refs` 和 campaign failure monitor 只用于提示证据链或批量状态风险，不能直接写入正式 metadata、文献映射、研究笔记或论文正文。
 - `rsa worker ...` 只调度 staging/review 自动化任务，不执行 formal write；worker queue 中的 `formal_write_allowed` 必须保持 `false`。
+- `rsa llm codex ...` 只管理可选 LLM provider 的本地凭据和状态；不会输出 token，不会抓取浏览器 cookies，也不会让 AI 产物直接进入 formal records。
 - `validate` 命令必须只读。
 - `generate` 和 `propose` 可以生成建议文件，但不能修改正式记录。
 - 正式写入遇到 schema 错误、缺少确认、重复或冲突时必须失败。
@@ -553,13 +652,13 @@ python -m pytest -q
 rsa --root . eval compare
 ```
 
-当前回归基线：192 个 pytest 测试通过；`rsa eval compare` 仍用于本地 harness 基线比较。
+当前回归基线：`python -m pytest -q` 为 206 passed；`rsa --root . eval compare` 为 0 regressions。
 
 ## 项目状态
 
-- 当前里程碑：`v1.0 Local Harness`
-- 当前版本：`v2.0` Phase 14 完成
-- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、AI 辅助评分、单篇 workflow、campaign batch review、本地 review workspace、写作安全检查和本地 worker automation
+- 当前里程碑：`v2.0 Scaled Literature Workstation`
+- 当前版本：`v2.0` Phase 16 已完成实现与验证
+- 状态：v1.0 已归档；v2.0 已完成授权全文获取、browser session provider、自动阅读草稿、视觉证据候选提取、campaign foundation、AI 辅助评分、单篇 workflow、campaign batch review、本地 review workspace、写作安全检查、本地 worker automation、可选 Codex OAuth LLM provider 和科研计划驱动文献发现
 - 主要用户语言：中文优先
 - 语言策略：见 `.planning/LANGUAGE-POLICY.md`
 - 字段名、YAML key、表格列、CLI flag、命令名和代码标识：保持英文稳定，并在用户可见位置提供中文解释
@@ -579,7 +678,9 @@ v2 建议优先扩展这些方向：
 9. 本地 review workspace。Phase 12 已完成静态监管台；未来可升级为 Web UI。
 10. Claim-level citation check。Phase 13 已完成 safety audit 和 campaign failure monitor。
 11. Background worker 与 scheduled automation。Phase 14 已完成本地 queue、one-shot runner、schedule 入队、status/logs 和恢复/取消语义。
-12. 后续可选增强：更强的 research-quality evals、Web review UI、advanced figure intelligence 和可选 multi-agent orchestration。
+12. Codex OAuth LLM provider。Phase 15 已完成可选 `codex_oauth` provider、local-only auth store、provider preflight 和 reading draft 集成。
+13. 科研计划驱动文献发现。Phase 16 已完成，目标是把科研计划转为检索式和候选 campaign，再复用现有下载、阅读、评分和监管链路。
+14. 后续可选增强：更强的 research-quality evals、Web review UI、advanced figure intelligence 和可选 multi-agent orchestration。
 
 更多 GSD 文档：
 

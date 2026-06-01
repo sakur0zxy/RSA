@@ -29,7 +29,9 @@ templates_root: custom_templates
     assert config.source_candidates_root == tmp_path / "custom_literature" / "source_candidates"
     assert config.pdfs_root == tmp_path / "custom_literature" / "pdfs"
     assert config.extracted_root == tmp_path / "custom_literature" / "extracted"
+    assert config.discovery_root == tmp_path / "custom_literature" / "discovery"
     assert config.sessions_root == tmp_path / ".rsa" / "sessions"
+    assert config.auth_root == tmp_path / ".rsa" / "auth"
     assert config.topic_profiles_root == tmp_path / "custom_literature" / "topic_profiles"
     assert config.default_max_candidates == 5
     assert config.hard_max_candidates == 20
@@ -41,7 +43,14 @@ templates_root: custom_templates
     assert config.source_discovery_default_auto_download is True
     assert config.custom_source_providers == []
     assert config.reading_draft_llm["provider"] is None
+    assert config.reading_draft_llm_codex_oauth["auth_store"] == ".rsa/auth/codex_oauth.yaml"
+    assert config.reading_draft_llm_codex_oauth["token_source"] == "rsa_store"
     assert config.reading_draft_ready_score_threshold == 6
+    assert config.discovery_default_provider == "openalex"
+    assert config.discovery_default_max_queries == 3
+    assert config.discovery_default_max_results == 5
+    assert config.discovery_allowed_providers == ["openalex", "crossref", "offline"]
+    assert config.discovery_automation_mode == "monitored_auto"
 
 
 def test_local_overrides_win_over_project_defaults(tmp_path):

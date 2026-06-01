@@ -27,15 +27,15 @@
 
 ## 全局依赖要求
 
-- [ ] **DEP-01:** 基础安装 `python -m pip install -e .` 包含当前核心 agent 功能所需 Python 依赖。
-- [ ] **DEP-02:** optional extras 只用于非核心增强、未来扩展或开发测试；不得把当前核心闭环拆成用户必须手动选择的 extras。
-- [ ] **DEP-03:** README/帮助文档提供中文功能依赖矩阵，明确区分基础安装、一次性环境初始化、非核心 extras 和开发依赖。
-- [ ] **DEP-04:** 提供 `rsa doctor` 或等价环境自检，检查核心功能依赖、外部运行资源和修复命令。
-- [ ] **DEP-05:** 依赖或外部资源缺失时，相关命令必须 fail closed，输出中文原因和修复命令，不得生成伪结果或 traceback-only 错误。
-- [ ] **DEP-06:** `.planning/DEPENDENCY-POLICY.md` 维护命令级核心闭环契约和功能-依赖矩阵，后续 README、`pyproject.toml`、doctor 和 preflight 必须与其一致。
-- [ ] **DEP-07:** `rsa doctor` 输出统一使用 `OK`、`WARN`、`BLOCKED` 状态，并列出受影响命令和中文修复命令。
-- [ ] **DEP-08:** 命令级 preflight 与 `rsa doctor` 共享依赖检查逻辑，避免同一缺失项给出不一致结论。
-- [ ] **DEP-09:** 测试覆盖 base runtime 下核心命令可启动、缺外部资源时 fail closed、doctor 输出与命令 gating 一致。
+- [x] **DEP-01:** 基础安装 `python -m pip install -e .` 包含当前核心 agent 功能所需 Python 依赖。
+- [x] **DEP-02:** optional extras 只用于非核心增强、未来扩展或开发测试；不得把当前核心闭环拆成用户必须手动选择的 extras。
+- [x] **DEP-03:** README/帮助文档提供中文功能依赖矩阵，明确区分基础安装、一次性环境初始化、非核心 extras 和开发依赖。
+- [x] **DEP-04:** 提供 `rsa doctor` 或等价环境自检，检查核心功能依赖、外部运行资源和修复命令。
+- [x] **DEP-05:** 依赖或外部资源缺失时，相关命令必须 fail closed，输出中文原因和修复命令，不得生成伪结果或 traceback-only 错误。
+- [x] **DEP-06:** `.planning/DEPENDENCY-POLICY.md` 维护命令级核心闭环契约和功能-依赖矩阵，后续 README、`pyproject.toml`、doctor 和 preflight 必须与其一致。
+- [x] **DEP-07:** `rsa doctor` 输出统一使用 `OK`、`WARN`、`BLOCKED` 状态，并列出受影响命令和中文修复命令。
+- [x] **DEP-08:** 命令级 preflight 与 `rsa doctor` 共享依赖检查逻辑，避免同一缺失项给出不一致结论。
+- [x] **DEP-09:** 测试覆盖 base runtime 下核心命令可启动、缺外部资源时 fail closed、doctor 输出与命令 gating 一致。
 
 ## Phase 6: Asset & Source Foundation
 
@@ -68,10 +68,10 @@
 
 ### Phase 8: Auto Reading Draft
 
-- [ ] **V2-READ-01:** User can generate reading note drafts only from local or authorized full text.
-- [ ] **V2-READ-02:** Drafts distinguish source-grounded claims, short quotes, agent summary, uncertain points and human decisions.
-- [ ] **V2-READ-03:** Drafts may output candidate `asset_suggestions`, but each suggestion must include Chinese reason text, confidence, and evidence basis; it must not assert that the figure/table is academically important.
-- [ ] **V2-READ-04:** Phase 8 must not crop images, run OCR, extract chart data, write asset manifests, approve notes, score papers, or write formal records.
+- [x] **V2-READ-01:** User can generate reading note drafts only from local or authorized full text.
+- [x] **V2-READ-02:** Drafts distinguish source-grounded claims, short quotes, agent summary, uncertain points and human decisions.
+- [x] **V2-READ-03:** Drafts may output candidate `asset_suggestions`, but each suggestion must include Chinese reason text, confidence, and evidence basis; it must not assert that the figure/table is academically important.
+- [x] **V2-READ-04:** Phase 8 must not crop images, run OCR, extract chart data, write asset manifests, approve notes, score papers, or write formal records.
 
 ### Phase 8.1: Visual Evidence Extraction
 
@@ -124,6 +124,37 @@
 - [x] **V2-WORKER-02:** Worker mode must reuse Phase 10 workflow primitives and Phase 11 campaign scheduling state instead of rewriting their core logic.
 - [x] **V2-WORKER-03:** Worker mode may add background workers, async task execution, long-task recovery, status monitoring, scheduled campaign runs and worker log summaries.
 - [x] **V2-WORKER-04:** Worker mode must not bypass formal write gates, implement multi-agent orchestration, or require complex cloud services for the local-first core workflow.
+
+### Phase 15: Codex Account OAuth LLM Provider
+
+- [x] **V2-CODEX-01:** RSA can define an optional `codex_oauth` or equivalent LLM provider that uses a user-authorized Codex/ChatGPT account session for AI tasks without replacing existing API-key and OpenAI-compatible providers.
+- [x] **V2-CODEX-02:** Provider authentication must use an explicit user authorization flow or import path; it must not automate the ChatGPT web UI, scrape browser cookies, store account passwords, or bypass OpenAI/Codex access controls.
+- [x] **V2-CODEX-03:** OAuth/session material must be stored local-only, ignored by git, refreshable when supported, and cleared through an explicit CLI command.
+- [x] **V2-CODEX-04:** `rsa doctor` and command-level preflight must report provider availability, missing login, expired tokens, quota/rate limits, unsupported models and recovery actions in Chinese-first text.
+- [x] **V2-CODEX-05:** Codex-account LLM calls must fail closed when credentials, entitlement, model support or backend compatibility is uncertain; no fake reading draft, scoring or review packet may be generated.
+- [x] **V2-CODEX-06:** Outputs produced through this provider remain staging/review artifacts and cannot write formal records or bypass existing human-confirmed formal write gates.
+
+### Phase 16: Research Plan Driven Literature Discovery
+
+- [x] **V2-DISCOVERY-01:** User can provide a research plan file, plain-text objective or existing topic profile, and RSA can derive a discovery profile without modifying formal records.
+- [x] **V2-DISCOVERY-02:** Discovery profiles must preserve stable English keys such as `plan_source`, `research_questions`, `query_bundle`, `source_provider`, `search_run_id`, `candidate_id`, `evidence_level` and `status`, while providing Chinese explanations for user-facing fields.
+- [x] **V2-DISCOVERY-03:** RSA can generate auditable search query bundles from the research plan, including Chinese rationale, English search terms, inclusion/exclusion hints, topic links and confidence.
+- [x] **V2-DISCOVERY-04:** Discovery search providers must be legal, configurable and auditable; default providers should be open scholarly indexes or user-configured custom sources, and must not bypass paywalls or use unauthorized mirrors.
+- [x] **V2-DISCOVERY-05:** Discovered papers enter staging/campaign records with source links, match evidence, dedup keys, triage status and Chinese rationale; discovery must not directly create `metadata/P###.yaml` or write `paper_index.md`.
+- [x] **V2-DISCOVERY-06:** Discovery results must integrate with existing Phase 8.2/11 campaign queues, metadata intake requests, review decisions and controlled automation instead of creating a parallel literature queue.
+- [x] **V2-DISCOVERY-07:** Discovery commands must fail closed when the plan is unreadable, query generation is unsupported, providers are unavailable, rate limits occur or evidence is insufficient; failures must write Chinese status/recovery guidance.
+- [x] **V2-DISCOVERY-08:** Phase 16 should reserve extension interfaces for iterative query refinement, richer scholarly metadata integrations, discovery evals and Web review UI, but keep the first implementation focused on research-plan-to-campaign discovery.
+
+### Phase 17: Dynamic Workflow Policy Engine
+
+- [ ] **V2-DYNAMIC-01:** RSA can evaluate a local workflow policy against current artifacts, evidence levels, dependency state, confidence, failures and user configuration to produce auditable `next_actions`.
+- [ ] **V2-DYNAMIC-02:** Dynamic workflow remains bounded: it reuses Phase 10 single-paper workflow, Phase 11 campaign scheduling, Phase 12 review workspace, Phase 13 safety checks and Phase 14 worker queue instead of replacing them.
+- [ ] **V2-DYNAMIC-03:** Policy decisions must be stored as local YAML/Markdown audit records with stable English keys and Chinese explanations, including `decision_id`, `trigger`, `inputs`, `selected_action`, `reason_zh`, `confidence`, `evidence_level`, `blocked_reason_zh` and `repair_hint_zh`.
+- [ ] **V2-DYNAMIC-04:** Policy rules must support conservative conditions such as `run_if`, `skip_if`, `retry_if`, `block_if`, `route_to_review_if` and `stop_before_formal_write`.
+- [ ] **V2-DYNAMIC-05:** Users can inspect, validate and override dynamic workflow decisions through Chinese-first CLI commands without editing formal records directly.
+- [ ] **V2-DYNAMIC-06:** AI or LLM assistance may suggest policy actions only as staging/review guidance; it must record evidence and confidence and must not directly execute formal writes.
+- [ ] **V2-DYNAMIC-07:** Dynamic workflow must fail closed on invalid policy files, missing required artifacts, conflicting actions, unsupported steps, dependency blocks or low confidence.
+- [ ] **V2-DYNAMIC-08:** Phase 17 reserves extension interfaces for policy plugins, LLM policy suggestions, Web UI policy editing and learned heuristics, but the first implementation must stay local-first, deterministic where possible and conservative by default.
 
 ### Deferred
 

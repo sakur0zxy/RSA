@@ -549,6 +549,21 @@ def call_llm_draft(
         return _mock_llm_draft(metadata, extraction)
     if provider_name in {"openai", "openai_compatible", "compatible"}:
         return _call_openai_compatible(config, metadata, extraction)
+    if provider_name in {"codex_oauth", "openai_codex"}:
+        from .codex_oauth import CodexOAuthError, call_codex_responses
+
+        try:
+            content = call_codex_responses(
+                config,
+                _build_prompt(metadata, extraction),
+                system_prompt=(
+                    "你是科研文献阅读助手。必须只输出合法 JSON，不要输出 Markdown。"
+                    "所有用户可读内容使用中文；证据不足时写入 uncertain_points_zh。"
+                ),
+            )
+        except CodexOAuthError as exc:
+            raise DraftError(f"Codex OAuth LLM 调用失败，未生成自动阅读草稿: {exc}") from exc
+        return _json_from_model_text(content)
     raise DraftError(f"暂不支持 LLM provider: {provider}，未生成自动阅读草稿。")
 
 
